@@ -38,13 +38,19 @@ jobs:
       - name: Собрать TitanLevel.exe
         shell: bash
         run: |
+          set -o pipefail
           mkdir -p windows/app
           cp -r app/src/main/assets/* windows/app/
-          cp windows/build/icon.png windows/app/icon.png
+          cp windows/res/icon.png windows/app/icon.png
           cd windows
-          npm install --no-audit --no-fund
-          npm run dist
+          npm install --no-audit --no-fund 2>&1 | tee ../build.log
+          npm run dist 2>&1 | tee -a ../build.log
           cp dist/TitanLevel.exe ../TitanLevel.exe
+      - name: Ошибка сборки — в аннотации
+        if: failure()
+        shell: bash
+        run: |
+          tail -n 25 build.log 2>/dev/null | sed 's/%/%25/g' | while IFS= read -r l; do echo "::error::$l"; done || true
       - uses: actions/upload-artifact@v4
         with:
           name: TitanLevel-windows

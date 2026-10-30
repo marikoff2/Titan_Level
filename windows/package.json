@@ -15,9 +15,20 @@
   "build": {
     "appId": "ua.titan.level",
     "productName": "TitanLevel",
-    "directories": { "output": "dist", "buildResources": "build" },
-    "files": ["main.js", "app/**/*"],
-    "win": { "target": "portable", "icon": "build/icon.ico" },
-    "portable": { "artifactName": "TitanLevel.exe" }
+    "directories": {
+      "output": "dist",
+      "buildResources": "res"
+    },
+    "files": [
+      "main.js",
+      "app/**/*"
+    ],
+    "win": {
+      "target": "portable",
+      "icon": "res/icon.ico"
+    },
+    "portable": {
+      "artifactName": "TitanLevel.exe"
+    }
   }
 }
