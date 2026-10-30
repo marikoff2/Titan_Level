@@ -1,0 +1,23 @@
+{
+  "name": "titan-level",
+  "version": "1.2.0",
+  "description": "Уровень станин X — TITAN4020",
+  "author": "TITAN4020 PNR",
+  "main": "main.js",
+  "private": true,
+  "scripts": {
+    "dist": "electron-builder --win portable --x64 --publish never"
+  },
+  "devDependencies": {
+    "electron": "31.7.7",
+    "electron-builder": "24.13.3"
+  },
+  "build": {
+    "appId": "ua.titan.level",
+    "productName": "TitanLevel",
+    "directories": { "output": "dist", "buildResources": "build" },
+    "files": ["main.js", "app/**/*"],
+    "win": { "target": "portable", "icon": "build/icon.ico" },
+    "portable": { "artifactName": "TitanLevel.exe" }
+  }
+}

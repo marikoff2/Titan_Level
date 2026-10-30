@@ -1,4 +1,4 @@
-name: Сборка APK
+name: Сборка APK и Windows
 
 on:
   push:
@@ -27,11 +27,45 @@ jobs:
         with:
           name: TitanLevel-apk
           path: TitanLevel.apk
+
+  windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '20'
+      - name: Собрать TitanLevel.exe
+        shell: bash
+        run: |
+          mkdir -p windows/app
+          cp -r app/src/main/assets/* windows/app/
+          cp windows/build/icon.png windows/app/icon.png
+          cd windows
+          npm install --no-audit --no-fund
+          npm run dist
+          cp dist/TitanLevel.exe ../TitanLevel.exe
+      - uses: actions/upload-artifact@v4
+        with:
+          name: TitanLevel-windows
+          path: TitanLevel.exe
+
+  release:
+    needs: [build, windows]
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          merge-multiple: true
       - name: Выложить в Releases
         uses: softprops/action-gh-release@v2
         with:
           tag_name: v1.0.${{ github.run_number }}
           name: Уровень станин 1.0.${{ github.run_number }}
-          body: APK для установки на Android. Скачайте TitanLevel.apk на телефон и откройте.
-          files: TitanLevel.apk
+          body: |
+            TitanLevel.apk — для Android: скачайте на телефон и откройте.
+            TitanLevel.exe — для Windows: скачайте и запустите, установка не нужна.
+          files: |
+            TitanLevel.apk
+            TitanLevel.exe
           make_latest: true
