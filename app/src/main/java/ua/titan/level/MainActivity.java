@@ -47,7 +47,11 @@ public class MainActivity extends Activity {
 
     @Override
     public void onBackPressed() {
-        if (web.canGoBack()) web.goBack();
-        else super.onBackPressed();
+        // «Назад» сначала сворачивает 3D с полного экрана, иначе — обычное поведение
+        web.evaluateJavascript("(window.titanBack&&window.titanBack())?'1':'0'", r -> {
+            if (r != null && r.contains("1")) return;
+            if (web.canGoBack()) web.goBack();
+            else MainActivity.super.onBackPressed();
+        });
     }
 }

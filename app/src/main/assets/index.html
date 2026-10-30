@@ -77,7 +77,7 @@ table.xt{border-collapse:collapse;font-variant-numeric:tabular-nums;min-width:44
 #scene{position:relative;width:100%;aspect-ratio:16/8;max-width:100%;min-height:260px;border-radius:8px;overflow:hidden;border:1px solid #263244;background:radial-gradient(120% 90% at 50% 30%,#1c2636 0%,#111823 55%,#0a0e15 100%)}
 #scene canvas{display:block}
 .legend{display:flex;align-items:center;gap:8px;font-family:var(--f-mono);font-size:12px;color:var(--muted)}
-.ramp{width:120px;height:8px;border-radius:2px;background:linear-gradient(90deg,#5aa3cf,#6b7789,#d4a25e)}
+.ramp{width:140px;height:10px;border-radius:3px;background:linear-gradient(90deg,#3f7fb8,#8fc3e3,#c7ccd4,#efc98c,#d97a45)}
 input[type=range]{width:140px;padding:0;background:none;border:none}
 .chart text{font-family:var(--f-mono);font-size:11px;fill:var(--muted)}
 .chart text.val{fill:var(--fg);font-size:12px;font-weight:500}
@@ -95,6 +95,14 @@ body.fsopen{overflow:hidden}
 #scene.fs .fsbar{top:calc(10px + env(safe-area-inset-top,0px));right:calc(10px + env(safe-area-inset-right,0px))}
 .fsbar button{background:rgba(12,17,26,.88);color:#dde6f2;border:1px solid #34465c;padding:7px 12px;font-size:13px}
 .fsbar button:hover{border-color:#8eabc8}
+.adjset{display:flex;flex-wrap:wrap;gap:10px 18px;align-items:center}
+.adjset label.step input[type=checkbox]{width:17px;height:17px;padding:0;accent-color:var(--accent)}
+.up{color:var(--accent);font-weight:600;white-space:nowrap}
+.dn{color:var(--bed2);font-weight:600;white-space:nowrap}
+.ok{color:var(--muted);white-space:nowrap}
+.xt td.act{text-align:left;font-family:var(--f-body);font-size:14px}
+.sumlist{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:4px;max-width:80ch}
+.steps{margin:0;padding-left:22px;display:flex;flex-direction:column;gap:4px;max-width:80ch}
 .snaprow{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
 input.wide{width:min(100%,380px);text-align:left;font-family:var(--f-body)}
 select{font-family:var(--f-body);font-size:14px;color:var(--fg);background:var(--input);border:1px solid var(--line);border-radius:4px;padding:6px 8px;max-width:100%}
@@ -121,6 +129,7 @@ button:disabled{opacity:.5;cursor:default}
       <label class="step" for="nsup">Опор на станине <input id="nsup" type="number" min="2" max="80" step="1" value="7" style="width:72px"></label>
       <label class="step" for="step">Шаг между опорами, м <input id="step" inputmode="decimal" value="1,000"></label>
       <span class="chip" id="exampleChip">пример — замените своими показаниями</span>
+      <button id="zeroBtn">Все нули</button>
       <button id="clear">Очистить</button>
     </div>
   </header>
@@ -138,7 +147,7 @@ button:disabled{opacity:.5;cursor:default}
     <section class="panel">
       <h2>Поперечный уровень</h2>
       <div class="cross" id="cross"></div>
-      <p class="note">Показание поперёк станины в мкм/м со знаком: «+» — внутренняя сторона (к центру станка) выше наружной. В расчёт идёт само показание уровня, без пересчёта на ширину станины. Высоты сторон даны относительно продольной высоты на этой опоре: внутренняя = h + разность/2, наружная = h − разность/2.</p>
+      <p class="note">Показание поперёк станины в мкм/м всегда относительно внутренней стороны (к центру станка): «+» — внутренняя сторона выше наружной, «−» — внутренняя ниже. В расчёт идёт само показание уровня, без пересчёта на ширину станины. Высоты сторон даны относительно продольной высоты на этой опоре: внутренняя = h + разность/2, наружная = h − разность/2.</p>
     </section>
 
     <section class="panel">
@@ -194,7 +203,7 @@ button:disabled{opacity:.5;cursor:default}
           <span class="mag" id="mag">×0</span>
         </div>
       </div>
-      <p class="note">Вид от передней части станка: левая станина слева, правая справа. Номер опоры — внизу у основания. Над опорой — продольная высота, мкм; поперечное отклонение — у края той стороны, которая выше. Отклонения увеличены (число справа), размеры станин схематичные. Пунктир — горизонталь через опору 1. Линии между станинами — размер 4130 в трёх точках; расхождение и схождение станин по ширине показано сдвигом в своём масштабе.</p>
+      <p class="note">Вид от передней части станка: левая станина слева, правая справа. Номер опоры — внизу у основания. Над опорой — продольная высота, мкм; поперечный уровень — у внутреннего края станины, со знаком относительно внутренней стороны; плашка над опорой наклонена в сторону завала (наклон увеличен, станина при этом не наклоняется). Станины — по форме станин X станка (кожух сверху, скосы снизу) на фундаментной плите; на месте каждой опоры два клиновых башмака — внутренний и наружный. Отклонения увеличены (число справа), размеры станин схематичные. Пунктир — горизонталь через опору 1. Линии между станинами — размер 4130 в трёх точках; расхождение и схождение станин по ширине показано сдвигом в своём масштабе.</p>
     </section>
   </div>
 
@@ -221,6 +230,7 @@ button:disabled{opacity:.5;cursor:default}
     </section>
     <p class="note">Продольная высота — относительно опоры 1 своей станины. Поперечная разность «+» — внутренняя сторона выше. Между опорами — прямые.</p>
   </div>
+
 </div>
 
 <script src="three.min.js"></script>
@@ -228,11 +238,8 @@ button:disabled{opacity:.5;cursor:default}
 <script>
 const KEY='titan-x-level-v1';
 const NMAX=80;
-const EXAMPLE={step:'1,000',width:'400',example:true,u:'um',n:7,w:['40','-20','30'],m:['5','0','-5','10','0','-5','5'],
-  r:[['20','-10','5','0','-15','10'],
-     ['8','4','-6','-12','3','9']],
-  c:[['10','5','-5','0','15','5','-10'],
-     ['-5','0','10','5','-10','0','5']]};
+const Z=n=>Array(n).fill('0');
+const EXAMPLE={step:'1,000',width:'400',example:false,u:'um',n:7,w:Z(3),m:Z(7),r:[Z(6),Z(6)],c:[Z(7),Z(7)]};
 let state=JSON.parse(JSON.stringify(EXAMPLE));
 try{const s=JSON.parse(localStorage.getItem(KEY));if(s&&s.r&&s.r.length===2){
   state=s;if(!s.c)state.c=[[],[]];if(s.width==null)state.width='400';
@@ -243,7 +250,9 @@ if(!state.w)state.w=['','',''];
 if(!state.m)state.m=[];
 if(!state.n)state.n=7;
 if(!state.vis)state.vis={long:true,cross:true,dist:true,mut:true};
+if(state.vis.adj==null)state.vis.adj=true;
 if(state.cmp==null)state.cmp='';
+if(!state.adj)state.adj={base:'auto',line:'lsq',w:'400',L:'4200',mut:true,tol:'2'};
 function save(){try{localStorage.setItem(KEY,JSON.stringify(state));}catch(e){}}
 
 let N=7;
@@ -255,6 +264,9 @@ function ensure(){ // лишние значения не удаляем — пр
   state.m=pad(state.m,N);
 }
 ensure();
+// все значения в нули (по запросу; один раз при открытии этой версии, дальше — кнопкой «Все нули»)
+function zeroAll(){state.r=[Z(N-1),Z(N-1)];state.c=[Z(N),Z(N)];state.m=Z(N);state.w=Z(3);state.example=false;}
+if(!state.zero1){zeroAll();state.zero1=true;try{localStorage.setItem(KEY,JSON.stringify(state));}catch(e){}}
 
 const NAMES=['Левая станина','Правая станина'];
 const COLS=['var(--accent)','var(--bed2)'];
@@ -322,8 +334,9 @@ document.getElementById('nsup').addEventListener('change',e=>{
 });
 document.getElementById('step').value=state.step;
 for(let k=0;k<3;k++)document.getElementById('w'+k).value=state.w[k]??'';
+document.getElementById('zeroBtn').onclick=()=>{zeroAll();buildInputs();refreshChip();save();update();};
 document.getElementById('clear').onclick=()=>{
-  state={step:state.step,width:state.width,example:false,u:'um',n:N,vis:state.vis,
+  state={step:state.step,width:state.width,example:false,zero1:true,u:'um',n:N,vis:state.vis,
     r:[Array(N-1).fill(''),Array(N-1).fill('')],c:[Array(N).fill(''),Array(N).fill('')],w:['','',''],m:Array(N).fill('')};
   document.querySelectorAll('#beds input,#cross input,.dist input,.mut input').forEach(i=>i.value='');
   refreshChip();save();update();
@@ -390,6 +403,7 @@ document.getElementById('snapList').addEventListener('click',e=>{
   if(b.dataset.del){if(b.dataset.armed!=='1'){arm(b,'Точно удалить?');return;}delSnap(b.dataset.del);}
 });
 (async()=>{
+  await new Promise(r=>setTimeout(r,0)); // дождаться инициализации страницы
   let db=null;try{db=window.claude&&window.claude.use?await window.claude.use('db'):null;}catch(e){db=null;}
   const store=document.getElementById('snapStore');
   if(!db){SNAPS=localSnaps();snapsLoaded=true;store.textContent='Замеры сохраняются в памяти этого телефона.';renderSnaps();update();return;}
@@ -430,14 +444,22 @@ const host=document.getElementById('scene');
 const renderer=new THREE.WebGLRenderer({antialias:true,alpha:true});renderer.setClearColor(0x000000,0);
 renderer.setPixelRatio(Math.min(devicePixelRatio,2));host.appendChild(renderer.domElement);
 const scene=new THREE.Scene();
-const camera=new THREE.PerspectiveCamera(35,2,0.1,100);
+const camera=new THREE.PerspectiveCamera(10,2,1,200);
 const controls=new THREE.OrbitControls(camera,renderer.domElement);
 controls.enableDamping=true;controls.target.set(0,0,0);
 scene.add(new THREE.HemisphereLight(0xffffff,0x667788,0.75));
 const dlight=new THREE.DirectionalLight(0xffffff,0.7);dlight.position.set(-4,8,5);scene.add(dlight);
 const rim=new THREE.DirectionalLight(0x9db4cf,0.35);rim.position.set(6,3,-6);scene.add(rim);
 // x — вдоль станины (опора 1 спереди, x<0), z — поперёк: левая станина z<0, правая z>0 (вид спереди)
-const FLOOR=-0.85,BH=0.3,BW=0.38,LEN=6,ZS=[-1.15,1.15],INNER=[1,-1];
+const BH=1.245,BW=0.35,FLOOR=-BH/2-0.1,LEN=6,ZS=[-(3.585*BW+BW/2),3.585*BW+BW/2],INNER=[1,-1],SHOE=0.05; // зазор между внутренними гранями ≈7,2 ширины верха, как на чертеже
+// профиль станины X (вид спереди) по присланному сечению: o — к наружной стороне (+), y — от верха вниз; в долях ширины верха и высоты
+// внутренняя сторона вертикальная; наружная: вертикально вниз, затем скос наружу к широкому основанию
+const PROF=[[-0.5,0],[0.5,0],[0.5,0.233],[1.246,0.78],[1.246,1],[-0.5,1]];
+const O_IN=-0.5*BW+0.035,O_OUT=1.246*BW-0.04,FLW=1.246*BW*2;
+// сечение станины X по чертежу (вид спереди)
+function bedGeo(b){const sh=new THREE.Shape(),P=PROF.map(([o,t])=>[o*BW*INNER[b],BH/2-t*BH]);
+  sh.moveTo(P[0][0],P[0][1]);for(let k=1;k<P.length;k++)sh.lineTo(P[k][0],P[k][1]);sh.lineTo(P[0][0],P[0][1]);
+  const g=new THREE.ExtrudeGeometry(sh,{depth:LEN,steps:240,bevelEnabled:false});g.translate(0,0,-LEN/2);g.rotateY(Math.PI/2);return g;}
 // палитра 3D-вида: тёмный приборный экран, ниже — голубой, выше — янтарный, расстояние — мятный, взаимный — фиолетовый
 const HUD={lo:'#5aa3cf',mid:'#6b7789',hi:'#d4a25e',text:'#dde6f2',muted:'#8c9bb0',dist:'#7fc4b2',mut:'#a597cf',edge:'#8eabc8',pill:'rgba(12,17,26,0.95)'};
 const SPAN=ZS[1]-ZS[0]-BW-0.08; // балка только между внутренними гранями станин
@@ -446,6 +468,9 @@ const grid=new THREE.GridHelper(14,56,0x34465c,0x1e2836);grid.material.transpare
   rg.addColorStop(0,'rgba(120,150,190,0.12)');rg.addColorStop(1,'rgba(120,150,190,0)');gg.fillStyle=rg;gg.fillRect(0,0,256,256);
   const pl=new THREE.Mesh(new THREE.PlaneGeometry(12,8),new THREE.MeshBasicMaterial({map:new THREE.CanvasTexture(gc),transparent:true,depthWrite:false}));
   pl.rotation.x=-Math.PI/2;pl.position.y=FLOOR+0.002;scene.add(pl);}
+{const sl=new THREE.Mesh(new THREE.BoxGeometry(LEN+1.6,0.3,ZS[1]-ZS[0]+BW+1.6),new THREE.MeshStandardMaterial({color:'#4a5059',roughness:.95,metalness:0}));
+  sl.position.y=FLOOR-0.151;scene.add(sl);
+  const se=new THREE.LineSegments(new THREE.EdgesGeometry(sl.geometry),new THREE.LineBasicMaterial({color:'#6b7584'}));se.position.copy(sl.position);scene.add(se);}
 
 function labelSprite(lines){
   const c=document.createElement('canvas');c.width=256;c.height=lines===3?180:128;
@@ -464,21 +489,26 @@ function drawLabel(s,rows,bg){ // rows: [[text,color,font]]; bg — тёмная
 function drop(o){scene.remove(o);if(o.geometry)o.geometry.dispose();if(o.material){if(o.material.map)o.material.map.dispose();o.material.dispose();}}
 
 const beds=ZS.map((z,b)=>{
-  const geo=new THREE.BoxGeometry(LEN,BH,BW,240,2,8);
-  const orig=geo.attributes.position.array.slice();
+  const geo=bedGeo(b);
+  const orig=geo.attributes.position.array.slice(),onorm=geo.attributes.normal.array.slice();
   geo.setAttribute('color',new THREE.BufferAttribute(new Float32Array(orig.length),3));
-  const mesh=new THREE.Mesh(geo,new THREE.MeshStandardMaterial({vertexColors:true,roughness:.38,metalness:.45}));
+  const mesh=new THREE.Mesh(geo,new THREE.MeshStandardMaterial({vertexColors:true,roughness:.7,metalness:.1}));
   mesh.position.z=z;scene.add(mesh);
+  // остальная форма станины: опорная полка внизу и две направляющие сверху
+  const parts=[];
+  const mk0=(g,color,rough,metal)=>{const orig=g.attributes.position.array.slice();g.setAttribute('color',new THREE.BufferAttribute(new Float32Array(orig.length),3));const m=new THREE.Mesh(g,new THREE.MeshStandardMaterial({vertexColors:true,roughness:rough,metalness:metal}));m.position.z=z;scene.add(m);parts.push({geo:g,orig,mesh:m,base:new THREE.Color(color)});};
+  // две направляющие сверху
+  [-1,1].forEach(sd=>mk0(new THREE.BoxGeometry(LEN,0.045,0.06,240,1,1).translate(0,BH/2+0.0225,sd*BW*0.27),'#c9d3df',.5,.25));
   const edges=new THREE.LineSegments(new THREE.EdgesGeometry(geo,25),new THREE.LineBasicMaterial({color:HUD.edge,transparent:true,opacity:.85}));edges.position.z=z;scene.add(edges);
   const ze=z-INNER[b]*(BW/2+0.01); // наружная грань
-  const lg=new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(-LEN/2,BH/2,ze),new THREE.Vector3(LEN/2,BH/2,ze)]);
+  const lg=new THREE.BufferGeometry().setFromPoints(Array.from({length:121},(_,k)=>new THREE.Vector3(-LEN/2+k*LEN/120,BH/2,ze))); // линия нуля: высота 0, но сдвигается вбок вместе со станиной
   const line=new THREE.Line(lg,new THREE.LineDashedMaterial({dashSize:.12,gapSize:.08}));line.computeLineDistances();scene.add(line);
-  const name=labelSprite(2);name.scale.set(1.1,0.55,1);name.position.set(0,0.05,z+(b?1:-1)*(BW/2+0.75));
+  const name=labelSprite(2);name.scale.set(1.1,0.55,1);name.position.set(0,0.05,z+(b?1:-1)*(FLW/2+0.75));
   // контур сохранённого замера для сравнения
-  const ggeo=new THREE.BoxGeometry(LEN,BH,BW,240,2,8);
+  const ggeo=bedGeo(b);
   const gmesh=new THREE.Mesh(ggeo,new THREE.MeshBasicMaterial({color:'#dfe7f2',transparent:true,opacity:.1,depthWrite:false}));gmesh.position.z=z;gmesh.visible=false;scene.add(gmesh);
   const gedges=new THREE.LineSegments(new THREE.EdgesGeometry(ggeo,25),new THREE.LineBasicMaterial({color:'#eef3f9',transparent:true,opacity:.6}));gedges.position.z=z;gedges.visible=false;scene.add(gedges);
-  return {geo,orig,mesh,edges,line,name,z,ggeo,gmesh,gedges,pillars:[],labels:[],nums:[],crs:[]};
+  return {geo,orig,onorm,mesh,edges,line,name,z,ggeo,gmesh,gedges,parts,pillars:[],bolts:[],labels:[],nums:[],crs:[]};
 });
 const front=labelSprite(2);front.scale.set(1.3,0.65,1);front.position.set(-LEN/2-0.9,FLOOR+0.05,0);
 const PTS=['начало','середина','конец'];
@@ -491,14 +521,25 @@ const lsc=()=>Math.min(1,Math.sqrt(7/N)); // уменьшение подписе
 function build3D(){
   const pw=Math.min(0.16,0.55*pitch()),k=lsc();
   beds.forEach(bd=>{
-    [...bd.pillars,...bd.labels,...bd.nums,...bd.crs].forEach(drop);
-    bd.pillars=[];bd.labels=[];bd.nums=[];bd.crs=[];
+    [...bd.pillars,...bd.bolts,...bd.labels,...bd.nums,...bd.crs,...(bd.shoeLbl||[]),...(bd.plq||[]),...(bd.sdash||[])].forEach(drop);
+    bd.pillars=[];bd.bolts=[];bd.labels=[];bd.nums=[];bd.crs=[];bd.shoeLbl=[];bd.plq=[];bd.sdash=[];bd.shoeW=Math.min(0.1,0.25*pitch());
     for(let i=0;i<N;i++){
-      const pm=new THREE.Mesh(new THREE.BoxGeometry(pw,1,BW+0.12),new THREE.MeshStandardMaterial({roughness:.6,metalness:.25}));
-      scene.add(pm);bd.pillars.push(pm);
+      // два башмака под опорой: [0] внутренний, [1] наружный
+      for(let j=0;j<2;j++){const pm=new THREE.Mesh(new THREE.BoxGeometry(Math.min(0.1,0.25*pitch()),1,SHOE),new THREE.MeshStandardMaterial({roughness:.6,metalness:.25}));
+        scene.add(pm);bd.pillars.push(pm);
+        const bt=new THREE.Mesh(new THREE.CylinderGeometry(0.007,0.007,0.045,8).rotateX(Math.PI/2),new THREE.MeshStandardMaterial({color:'#aab6c4',roughness:.3,metalness:.8}));
+        scene.add(bt);bd.bolts.push(bt);
+        // контур башмака пунктиром до верха станины
+        const dg=new THREE.BufferGeometry();dg.setAttribute('position',new THREE.BufferAttribute(new Float32Array(6),3));
+        const dln=new THREE.LineSegments(dg,new THREE.LineDashedMaterial({color:'#8c9bb0',dashSize:0.035,gapSize:0.03,transparent:true,opacity:.5,depthTest:false}));
+        dln.renderOrder=2;scene.add(dln);bd.sdash.push(dln);}
+      const sl=labelSprite(2);sl.scale.set(0.46*k,0.23*k,1);bd.shoeLbl.push(sl);
       const l=labelSprite(3);l.scale.multiplyScalar(k);bd.labels.push(l);
       const ns=labelSprite(2);ns.scale.set(0.5*k,0.25*k,1);bd.nums.push(ns);
       const cs=labelSprite(2);cs.scale.set(0.5*k,0.25*k,1);bd.crs.push(cs);
+      // плашка поперечного уровня: наклоняется только она, станина остаётся прямой
+      const pq=new THREE.Mesh(new THREE.BoxGeometry(Math.min(0.07,0.35*pitch()),0.025,BW*0.95),new THREE.MeshStandardMaterial({color:HUD.hi,roughness:.4,metalness:.2,emissive:HUD.hi,emissiveIntensity:.15}));
+      scene.add(pq);bd.plq.push(pq);
     }
   });
   beams.forEach(bm=>{drop(bm.mesh);drop(bm.sp);});
@@ -513,14 +554,23 @@ function lin(h,s){const i=Math.min(N-2,Math.max(0,Math.floor(s)));const f=s-i;re
 function linW(w,s){const M=(N-1)/2;return s<=M?w[0]+(w[1]-w[0])*s/M:w[1]+(w[2]-w[1])*(s-M)/M;}
 function filled(h){const o=[];let last=0;h.forEach(v=>{if(v!=null)last=v;o.push(last)});return o;}
 
+const SHOE_C='#3a4555',SHOE_UP='#b0844a';
 function applyColors(){
-  beds.forEach(bd=>{bd.pillars.forEach(p=>{p.material.color=new THREE.Color('#3a4555');p.material.emissive=new THREE.Color('#0d1118');});
+  beds.forEach(bd=>{bd.pillars.forEach(p=>{p.material.color=new THREE.Color(SHOE_C);p.material.emissive=new THREE.Color('#0d1118');});
     bd.line.material.color=new THREE.Color(HUD.muted);});
   dims.forEach(d=>d.ln.material.color=new THREE.Color(HUD.dist));
   beams.forEach(bm=>{bm.mesh.material.color=new THREE.Color(HUD.mut);bm.mesh.material.emissive=new THREE.Color(HUD.mut);bm.mesh.material.emissiveIntensity=.12;});
 }
 function applyTheme(){applyColors();update3D();}
 
+const u1=v=>(v<10?v.toFixed(1):Math.round(v).toString()).replace('.',',');
+const SIDE_C=new THREE.Color('#2b3038');
+// мягкая расходящаяся шкала: светлый нейтральный ноль, плавно в голубой (ниже) и тёплый оранжевый (выше);
+// малые отклонения усилены (корень), чтобы были заметны
+const DEV=[['#3f7fb8',-1],['#8fc3e3',-0.45],['#c7ccd4',0],['#efc98c',0.45],['#d97a45',1]].map(([c,p])=>[new THREE.Color(c),p]);
+function devCol(t){const a=Math.sign(t)*Math.pow(Math.min(1,Math.abs(t)),0.6);
+  for(let k=0;k<DEV.length-1;k++){const [c0,p0]=DEV[k],[c1,p1]=DEV[k+1];if(a<=p1)return c0.clone().lerp(c1,(a-p0)/(p1-p0));}
+  return DEV[DEV.length-1][0].clone();}
 function update3D(){
   const V=state.vis,P=pitch();
   const hs=H.map(h=>V.long?filled(h):Array(N).fill(0)),ds=D.map(d=>d.map(v=>v==null||!V.cross?0:v));
@@ -528,7 +578,7 @@ function update3D(){
   let maxAbs=5;[[hs,ds],...(CB?[[ghs,gds]]:[])].forEach(([HH,DD])=>HH.forEach((h,b)=>h.forEach((v,i)=>{maxAbs=Math.max(maxAbs,Math.abs(v+DD[b][i]/2),Math.abs(v-DD[b][i]/2));})));
   const DEL='#f3f6fa',dl=(a,b0,d=1)=>a==null||b0==null?null:['Δ '+fmt(a-b0,d),DEL,'500 32px "IBM Plex Mono", monospace'];
   const mult=Math.pow(2,Number(document.getElementById('exag').value));
-  factor=0.28/(maxAbs*1e-6)*mult; // мкм -> м сцены
+  factor=0.13/(maxAbs*1e-6)*mult; // мкм -> м сцены
   const q=factor>1e5?1000:100;
   document.getElementById('mag').textContent='×'+(Math.round(factor/q)*q).toLocaleString('ru-RU');
   const cHi=new THREE.Color(HUD.hi),cLo=new THREE.Color(HUD.lo),cMid=new THREE.Color(HUD.mid);
@@ -539,34 +589,68 @@ function update3D(){
     for(let k=0;k<pos.count;k++){
       const x=o[3*k],zl=o[3*k+2],s=(x+LEN/2)/LEN*(N-1);
       const side=zl*INNER[b]/(BW/2); // +1 внутренняя грань, −1 наружная
-      const v=lin(h,s)+side*lin(dd,s)/2;
+      const v=lin(h,s); // поперечный уровень сечение не наклоняет — станина стоит ровно, он показан подписями
       pos.array[3*k+1]=o[3*k+1]+v*1e-6*factor;
       pos.array[3*k+2]=zl-INNER[b]*linW(wd,s)/2*1e-6*fW;
-      const t=Math.max(-1,Math.min(1,v/maxAbs));const c=cMid.clone().lerp(t>=0?cHi:cLo,Math.abs(t));
+      const t=Math.max(-1,Math.min(1,v/maxAbs));
+      // верх (кожух) — цвет по высоте, бока — тёмный графит, как на станке
+      const c=bd.onorm[3*k+1]>0.7?devCol(t):SIDE_C;
       col.array[3*k]=c.r;col.array[3*k+1]=c.g;col.array[3*k+2]=c.b;
     }
     pos.needsUpdate=true;col.needsUpdate=true;bd.geo.computeVertexNormals();
+    {const la=bd.line.geometry.attributes.position,n=la.count;
+      for(let k=0;k<n;k++){const s=k/(n-1)*(N-1);la.array[3*k+2]=bd.z-INNER[b]*(BW/2+0.012)-INNER[b]*linW(wd,s)/2*1e-6*fW;}
+      la.needsUpdate=true;bd.line.geometry.computeBoundingSphere();bd.line.computeLineDistances();}
+    bd.parts.forEach(pt=>{const pp=pt.geo.attributes.position,po=pt.orig;
+      for(let k=0;k<pp.count;k++){const x=po[3*k],zl=po[3*k+2],s=(x+LEN/2)/LEN*(N-1),side=zl*INNER[b]/(BW/2);
+        pp.array[3*k+1]=po[3*k+1]+lin(h,s)*1e-6*factor;pp.array[3*k+2]=zl-INNER[b]*linW(wd,s)/2*1e-6*fW;
+        // направляющие окрашены по продольной высоте, как верх станины
+        const tr=Math.max(-1,Math.min(1,lin(h,s)/maxAbs)),ca=pt.geo.attributes.color.array,cc=devCol(tr);
+        ca[3*k]=cc.r;ca[3*k+1]=cc.g;ca[3*k+2]=cc.b;}
+      pp.needsUpdate=true;pt.geo.attributes.color.needsUpdate=true;pt.geo.computeVertexNormals();});
     bd.edges.geometry.dispose();bd.edges.geometry=new THREE.EdgesGeometry(bd.geo,25);
     bd.gmesh.visible=bd.gedges.visible=!!CB;
     if(CB){const gh=ghs[b],gd=gds[b],gp=bd.ggeo.attributes.position;
       for(let k=0;k<gp.count;k++){const x=o[3*k],zl=o[3*k+2],s=(x+LEN/2)/LEN*(N-1),side=zl*INNER[b]/(BW/2);
-        gp.array[3*k+1]=o[3*k+1]+(lin(gh,s)+side*lin(gd,s)/2)*1e-6*factor;gp.array[3*k+2]=zl-INNER[b]*linW(gwd,s)/2*1e-6*fW;}
+        gp.array[3*k+1]=o[3*k+1]+lin(gh,s)*1e-6*factor;gp.array[3*k+2]=zl-INNER[b]*linW(gwd,s)/2*1e-6*fW;}
       gp.needsUpdate=true;bd.gedges.geometry.dispose();bd.gedges.geometry=new THREE.EdgesGeometry(bd.ggeo,25);}
     for(let i=0;i<N;i++){
-      const x=-LEN/2+i*P,dy=h[i]*1e-6*factor,top=BH/2+dy+Math.abs(dd[i])/2*1e-6*factor,bot=-BH/2+dy-Math.abs(dd[i])/2*1e-6*factor;
+      const x=-LEN/2+i*P,dy=h[i]*1e-6*factor,top=BH/2+dy,bot=-BH/2+dy;
       const zz=bd.z-INNER[b]*linW(wd,i)/2*1e-6*fW;
-      const p=bd.pillars[i];const ht=Math.max(0.02,bot-FLOOR);p.scale.y=ht;p.position.set(x,FLOOR+ht/2,zz);
+      // башмаки: каждый доходит до низа станины со своей стороны
+      const W=(num(state.adj&&state.adj.w)||400)/1000,tol=Math.abs(num(state.adj&&state.adj.tol))||0,dvr=D[b][i];
+      const raw=dvr==null?null:dvr*W,need=false&&raw!=null&&Math.abs(raw)>=tol&&raw!==0; // мкм разницы сторон
+      [1,-1].forEach((side,j)=>{const p=bd.pillars[2*i+j];
+        const o=side===1?O_IN:O_OUT,sf=-o/(BW/2),bs=-BH/2+dy,ht=Math.max(0.02,bs-FLOOR),sz=zz-INNER[b]*o;
+        p.scale.y=ht;p.position.set(x,FLOOR+ht/2,sz);
+        {// одна линия от центра башмака: внутренний — до верха, наружный — только до скоса станины
+          const dln=bd.sdash[2*i+j],a=dln.geometry.attributes.position.array,y0=FLOOR+ht,on=o/BW;
+          const tc=on<=0.5?0:0.233+Math.min(1,(on-0.5)/0.746)*0.547,y1=BH/2-tc*BH+dy;
+          a.set([x,y0,sz,x,y1,sz],0);
+          dln.geometry.attributes.position.needsUpdate=true;dln.geometry.computeBoundingSphere();dln.computeLineDistances();}
+        bd.bolts[2*i+j].position.set(x,FLOOR+ht*0.45,sz-INNER[b]*Math.sign(o)*(SHOE/2+0.02));
+        const lower=need&&((raw<0&&side===1)||(raw>0&&side===-1)); // поднимаем башмак у низкой стороны
+        p.material.color.set(lower?SHOE_UP:SHOE_C);p.material.emissive.set(lower?'#3a2a12':'#0d1118');
+        if(lower){const sl=bd.shoeLbl[i];sl.visible=true;sl.position.set(x,FLOOR+ht+0.02,sz+INNER[b]*side*0.16);
+          drawLabel(sl,[['▲ '+u1(Math.abs(raw)),SHOE_UP,'600 44px "IBM Plex Mono", monospace']],true);}
+      });
+      if(!need)bd.shoeLbl[i].visible=false;
       const l=bd.labels[i];l.position.set(x,top+0.34*lsc(),zz);
       const rows=[];
       if(V.long){rows.push([H[b][i]==null?'—':fmt(H[b][i]),fg,'500 38px "IBM Plex Mono", monospace']);
         const r2=CB&&dl(H[b][i],CB.H[b][i]);if(r2)rows.push(r2);}
       drawLabel(l,rows,true);l.visible=rows.length>0;
-      const n=bd.nums[i];n.position.set(x,FLOOR+0.04,zz-INNER[b]*(BW/2+0.2));
+      const n=bd.nums[i];n.position.set(x,FLOOR+0.04,zz-INNER[b]*(FLW/2+0.2));
       drawLabel(n,[[String(i+1),mu,'600 52px "IBM Plex Mono", monospace']]);
-      // поперечное отклонение — у края той стороны, которая выше
+      // плашка: наклон в сторону завала, «+» — внутренняя выше
+      {const pq=bd.plq[i],dv0=D[b][i];pq.visible=V.cross&&dv0!=null;
+        if(pq.visible){const mx=Math.max(10,...D.flat().filter(v=>v!=null).map(Math.abs)),ang=Math.max(-1,Math.min(1,dv0/mx))*0.32;
+          pq.position.set(x,top+0.07,zz);pq.rotation.set(-INNER[b]*ang,0,0);
+          pq.material.color.set(dv0===0?HUD.muted:HUD.hi);pq.material.emissive.set(dv0===0?HUD.muted:HUD.hi);}}
+      // поперечный уровень — всегда у внутреннего края, знак относительно внутренней стороны
       const cs=bd.crs[i],dv=D[b][i];cs.visible=V.cross&&dv!=null;
-      if(cs.visible){const sd=dv>0?INNER[b]:dv<0?-INNER[b]:0;
-        cs.position.set(x,top+0.1,zz+sd*(BW/2+0.06));
+      if(cs.visible){
+        cs.position.set(x,top+0.1,zz+INNER[b]*(BW/2+0.06));
         const r2=CB&&dl(dv,CB.D[b][i],0);
         drawLabel(cs,[[fmt(dv,0),dv===0?mu:hiC,'600 46px "IBM Plex Mono", monospace'],...(r2?[r2]:[])],true);}
     }
@@ -616,9 +700,12 @@ function update(){
 
 function setView(v){
   ['vIso','vFront','vSide'].forEach(id=>document.getElementById(id).classList.toggle('on',id===v));
-  if(v==='vSide')camera.position.set(0,0.25,11.5);
-  else if(v==='vFront')camera.position.set(-11,0.4,0);
-  else camera.position.set(-8.2,4.8,5.2);
+  // спереди и сбоку — почти без перспективы, чтобы стенки станин не казались развалёнными
+  // все виды почти без перспективы: при нулевых отклонениях станины строго параллельны
+  camera.fov=9;camera.updateProjectionMatrix();
+  if(v==='vSide')camera.position.set(0,0.25,52);
+  else if(v==='vFront')camera.position.set(-46,0.4,0);
+  else camera.position.set(-30,21,24);
   controls.target.set(0,0,0);controls.update();
 }
 ['vIso','vFront','vSide'].forEach(id=>document.getElementById(id).onclick=()=>setView(id));
@@ -643,9 +730,9 @@ const fsBtn=document.getElementById('fsBtn'),fsViews=document.getElementById('fs
 function setFs(on){host.classList.toggle('fs',on);document.body.classList.toggle('fsopen',on);
   fsBtn.textContent=on?'✕ Свернуть':'⛶ На весь экран';fsBtn.setAttribute('aria-label',on?'Свернуть 3D':'Открыть 3D на весь экран');fsViews.hidden=!on;
   requestAnimationFrame(resize);}
-fsBtn.onclick=()=>{if(host.classList.contains('fs')){if(location.hash==='#full')history.back();else setFs(false);}
-  else{try{location.hash='full';}catch(e){}setFs(true);}};
-addEventListener('hashchange',()=>{if(location.hash!=='#full'&&host.classList.contains('fs'))setFs(false);});
+fsBtn.onclick=()=>setFs(!host.classList.contains('fs'));
+// для приложения: системная кнопка «Назад» сначала сворачивает 3D
+window.titanBack=()=>{if(host.classList.contains('fs')){setFs(false);return true;}return false;};
 addEventListener('keydown',e=>{if(e.key==='Escape'&&host.classList.contains('fs'))fsBtn.click();});
 fsViews.querySelectorAll('button').forEach(b=>b.onclick=()=>setView(b.dataset.v));
 buildInputs();build3D();renderSnaps();refreshChip();setView('vIso');resize();update();applyTheme();
