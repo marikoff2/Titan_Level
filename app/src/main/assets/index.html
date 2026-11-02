@@ -129,6 +129,7 @@ button:disabled{opacity:.5;cursor:default}
       <label class="step" for="nsup">Опор на станине <input id="nsup" type="number" min="2" max="80" step="1" value="7" style="width:72px"></label>
       <label class="step" for="step">Шаг между опорами, м <input id="step" inputmode="decimal" value="1,000"></label>
       <span class="chip" id="exampleChip">пример — замените своими показаниями</span>
+      <button id="exportBtn" class="on">Выгрузить замеры</button>
       <button id="zeroBtn">Все нули</button>
       <button id="clear">Очистить</button>
     </div>
@@ -412,6 +413,40 @@ document.getElementById('snapList').addEventListener('click',e=>{
     SNAPS=snap.docs.map(d=>({id:d.id,...d.data()})).filter(s=>s.data&&s.data.n);snapsLoaded=!snap.metadata.fromCache;renderSnaps();update();
   },()=>{store.textContent='Список замеров сейчас недоступен.';});
 })();
+
+// --- выгрузка замеров в файл (JSON) для анализа
+function measBlock(d){const C=computeAll(d),n=d.n;
+  const bed=b=>({
+    продольный_показания_мкм_на_м:(d.r[b]||[]).slice(0,n-1).map(v=>{const x=num(v);return isNaN(x)?null:x;}),
+    продольный_высота_опор_мкм:C.H[b],
+    поперечный_показания_мкм_на_м:C.D[b]});
+  return {опор:n,шаг_м:num(d.step),
+    левая_станина:bed(0),правая_станина:bed(1),
+    расстояние_4130_отклонение_мкм:{начало:C.WD[0],середина:C.WD[1],конец:C.WD[2]},
+    взаимный_уровень_мкм_на_м:C.MU};}
+function buildExport(){const now=new Date();
+  return {станок:'TITAN4020 s/n 20250035',документ:'Уровень станин X — выгрузка замеров',выгружено:now.toISOString(),
+    условные_обозначения:{
+      станины:'левая/правая — вид от передней части станка; опора 1 — перед станка',
+      продольный:'показание уровня в мкм/м на промежутке опора i → i+1; «+» — следующая опора выше; высота накопительно от опоры 1 (=0)',
+      поперечный:'показание уровня в мкм/м поперёк станины относительно внутренней стороны; «+» — внутренняя сторона выше; ширина станины ≈400 мм',
+      расстояние:'отклонение по индикатору от калибра 4130 мм, мкм; «+» — станины дальше друг от друга; двигают левую станину',
+      взаимный:'показание уровня на балке поперёк обеих станин, мкм/м; «+» — правая станина выше; база балки ≈4200 мм'},
+    текущие_значения:measBlock({n:N,step:state.step,r:state.r,c:state.c,w:state.w,m:state.m}),
+    сохранённые_замеры:SNAPS.map(x=>({название:x.name,сохранён:x.savedAt,...measBlock(x.data)}))};}
+async function doExport(){const now=new Date(),pad2=v=>String(v).padStart(2,'0');
+  const name=`TitanLevel_${now.getFullYear()}-${pad2(now.getMonth()+1)}-${pad2(now.getDate())}_${pad2(now.getHours())}${pad2(now.getMinutes())}.json`;
+  const text=JSON.stringify(buildExport(),null,2);
+  // Android-приложение: сохранить в «Загрузки» и открыть «Поделиться»
+  if(window.TitanAndroid&&window.TitanAndroid.saveFile){window.TitanAndroid.saveFile(name,text);return;}
+  // страница в claude.ai
+  let dl=null;try{dl=window.claude&&window.claude.use?await window.claude.use('downloads'):null;}catch(e){dl=null;}
+  if(dl){try{await dl.save({filename:name,data:text});flash(`Выгружено: ${name}`);}
+    catch(e){if(e&&e.code!=='declined')flash('Не удалось выгрузить файл. Попробуйте ещё раз.');}return;}
+  // Windows-приложение и обычный браузер
+  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([text],{type:'application/json'}));a.download=name;
+  document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove();},2000);flash(`Выгружено: ${name}`);}
+document.getElementById('exportBtn').onclick=doExport;
 
 // --- графики
 function drawChart(id,series,labels){
