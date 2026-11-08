@@ -2,7 +2,7 @@ name: Сборка APK и Windows
 
 on:
   push:
-    branches: [main]
+    branches: [main, okonchatelnoe-vystavlenie]
   workflow_dispatch:
 
 permissions:
@@ -57,6 +57,7 @@ jobs:
           path: TitanLevel.exe
 
   release:
+    if: github.ref == 'refs/heads/main'
     needs: [build, windows]
     runs-on: ubuntu-24.04
     steps:
@@ -75,3 +76,27 @@ jobs:
             TitanLevel.apk
             TitanLevel.exe
           make_latest: true
+
+  # тестовая сборка ветки: отдельный предварительный выпуск, «Latest» не трогает
+  prerelease:
+    if: github.ref != 'refs/heads/main'
+    needs: [build, windows]
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          merge-multiple: true
+      - name: Выложить тестовую сборку
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: test-${{ github.ref_name }}-${{ github.run_number }}
+          name: ТЕСТ ${{ github.ref_name }} ${{ github.run_number }}
+          target_commitish: ${{ github.sha }}
+          prerelease: true
+          make_latest: false
+          body: |
+            Тестовая сборка ветки ${{ github.ref_name }} (вкладка «Окончательное выставление станин X»).
+            TitanLevel.exe — Windows, TitanLevel.apk — Android.
+          files: |
+            TitanLevel.apk
+            TitanLevel.exe
