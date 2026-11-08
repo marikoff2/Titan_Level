@@ -76,6 +76,8 @@ table.xt{border-collapse:collapse;font-variant-numeric:tabular-nums;min-width:44
 .viewbar .grp{display:flex;flex-wrap:wrap;align-items:center;gap:8px}
 #scene{position:relative;width:100%;aspect-ratio:16/8;max-width:100%;min-height:260px;border-radius:8px;overflow:hidden;border:1px solid #263244;background:radial-gradient(120% 90% at 50% 30%,#1c2636 0%,#111823 55%,#0a0e15 100%)}
 #scene canvas{display:block}
+#finScene{position:relative;width:100%;aspect-ratio:16/8;max-width:100%;min-height:260px;border-radius:8px;overflow:hidden;border:1px solid #263244;background:radial-gradient(120% 90% at 50% 30%,#1c2636 0%,#111823 55%,#0a0e15 100%)}
+#finScene canvas{display:block}
 .legend{display:flex;align-items:center;gap:8px;font-family:var(--f-mono);font-size:12px;color:var(--muted)}
 .ramp{width:140px;height:10px;border-radius:3px;background:linear-gradient(90deg,#3f7fb8,#8fc3e3,#c7ccd4,#efc98c,#d97a45)}
 input[type=range]{width:140px;padding:0;background:none;border:none}
@@ -238,6 +240,43 @@ button:disabled{opacity:.5;cursor:default}
 
   <div class="tabpane" id="tabFinal" hidden>
     <section class="panel">
+      <div class="viewbar">
+        <h2>Окончательное выставление: замер</h2>
+        <div class="grp"><button id="finExport" class="on">Выгрузить замеры</button><button id="finClear">Очистить</button></div>
+      </div>
+      <p class="status" id="finStatus" role="status"></p>
+      <p class="note">Вводятся показания уровня в мкм/м со знаком, как есть. Значения этой вкладки хранятся отдельно от вкладки «Ввод и 3D» и выгружаются своей кнопкой. Ниже, под расчётом, — методика и схемы.</p>
+    </section>
+
+    <section class="panel">
+      <h2>Продольный уровень</h2>
+      <p class="note">Линейка 1 м на подкладках 669 мм, по внутренней направляющей, от опоры 1 к опоре 18. Показание шага: «+» — передняя подкладка (дальше от опоры 1) выше задней. Δh = показание × 0,669. Опоры 3, 8, 13, 18 — с поправкой на 51 мм. Отклонение — от прямой через опоры 1 и 18 своей станины: «+» — опора выше прямой, её опустить.</p>
+      <div class="cross" id="finLong"></div>
+    </section>
+
+    <section class="panel">
+      <h2>Поперечный уровень</h2>
+      <p class="note">Полуметровая линейка поперёк обеих направляющих, уровень посередине. Показание: «+» — внутренняя сторона выше. Внутренние опоры не трогаем — правим наружную: δ = показание × 0,955 мкм (ряды опор ≈ 955 мм). «+» — наружную поднять.</p>
+      <div class="cross" id="finCross"></div>
+    </section>
+
+    <section class="panel">
+      <div class="viewbar">
+        <h2>Станины на опорах, вид с отклонениями</h2>
+        <div class="grp"><button id="fvIso" class="on">Изометрия</button><button id="fvFront">Спереди</button><button id="fvSide">Сбоку</button></div>
+      </div>
+      <div id="finScene"></div>
+      <div class="viewbar">
+        <div class="legend"><span>ниже прямой 1–18</span><span class="ramp"></span><span>выше</span></div>
+        <div class="grp">
+          <label class="step" for="fexag">Масштаб отклонений <input type="range" id="fexag" min="-2" max="2" step="0.05" value="0"></label>
+          <span class="mag" id="fmag">×0</span>
+        </div>
+      </div>
+      <p class="note">Вид от передней части станка: левая станина слева. Цвет верха — отклонение от прямой через опоры 1 и 18. Под станиной — опоры: синие выставляем, серые поджимаем; внутренний ряд — под внутренней направляющей, наружный — под широким основанием. Над выставляемой опорой: отклонение и что сделать с внутренней опорой, ниже — поправка наружной опоры по поперечному уровню; наклон плашки над опорой — поперечный уровень (увеличен).</p>
+    </section>
+
+    <section class="panel">
       <h2>Окончательное выставление станин X на опорах фундамента</h2>
       <p class="note">По чертежу фундамента TITAN4020 (R02, 2025.07.11). Перед станка — со стороны пульта, опора 1 — передняя. Размеры с чертежа читались по скану: перед разметкой проверить рулеткой шаг колодцев и период 2007 мм (между колодцами 1 и 6). Допуски на прямолинейность, скрутку и взаимный уровень — из документации M69-1, здесь их нет.</p>
       <ul class="sumlist">
@@ -314,12 +353,6 @@ button:disabled{opacity:.5;cursor:default}
       </ol>
     </section>
 
-    <section class="panel">
-      <h2>Расчёт по замеру</h2>
-      <p class="note">Ввод — показание уровня в мкм/м со знаком. Продольный: «+» — передняя подкладка (дальше от опоры 1) выше задней. Поперечный: «+» — внутренняя сторона выше. Прямая для отклонений — через опоры 1 и 18 своей станины. Значения этой вкладки хранятся отдельно и в «Выгрузить замеры» не входят.</p>
-      <div class="cross" id="finCalc"></div>
-      <div class="snaprow"><button id="finClear">Очистить расчёт</button></div>
-    </section>
   </div>
 
 </div>
@@ -943,35 +976,137 @@ document.getElementById('finSteps2').innerHTML=s;
 
 // расчёт
 const nm=v=>{const t=String(v??'').trim().replace(',','.');return t===''?NaN:Number(t);};
+const ok=v=>isNaN(v)?null:Math.round(v*10)/10;
 const act=(d,up,dn)=>isNaN(d)?'—':Math.abs(d)<0.05?'<span class="ok">в линии</span>':d>0?`<span class="dn">${dn} ${f1(Math.abs(d))}</span>`:`<span class="up">${up} ${f1(Math.abs(d))}</span>`;
-function calc(){
-  const host=document.getElementById('finCalc');
-  host.innerHTML=['Левая станина','Правая станина'].map((name,b)=>{
-    const r=fs.r[b].map(nm),h=[0];for(let k=0;k<10;k++)h.push(isNaN(h[k])||isNaN(r[k])?NaN:h[k]+r[k]*BASE/1000);
-    const hs={1:h[0],3:h[1]+r[1]*0.051,6:h[3],8:h[4]+r[4]*0.051,11:h[6],13:h[7]+r[7]*0.051,16:h[9],18:h[10]+r[9]*0.051};
-    const line=n=>hs[1]+(hs[18]-hs[1])*FX[n-1]/FX[17];
-    let t=`<div class="xbox"><div class="bedhead"><span class="sw" style="background:${b?'var(--bed2)':'var(--accent)'}"></span><h3>${name}</h3></div>`;
-    t+=`<div class="scroll"><table class="xt"><thead><tr><th>Шаг</th><th>Показание, мкм/м</th><th>Δh, мкм</th><th>Точка</th><th>h точки, мкм</th></tr></thead><tbody>`;
-    for(let k=0;k<10;k++)t+=`<tr><td class="sup">${k+1}</td><td class="in"><input data-fb="${b}" data-fk="r" data-fi="${k}" inputmode="decimal" value="${fs.r[b][k]}" aria-label="${name}, шаг ${k+1}, мкм/м"></td><td>${isNaN(r[k])?'—':fmt(r[k]*BASE/1000)}</td><td class="act">${k+1} · ${PTNAME[k+1]}</td><td class="d">${isNaN(h[k+1])?'—':fmt(h[k+1])}</td></tr>`;
-    t+=`</tbody></table></div>`;
-    t+=`<div class="scroll"><table class="xt"><thead><tr><th>Опора</th><th>h, мкм</th><th>От прямой 1–18, мкм</th><th>Продольный: внутр. опора</th><th>Поперечный, мкм/м</th><th>Наружная опора, мкм</th></tr></thead><tbody>`;
-    MEAS.forEach((n,j)=>{const d=hs[n]-line(n),c=nm(fs.c[b][j]);
-      t+=`<tr><td class="sup">${n}</td><td>${isNaN(hs[n])?'—':fmt(hs[n])}</td><td class="d">${isNaN(d)?'—':fmt(d)}</td><td class="act">${n===1||n===18?'<span class="ok">база прямой</span>':act(d,'поднять','опустить')}</td><td class="in"><input data-fb="${b}" data-fk="c" data-fi="${j}" inputmode="decimal" value="${fs.c[b][j]}" aria-label="${name}, опора ${n}, поперечный, мкм/м"></td><td class="act">${isNaN(c)?'—':act(-c*0.955,'поднять','опустить')}</td></tr>`;});
-    t+=`</tbody></table></div><p class="note">Контрольные точки: 2 = ${isNaN(h[2])?'—':fmt(h[2])}, 5 = ${isNaN(h[5])?'—':fmt(h[5])}, 8 = ${isNaN(h[8])?'—':fmt(h[8])} мкм — записать до поджатия пропущенных опор и сравнить после.</p></div>`;
+const actTxt=(d,up,dn)=>isNaN(d)?null:Math.abs(d)<0.05?'в линии':(d>0?dn:up)+' '+f1(Math.abs(d));
+const BEDN=['Левая станина','Правая станина'],BEDC=['var(--accent)','var(--bed2)'];
+// всё по одной станине: высоты точек, высоты опор, отклонения от прямой 1–18, поперечный
+function comp(b){
+  const r=fs.r[b].map(nm),h=[0];for(let k=0;k<10;k++)h.push(isNaN(h[k])||isNaN(r[k])?NaN:h[k]+r[k]*BASE/1000);
+  const hs={1:h[0],3:h[1]+r[1]*0.051,6:h[3],8:h[4]+r[4]*0.051,11:h[6],13:h[7]+r[7]*0.051,16:h[9],18:h[10]+r[9]*0.051};
+  const line=X=>hs[1]+(hs[18]-hs[1])*X/FX[17];
+  const dev={};MEAS.forEach(n=>{dev[n]=hs[n]-line(FX[n-1]);});
+  const c=fs.c[b].map(nm),out=c.map(v=>v*0.955);
+  // профиль отклонения по X для 3D: точки замера + опора 18
+  const px=[...PT,FX[17]],ph=[...h,hs[18]].map((v,i)=>v-line(px[i]));
+  return {r,h,hs,dev,c,out,px,ph};
+}
+function bedHead(b){return `<div class="bedhead"><span class="sw" style="background:${BEDC[b]}"></span><h3>${BEDN[b]}</h3></div>`;}
+function inp(b,k,i,lab,v){return `<input data-fb="${b}" data-fk="${k}" data-fi="${i}" inputmode="decimal" value="${v}" aria-label="${lab}">`;}
+function render(){
+  const C=[comp(0),comp(1)];
+  document.getElementById('finLong').innerHTML=C.map((R,b)=>{
+    let t=`<div class="xbox">${bedHead(b)}<div class="scroll"><table class="xt"><thead><tr><th>Шаг</th><th>Подкладки, мм</th><th>Показание, мкм/м</th><th>Δh, мкм</th><th>Высота точки, мкм</th></tr></thead><tbody>`;
+    for(let k=0;k<10;k++)t+=`<tr><td class="sup">${k+1}</td><td class="act">${PT[k]} → ${PT[k+1]}</td><td class="in">${inp(b,'r',k,BEDN[b]+', шаг '+(k+1)+', мкм/м',fs.r[b][k])}</td><td>${isNaN(R.r[k])?'—':fmt(R.r[k]*BASE/1000)}</td><td class="d">${isNaN(R.h[k+1])?'—':fmt(R.h[k+1])}</td></tr>`;
+    t+=`</tbody></table></div><div class="scroll"><table class="xt"><thead><tr><th>Опора</th><th>Высота, мкм</th><th>От прямой 1–18, мкм</th><th>Внутренняя опора</th></tr></thead><tbody>`;
+    MEAS.forEach(n=>{t+=`<tr><td class="sup">${n}</td><td>${isNaN(R.hs[n])?'—':fmt(R.hs[n])}</td><td class="d">${isNaN(R.dev[n])?'—':fmt(R.dev[n])}</td><td class="act">${n===1||n===18?'<span class="ok">база прямой</span>':act(R.dev[n],'поднять','опустить')}</td></tr>`;});
+    t+=`</tbody></table></div><p class="note">Контрольные точки (записать до поджатия пропущенных опор и сравнить после): 2 = ${isNaN(R.h[2])?'—':fmt(R.h[2])}, 5 = ${isNaN(R.h[5])?'—':fmt(R.h[5])}, 8 = ${isNaN(R.h[8])?'—':fmt(R.h[8])} мкм.</p></div>`;
     return t;}).join('');
-  host.querySelectorAll('input').forEach(el=>{
+  document.getElementById('finCross').innerHTML=C.map((R,b)=>{
+    let t=`<div class="xbox">${bedHead(b)}<div class="scroll"><table class="xt"><thead><tr><th>Опора</th><th>Показание, мкм/м</th><th>Разность рядов, мкм</th><th>Наружная опора</th></tr></thead><tbody>`;
+    MEAS.forEach((n,j)=>{const c=R.c[j];t+=`<tr><td class="sup">${n}</td><td class="in">${inp(b,'c',j,BEDN[b]+', опора '+n+', поперечный, мкм/м',fs.c[b][j])}</td><td>${isNaN(c)?'—':fmt(R.out[j])}</td><td class="act">${act(-R.out[j],'поднять','опустить')}</td></tr>`;});
+    return t+`</tbody></table></div></div>`;}).join('');
+  document.querySelectorAll('#finLong input,#finCross input').forEach(el=>{
     el.addEventListener('change',()=>{fs[el.dataset.fk][+el.dataset.fb][+el.dataset.fi]=el.value;fsave();
       // пересчёт после перехода фокуса (Tab/Enter), фокус возвращаем на то же поле
       setTimeout(()=>{const a=document.activeElement,q=a&&a.dataset&&a.dataset.fk?`input[data-fb="${a.dataset.fb}"][data-fk="${a.dataset.fk}"][data-fi="${a.dataset.fi}"]`:null;
-        calc();if(q){const n=host.querySelector(q);if(n)n.focus();}},0);});});
+        render();if(q){const n=document.querySelector(q);if(n)n.focus();}},0);});});
+  upd3(C);
 }
+const fstat=t=>{const el=document.getElementById('finStatus');el.textContent=t;setTimeout(()=>{el.textContent='';},5000);};
 // очистка в два нажатия (confirm() в приложении Android не показывается)
 let clrT=0;const clrB=document.getElementById('finClear');
 clrB.onclick=()=>{if(!clrT){clrB.textContent='Нажмите ещё раз — очистить';clrB.classList.add('danger');
-  clrT=setTimeout(()=>{clrT=0;clrB.textContent='Очистить расчёт';clrB.classList.remove('danger');},3000);return;}
-  clearTimeout(clrT);clrT=0;clrB.textContent='Очистить расчёт';clrB.classList.remove('danger');
-  fs={r:[Array(10).fill(''),Array(10).fill('')],c:[Array(8).fill(''),Array(8).fill('')]};fsave();calc();};
-calc();
+  clrT=setTimeout(()=>{clrT=0;clrB.textContent='Очистить';clrB.classList.remove('danger');},3000);return;}
+  clearTimeout(clrT);clrT=0;clrB.textContent='Очистить';clrB.classList.remove('danger');
+  fs={r:[Array(10).fill(''),Array(10).fill('')],c:[Array(8).fill(''),Array(8).fill('')]};fsave();render();};
+
+// выгрузка
+function finData(){return BEDN.map((name,b)=>{const R=comp(b);return {станина:name,
+  продольный:{шаги:PT.slice(1).map((x,k)=>({шаг:k+1,подкладки_мм:[PT[k],x],показание_мкм_на_м:ok(R.r[k]),dh_мкм:ok(R.r[k]*BASE/1000),высота_точки_мкм:ok(R.h[k+1])})),
+    опоры:MEAS.map(n=>({опора:n,X_мм:FX[n-1],высота_мкм:ok(R.hs[n]),от_прямой_1_18_мкм:ok(R.dev[n]),внутренняя_опора:n===1||n===18?'база прямой':actTxt(R.dev[n],'поднять','опустить')})),
+    контрольные_точки_мкм:{'2':ok(R.h[2]),'5':ok(R.h[5]),'8':ok(R.h[8])}},
+  поперечный:MEAS.map((n,j)=>({опора:n,показание_мкм_на_м:ok(R.c[j]),разность_рядов_мкм:ok(R.out[j]),наружная_опора:actTxt(-R.out[j],'поднять','опустить')}))};});}
+document.getElementById('finExport').onclick=async()=>{
+  const now=new Date(),p2=v=>String(v).padStart(2,'0');
+  const name=`TitanLevel_okonch_${now.getFullYear()}-${p2(now.getMonth()+1)}-${p2(now.getDate())}_${p2(now.getHours())}${p2(now.getMinutes())}.json`;
+  const text=JSON.stringify({станок:'TITAN4020 s/n 20250035',документ:'Окончательное выставление станин X — выгрузка замеров',выгружено:now.toISOString(),
+    условные_обозначения:{
+      продольный:'линейка 1 м на подкладках 669 мм по внутренней направляющей; показание в мкм/м, «+» — передняя подкладка выше задней; высота накопительно от опоры 1 (=0); опоры 3, 8, 13, 18 — с поправкой на 51 мм; отклонение от прямой через опоры 1 и 18, «+» — опора выше прямой',
+      поперечный:'линейка 0,5 м поперёк направляющих; показание в мкм/м, «+» — внутренняя сторона выше; разность рядов = показание × 0,955 (ряды опор ≈955 мм); правится наружная опора',
+      X:'от оси опоры 1, мм; опоры по чертежу фундамента TITAN4020 R02'},
+    станины:finData()},null,2);
+  if(window.TitanAndroid&&window.TitanAndroid.saveFile){window.TitanAndroid.saveFile(name,text);return;}
+  let dl=null;try{dl=window.claude&&window.claude.use?await window.claude.use('downloads'):null;}catch(e){dl=null;}
+  if(dl){try{await dl.save({filename:name,data:text});fstat(`Выгружено: ${name}`);}catch(e){if(e&&e.code!=='declined')fstat('Не удалось выгрузить файл. Попробуйте ещё раз.');}return;}
+  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([text],{type:'application/json'}));a.download=name;
+  document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove();},2000);fstat(`Выгружено: ${name}`);};
+
+// --- 3D: станины на опорах фундамента
+const fhost=document.getElementById('finScene');
+const frend=new THREE.WebGLRenderer({antialias:true,alpha:true});frend.setClearColor(0x000000,0);
+frend.setPixelRatio(Math.min(devicePixelRatio,2));fhost.appendChild(frend.domElement);
+const fsc=new THREE.Scene(),fcam=new THREE.PerspectiveCamera(9,2,1,200),fctl=new THREE.OrbitControls(fcam,frend.domElement);
+fctl.enableDamping=true;
+fsc.add(new THREE.HemisphereLight(0xffffff,0x667788,0.75));
+{const d=new THREE.DirectionalLight(0xffffff,0.7);d.position.set(-4,8,5);fsc.add(d);const r2=new THREE.DirectionalLight(0x9db4cf,0.35);r2.position.set(6,3,-6);fsc.add(r2);}
+const XS=X=>-LEN/2+X/FX[17]*LEN; // X мм -> сцена
+const PADH=0.12,BOT=-BH/2;
+{const g=new THREE.GridHelper(14,56,0x34465c,0x1e2836);g.material.transparent=true;g.material.opacity=.9;g.position.y=BOT-PADH;fsc.add(g);}
+function fsprite(w,hh){const c=document.createElement('canvas');c.width=256;c.height=hh;const t=new THREE.CanvasTexture(c);
+  const s=new THREE.Sprite(new THREE.SpriteMaterial({map:t,depthTest:false,transparent:true}));s.scale.set(w,w*hh/256,1);s.renderOrder=5;s.userData={c,t};fsc.add(s);return s;}
+function fdraw(s,rows){const {c,t}=s.userData,g=c.getContext('2d');g.clearRect(0,0,c.width,c.height);g.textAlign='center';
+  rows.forEach((r,k)=>{if(!r[0])return;g.font=r[2]||'600 34px "IBM Plex Mono", monospace';const y=44+k*52,w=Math.min(250,g.measureText(r[0]).width+26);
+    g.fillStyle=HUD.pill;g.fillRect(128-w/2,y-34,w,44);g.globalAlpha=.6;g.strokeStyle=r[1];g.lineWidth=2;g.strokeRect(128-w/2,y-34,w,44);g.globalAlpha=1;
+    g.fillStyle=r[1];g.fillText(r[0],128,y);});t.needsUpdate=true;}
+const fbeds=ZS.map((z,b)=>{
+  const geo=bedGeo(b),orig=geo.attributes.position.array.slice(),onorm=geo.attributes.normal.array.slice();
+  geo.setAttribute('color',new THREE.BufferAttribute(new Float32Array(orig.length),3));
+  const mesh=new THREE.Mesh(geo,new THREE.MeshStandardMaterial({vertexColors:true,roughness:.7,metalness:.1}));mesh.position.z=z;fsc.add(mesh);
+  const edges=new THREE.LineSegments(new THREE.EdgesGeometry(geo,25),new THREE.LineBasicMaterial({color:HUD.edge,transparent:true,opacity:.6}));edges.position.z=z;fsc.add(edges);
+  const zin=z+0.27*BW*INNER[b],zout=z-1.02*BW*INNER[b]; // ряды опор: внутренний под внутренней направляющей, наружный под основанием
+  const pads=[],nums=[];
+  FX.forEach((x,i)=>{const n=i+1,m=MEAS.includes(n);
+    [zin,zout].forEach((zz,j)=>{if(j===0&&OUTONLY.includes(n))return;
+      const p=new THREE.Mesh(new THREE.BoxGeometry(0.11,PADH,0.11),new THREE.MeshStandardMaterial({color:m?HUD.lo:'#5d6676',roughness:.6,metalness:.25,emissive:m?HUD.lo:'#000000',emissiveIntensity:m?.25:0}));
+      p.position.set(XS(x),BOT-PADH/2,zz);p.userData={x,i};fsc.add(p);pads.push(p);});
+    const ns=fsprite(0.5,64);ns.position.set(XS(x),BOT-PADH-0.08,zout-INNER[b]*0.22);fdraw(ns,[[String(n),m?HUD.text:HUD.muted,'600 34px "IBM Plex Mono", monospace']]);nums.push(ns);});
+  const labs={},plq={};
+  MEAS.forEach(n=>{labs[n]=fsprite(0.8,120);
+    const q=new THREE.Mesh(new THREE.BoxGeometry(0.06,0.02,BW*0.9),new THREE.MeshStandardMaterial({color:HUD.hi,roughness:.4,metalness:.2,emissive:HUD.hi,emissiveIntensity:.15}));fsc.add(q);plq[n]=q;});
+  const name=fsprite(1.3,64);name.position.set(0,BOT-PADH,z-INNER[b]*2.3*BW);fdraw(name,[[BEDN[b],b?HUD.hi:HUD.lo,'600 30px "IBM Plex Sans", sans-serif']]);
+  return {geo,orig,onorm,mesh,edges,z,pads,labs,plq};});
+{const f=fsprite(1.2,64);f.position.set(-LEN/2-0.8,BOT,0);fdraw(f,[['перед станка',HUD.muted,'500 28px "IBM Plex Sans", sans-serif']]);}
+function interp(px,ph,X){if(ph.some(v=>isNaN(v)))return 0;let k=0;while(k<px.length-2&&X>px[k+1])k++;return ph[k]+(ph[k+1]-ph[k])*(X-px[k])/(px[k+1]-px[k]);}
+let lastC=null;
+function upd3(C){lastC=C;
+  let mx=5;C.forEach(R=>R.ph.forEach(v=>{if(!isNaN(v))mx=Math.max(mx,Math.abs(v));}));
+  const mult=Math.pow(2,Number(document.getElementById('fexag').value)),fac=0.13/(mx*1e-6)*mult;
+  const q=fac>1e5?1000:100;document.getElementById('fmag').textContent='×'+(Math.round(fac/q)*q).toLocaleString('ru-RU');
+  fbeds.forEach((bd,b)=>{const R=C[b],pos=bd.geo.attributes.position,col=bd.geo.attributes.color,o=bd.orig;
+    for(let k=0;k<pos.count;k++){const X=(o[3*k]+LEN/2)/LEN*FX[17],v=interp(R.px,R.ph,X);
+      pos.array[3*k+1]=o[3*k+1]+v*1e-6*fac;
+      const c=bd.onorm[3*k+1]>0.7?devCol(Math.max(-1,Math.min(1,v/mx))):SIDE_C;col.array[3*k]=c.r;col.array[3*k+1]=c.g;col.array[3*k+2]=c.b;}
+    pos.needsUpdate=true;col.needsUpdate=true;bd.geo.computeVertexNormals();
+    bd.edges.geometry.dispose();bd.edges.geometry=new THREE.EdgesGeometry(bd.geo,25);
+    bd.pads.forEach(p=>{const dy=interp(R.px,R.ph,p.userData.x)*1e-6*fac;p.scale.y=Math.max(0.2,(PADH+dy)/PADH);p.position.y=BOT-PADH+(PADH+dy)/2;});
+    MEAS.forEach((n,j)=>{const X=FX[n-1],dy=interp(R.px,R.ph,X)*1e-6*fac,d=R.dev[n],c=R.c[j];
+      const t1=n===1||n===18?['база',HUD.muted]:isNaN(d)?['—',HUD.muted]:Math.abs(d)<0.05?['в линии',HUD.muted]:[(d>0?'↓ ':'↑ ')+f1(Math.abs(d)),d>0?HUD.hi:HUD.lo];
+      const t2=isNaN(c)?['',HUD.muted]:Math.abs(c)<0.05?['нар. 0',HUD.muted]:['нар. '+(c>0?'↑ ':'↓ ')+f1(Math.abs(c*0.955)),c>0?HUD.lo:HUD.hi];
+      fdraw(bd.labs[n],[[n+': '+t1[0],t1[1]],[t2[0],t2[1],'500 30px "IBM Plex Mono", monospace']]);
+      bd.labs[n].position.set(XS(X),BH/2+dy+0.4,bd.z);
+      const pq=bd.plq[n];pq.position.set(XS(X),BH/2+dy+0.07,bd.z);
+      pq.rotation.x=isNaN(c)?0:Math.max(-0.35,Math.min(0.35,-INNER[b]*c/Math.max(20,mx)*0.25));});
+  });}
+function fview(v){['fvIso','fvFront','fvSide'].forEach(id=>document.getElementById(id).classList.toggle('on',id===v));
+  if(v==='fvSide')fcam.position.set(0,0.25,52);else if(v==='fvFront')fcam.position.set(-46,0.4,0);else fcam.position.set(-30,21,24);
+  fctl.target.set(0,0,0);fctl.update();}
+['fvIso','fvFront','fvSide'].forEach(id=>document.getElementById(id).onclick=()=>fview(id));
+document.getElementById('fexag').addEventListener('input',()=>lastC&&upd3(lastC));
+function fresize(){const w=fhost.clientWidth,h=fhost.clientHeight;if(!w||!h)return;frend.setSize(w,h,false);frend.domElement.style.width=w+'px';frend.domElement.style.height=h+'px';fcam.aspect=w/h;fcam.updateProjectionMatrix();}
+new ResizeObserver(fresize).observe(fhost);
+fview('fvIso');render();
+(function floop(){if(fhost.clientWidth){fctl.update();frend.render(fsc,fcam);}requestAnimationFrame(floop);})();
 })();
 </script>
 </body>
