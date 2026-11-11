@@ -241,23 +241,29 @@ button:disabled{opacity:.5;cursor:default}
   <div class="tabpane" id="tabFinal" hidden>
     <section class="panel">
       <div class="viewbar">
-        <h2>Окончательное выставление: замер</h2>
+        <h2>Окончательное выставление станин X</h2>
         <div class="grp"><button id="finExport" class="on">Выгрузить замеры</button><button id="finClear">Очистить</button></div>
       </div>
       <p class="status" id="finStatus" role="status"></p>
-      <p class="note">Вводятся показания уровня в мкм/м со знаком, как есть. Значения этой вкладки хранятся отдельно от вкладки «Ввод и 3D» и выгружаются своей кнопкой. Ниже, под расчётом, — методика и схемы.</p>
+      <p class="note">Линейка по <b>наружной</b> направляющей, 11 меток через 669 мм, 10 шагов. Показания уровня — в мкм/м со знаком, как есть. Внизу — схема, где ставить линейку.</p>
     </section>
 
     <section class="panel">
-      <h2>Продольный уровень</h2>
-      <p class="note">Линейка 1 м на подкладках 669 мм, по внутренней направляющей, от опоры 1 к опоре 18. Показание шага: «+» — передняя подкладка (дальше от опоры 1) выше задней. Δh = показание × 0,669. Опоры 3, 8, 13, 18 — с поправкой на 51 мм. Отклонение — от прямой через опоры 1 и 18 своей станины: «+» — опора выше прямой, её опустить.</p>
+      <h2>1. Продольный уровень</h2>
+      <p class="note">«+» — передняя подкладка (дальше от опоры 1) выше задней.</p>
       <div class="cross" id="finLong"></div>
     </section>
 
     <section class="panel">
-      <h2>Поперечный уровень</h2>
-      <p class="note">Полуметровая линейка поперёк обеих направляющих, уровень посередине. Показание: «+» — внутренняя сторона выше. Внутренние опоры не трогаем — правим наружную: δ = показание × 0,955 мкм (ряды опор ≈ 955 мм). «+» — наружную поднять.</p>
+      <h2>2. Поперечный уровень</h2>
+      <p class="note">Линейка поперёк обеих направляющих над опорой, уровень посередине. «+» — внутренняя сторона выше.</p>
       <div class="cross" id="finCross"></div>
+    </section>
+
+    <section class="panel">
+      <h2>3. Что править</h2>
+      <p class="note">Поправки сразу для пары опор: наружная направляющая встаёт на прямую 1–18 и поперечный уходит в ноль. «↑» — поднять, «↓» — опустить, мкм. После правки — перемерить.</p>
+      <div class="cross" id="finFix"></div>
     </section>
 
     <section class="panel">
@@ -273,86 +279,20 @@ button:disabled{opacity:.5;cursor:default}
           <span class="mag" id="fmag">×0</span>
         </div>
       </div>
-      <p class="note">Вид от передней части станка: левая станина слева. Цвет верха — отклонение от прямой через опоры 1 и 18. Под станиной — опоры: синие выставляем, серые поджимаем; внутренний ряд — под внутренней направляющей, наружный — под широким основанием. Над выставляемой опорой: отклонение и что сделать с внутренней опорой, ниже — поправка наружной опоры по поперечному уровню; наклон плашки над опорой — поперечный уровень (увеличен).</p>
+      <p class="note">Вид от передней части станка, левая станина слева. Над опорой: «вн» — внутренняя опора, «нар» — наружная.</p>
     </section>
 
     <section class="panel">
-      <h2>Окончательное выставление станин X на опорах фундамента</h2>
-      <p class="note">По чертежу фундамента TITAN4020 (R02, 2025.07.11). Перед станка — со стороны пульта, опора 1 — передняя. Размеры с чертежа читались по скану: перед разметкой проверить рулеткой шаг колодцев и период 2007 мм (между колодцами 1 и 6). Допуски на прямолинейность, скрутку и взаимный уровень — из документации M69-1, здесь их нет.</p>
-      <ul class="sumlist">
-        <li>Под станины 64 колодца: на каждой станине два ряда — наружный 18 колодцев, внутренний 14. Ряды ≈ 955 мм друг от друга (размер 955 у переднего торца).</li>
-        <li>Во внутреннем ряду нет колодцев на позициях 2, 7, 12, 17 — там только наружный.</li>
-        <li>Шаг колодцев вдоль X — 360 и ≈ 429 мм (428,5 / 430). Расстановка повторяется с периодом 2007 мм: колодцы 1, 6, 11, 16 стоят на 0, 2007, 4014, 6021 мм.</li>
-        <li>Верх станины ≈ 400 мм — расстояние между направляющими. Внутренняя направляющая стоит над внутренним рядом колодцев, наружная — не доходя до наружного ряда (станина книзу расширяется наружу).</li>
-        <li>Поэтому внутренние опоры задают высоту и прямолинейность внутренней направляющей, а наружные поворачивают сечение вокруг внутренней опоры — задают поперечный наклон.</li>
-      </ul>
-    </section>
-
-    <section class="panel">
-      <h2>План опор и точки замера</h2>
-      <div class="scroll"><svg class="fin" id="finPlan" viewBox="0 0 680 320" width="100%" style="min-width:560px" role="img" aria-label="План опор станины и точки замера с базой 669 мм"></svg></div>
-      <p class="note">Обе станины одинаковые. Точки замера — на внутренней направляющей, X от оси опоры 1.</p>
-      <div class="scroll"><table class="xt"><thead><tr><th>Опора</th><th>X, мм</th><th>Шаг до следующей, мм</th><th>Внутренний колодец</th><th>Что делать</th></tr></thead><tbody id="finWells"></tbody></table></div>
-    </section>
-
-    <section class="panel">
-      <h2>Продольный уровень: одна база 669 мм</h2>
-      <p class="note">Постоянная база «через опору» точно в колодцы не ложится: сумма двух соседних шагов — 720, 788,5 или 858,5 мм. Поэтому база = 2007 / 3 = 669 мм: точки замера попадают точно на опоры 1, 6, 11, 16 и с недолётом 51 мм — на опоры 3, 8, 13, 18. Недолёт учитывается: h<sub>опоры</sub> = h<sub>точки</sub> + показание шага × 0,051 (при 40 мкм/м это 2 мкм).</p>
-      <ol class="steps">
-        <li>Мерить и выставлять опоры 1, 3, 6, 8, 11, 13, 16, 18 — все с внутренним колодцем, прямо под внутренней направляющей.</li>
-        <li>Остальные опоры (2, 4, 5, 7, 9, 10, 12, 14, 15, 17) — подвести до касания под индикатором, без подъёма станины.</li>
-        <li>Контрольные точки 2, 5, 8 лежат между пропущенными опорами. После поджатия 4–5, 9–10, 14–15 перемерить их: если высота изменилась — опору перетянули.</li>
-        <li>Перепад на шаге: Δh = показание (мкм/м) × 0,669. 10 шагов от опоры 1 до опоры 18, потом обратный проход 10 → 1 (разница = дрейф уровня или температура).</li>
-      </ol>
-      <div class="scroll"><table class="xt"><thead><tr><th>Шаг</th><th>Задняя подкладка</th><th>Передняя подкладка</th><th>Что даёт шаг</th></tr></thead><tbody id="finSteps"></tbody></table></div>
-    </section>
-
-    <section class="panel">
-      <h2>Как ставить линейку</h2>
-      <div class="scroll"><svg class="fin" id="finSide" viewBox="0 0 680 400" width="100%" style="min-width:560px" role="img" aria-label="Линейка 1000 мм на подкладках 669 мм и стыковка шагов"></svg></div>
-      <ul class="sumlist">
-        <li>Подкладки на 669 мм, всю станину не менять. Линейка на подкладках с равными свесами ≈ 165 мм, уровень строго посередине: тогда прогиб линейки не даёт наклона под уровнем.</li>
-        <li>Стыковка: передняя подкладка шага = задняя подкладка следующего шага, ровно на ту же метку.</li>
-        <li>Метки 0, 669, 1338 … 6690 размечать на внутренней направляющей заранее, рулеткой от метки 0 нарастающим итогом (не по 669 от предыдущей). Ось колодца 1 перенести наверх станины.</li>
-        <li>Проверка разметки: метки 2007, 4014, 6021 должны лечь точно на оси колодцев 6, 11, 16.</li>
-        <li>Проверить, что станины хватает на свесы: на шаге 1 линейка уходит на 165 мм перед осью опоры 1, на шаге 10 — до 6855 мм, на 114 мм за ось опоры 18.</li>
-      </ul>
+      <h2>Где ставить линейку</h2>
       <div class="scroll"><svg class="fin" id="finSteps2" viewBox="0 0 680 340" width="100%" style="min-width:560px" role="img" aria-label="Десять положений линейки относительно опор"></svg></div>
-    </section>
-
-    <section class="panel">
-      <h2>Поперечный уровень: полуметровая линейка</h2>
       <ul class="sumlist">
-        <li>Подкладки на обе направляющие (база ≈ 400 мм), линейка на подкладках симметрично, уровень посередине. Мерить на тех же опорах 1, 3, 6, 8, 11, 13, 16, 18.</li>
-        <li>Поправка на наружную опору: δ = показание (мкм/м) × 0,955 мкм. «+» — внутренняя выше, значит наружную поднять.</li>
-        <li>Порядок: сначала внутренними опорами продольный профиль, потом наружными — поперечный.</li>
-        <li>На позициях 2, 7, 12, 17 внутреннего колодца нет — поперечный там только для контроля.</li>
+        <li>Метки 0, 669 … 6690 — на наружной направляющей, рулеткой от оси опоры 1 нарастающим итогом. Метки 2007, 4014, 6021 должны лечь на оси опор 6, 11, 16.</li>
+        <li>Линейка 1 м, свесы по ≈ 165 мм, уровень посередине. Передняя подкладка шага = задняя подкладка следующего. Подкладки — по центру направляющей.</li>
+        <li>Выставляем синие опоры 1, 3, 6, 8, 11, 13, 16, 18. Серые — после этого до касания под индикатором; затем сравнить контрольные точки 2, 5, 8 — изменились, значит опору перетянули.</li>
+        <li>4130 — толкателями на X ≈ 934 и ≈ 5807 мм, двигать только левую станину, после толкания перемерить её.</li>
+        <li>Поправки считаются для жёсткого сечения: внутренняя направляющая над внутренним рядом, наружная — в 400 мм от него, ряды в 955 мм (по скану R02). Проверить: поднять одну наружную опору на известную величину и сравнить показания.</li>
       </ul>
     </section>
-
-    <section class="panel">
-      <h2>Расстояние 4130 и толкатели</h2>
-      <ul class="sumlist">
-        <li>Гнёзда D-D — колодцы под толкатели: стенку станины можно толкать внутрь и наружу. По чертежу они у наружного и внутреннего ряда на X ≈ 934 мм (между колодцами 3 и 4) и ≈ 5807 мм (между 15 и 16) — проверить на месте.</li>
-        <li>4130 мерить там, где правишь (X ≈ 934 и ≈ 5807), плюс середина (опоры 9–10) для контроля.</li>
-        <li>Толкатели в двух точках по X дают сдвиг станины и параллельность. Изгиб станины в плане ими не исправить: если середина не сходится с концами — это кривизна станины.</li>
-        <li>Двигается только левая станина. После каждого толкания перемерить продольный и поперечный уровень этой станины.</li>
-      </ul>
-    </section>
-
-    <section class="panel">
-      <h2>Порядок на 64 опорах</h2>
-      <ol class="steps">
-        <li>Грубо по уровню: позиции 1, 9–10, 18 — сначала внутренние опоры, затем наружные.</li>
-        <li>Толкателями — 4130 на X ≈ 934 и ≈ 5807 мм (левая станина).</li>
-        <li>Тонко продольный по внутренней направляющей — внутренние опоры 1, 3, 6, 8, 11, 13, 16, 18.</li>
-        <li>Тонко поперечный — наружные опоры (× 0,955).</li>
-        <li>Остальные опоры — до касания под индикатором; перемерить контрольные точки 2, 5, 8.</li>
-        <li>Взаимный уровень: балка на одинаковых X обеих станин, разворот на 180°, среднее.</li>
-        <li>Снова 4130 и полный контрольный замер.</li>
-      </ol>
-    </section>
-
   </div>
 
 </div>
@@ -900,6 +840,7 @@ buildInputs();build3D();renderSnaps();refreshChip();setView('vIso');resize();upd
 // --- вкладка «Окончательное выставление станин X» (чертёж фундамента TITAN4020 R02)
 (function(){
 const FX=[0,360,720,1148.5,1578.5,2007,2367,2727,3155.5,3585.5,4014,4374,4734,5162.5,5592.5,6021,6381,6741];
+const ROWS=955,GW=400; // ряды опор и наружная направляющая от внутреннего ряда, мм
 const MEAS=[1,3,6,8,11,13,16,18],OUTONLY=[2,7,12,17],BASE=669,PUSH=[934.25,5806.75];
 const PT=Array.from({length:11},(_,k)=>k*BASE);
 const PTNAME=['опора 1','опора 3 (−51)','контроль между 4 и 5','опора 6','опора 8 (−51)','контроль между 9 и 10','опора 11','опора 13 (−51)','контроль между 14 и 15','опора 16','опора 18 (−51)'];
@@ -913,57 +854,8 @@ const T=(x,y,t,a,cls)=>`<text x="${x}" y="${y}"${a?` text-anchor="${a}"`:''}${cl
 const wellRect=(i,y)=>{const n=i+1,m=MEAS.includes(n);
   return `<rect x="${sx(FX[i])-6}" y="${y-6}" width="12" height="12" rx="2" fill="${m?'var(--accent)':'none'}" fill-opacity="${m?0.3:1}" stroke="${m?'var(--accent)':'var(--muted)'}" stroke-width="${m?1.5:1}"/>`;};
 
-// план опор
-let s='';
-s+=T(20,30,'← перед станка','start','lab');
-FX.forEach((x,i)=>{s+=T(sx(x),58,i+1,'middle',MEAS.includes(i+1)?'val':'');});
-s+=T(20,99,'наружный ряд','start','lab')+T(20,132,'наруж. направл.','start','lab')+T(20,164,'внутр. ряд','start','lab');
-s+=`<line x1="122" y1="128" x2="628" y2="128" stroke="var(--muted)" stroke-dasharray="4 3"/><line x1="112" y1="160" x2="628" y2="160" stroke="var(--fg)" stroke-width="1.5"/>`;
-FX.forEach((x,i)=>{s+=wellRect(i,95);if(!OUTONLY.includes(i+1))s+=wellRect(i,160);});
-PUSH.forEach(x=>[95,160].forEach(y=>{s+=`<rect x="${sx(x)-3.5}" y="${y-3.5}" width="7" height="7" fill="none" stroke="var(--bed2)" stroke-width="1.2"/>`;}));
-s+=T(20,209,'точки замера','start','lab')+`<line x1="120" y1="205" x2="620" y2="205" stroke="var(--line)"/>`;
-PT.forEach((x,k)=>{const c=k%3===2;s+=`<circle cx="${sx(x)}" cy="205" r="5" fill="${c?'var(--hi)':'var(--accent)'}" fill-opacity="${c?0.8:0.6}" stroke="${c?'var(--hi)':'var(--accent)'}"/>`+T(sx(x),228,k,'middle');
-  if(k%2===0)s+=T(sx(x),244,String(x),'middle');});
-s+=T(20,244,'X, мм','start','lab');
-s+=`<rect x="20" y="266" width="12" height="12" rx="2" fill="var(--accent)" fill-opacity="0.3" stroke="var(--accent)" stroke-width="1.5"/>`+T(40,276,'мерить и выставлять','start','lab');
-s+=`<rect x="200" y="266" width="12" height="12" rx="2" fill="none" stroke="var(--muted)"/>`+T(220,276,'поджать под индикатором','start','lab');
-s+=`<rect x="410" y="268.5" width="7" height="7" fill="none" stroke="var(--bed2)" stroke-width="1.2"/>`+T(426,276,'толкатель D-D','start','lab');
-s+=`<circle cx="26" cy="300" r="5" fill="var(--accent)" fill-opacity="0.6" stroke="var(--accent)"/>`+T(40,304,'точка замера, база 669','start','lab');
-s+=`<circle cx="206" cy="300" r="5" fill="var(--hi)" fill-opacity="0.8" stroke="var(--hi)"/>`+T(220,304,'контрольная точка','start','lab');
-document.getElementById('finPlan').innerHTML=s;
-
-// таблица колодцев
-document.getElementById('finWells').innerHTML=FX.map((x,i)=>{const n=i+1;
-  return `<tr><td class="sup">${n}</td><td>${f1(x)}</td><td>${i<17?f1(FX[i+1]-x):'—'}</td><td class="act">${OUTONLY.includes(n)?'нет':'есть'}</td><td class="act">${MEAS.includes(n)?'<b>мерить и выставлять</b>':'поджать до касания'}</td></tr>`;}).join('');
-
-// таблица шагов
-document.getElementById('finSteps').innerHTML=PT.slice(1).map((x,k)=>
-  `<tr><td class="sup">${k+1}</td><td>${PT[k]} — ${PTNAME[k]}</td><td>${x} — ${PTNAME[k+1]}</td><td class="act">${k%3===1?'контрольная точка':'высота опоры '+PTNAME[k+1].replace(' (−51)','').replace('опора ','')}</td></tr>`).join('');
-
-// вид сбоку и стыковка
-const ARW='<defs><marker id="finArr" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M2 1L8 5L2 9" fill="none" stroke="var(--muted)" stroke-width="1.5"/></marker></defs>';
-const dim=(x1,x2,y)=>`<line x1="${x1}" y1="${y}" x2="${x2}" y2="${y}" stroke="var(--muted)" marker-start="url(#finArr)" marker-end="url(#finArr)"/>`;
-s=ARW;
-s+=T(340,36,'уровень строго посередине','middle','lab');
-s+=`<rect x="300" y="48" width="80" height="28" rx="4" fill="var(--hi)" fill-opacity="0.15" stroke="var(--hi)"/>`+T(340,67,'уровень','middle','val');
-s+=`<rect x="90" y="76" width="500" height="20" rx="3" fill="var(--steel)" fill-opacity="0.35" stroke="var(--muted)"/>`+T(96,70,'гранитная линейка 1000 мм','start','lab');
-s+=`<rect x="165" y="96" width="16" height="22" rx="2" fill="var(--accent)" fill-opacity="0.4" stroke="var(--accent)"/><rect x="499" y="96" width="16" height="22" rx="2" fill="var(--accent)" fill-opacity="0.4" stroke="var(--accent)"/>`;
-s+=`<line x1="40" y1="118" x2="640" y2="118" stroke="var(--fg)" stroke-width="1.5"/><line x1="173" y1="122" x2="173" y2="134" stroke="var(--fg)"/><line x1="507" y1="122" x2="507" y2="134" stroke="var(--fg)"/>`;
-s+=T(173,150,'метка k','middle','lab')+T(507,150,'метка k+1','middle','lab');
-s+=dim(177,503,178)+T(340,170,'669 мм — одна база на всю станину','middle','val');
-s+=dim(92,169,178)+T(130,170,'≈165','middle','lab')+dim(511,588,178)+T(550,170,'≈165','middle','lab');
-s+=T(40,206,'внутренняя направляющая; подкладки — две одинаковые опоры линейки','start','lab');
-s+=`<line x1="40" y1="228" x2="640" y2="228" stroke="var(--line)"/>`;
-s+=T(95,282,'шаг 1','end','lab')+`<rect x="103" y="272" width="284" height="12" rx="2" fill="var(--steel)" fill-opacity="0.35" stroke="var(--muted)"/>`;
-s+=T(590,322,'шаг 2','start','lab')+`<rect x="293" y="312" width="284" height="12" rx="2" fill="none" stroke="var(--muted)" stroke-dasharray="4 3"/>`;
-s+=`<g stroke="var(--accent)" stroke-width="1.5"><line x1="150" y1="284" x2="150" y2="356"/><line x1="340" y1="284" x2="340" y2="312"/><line x1="340" y1="324" x2="340" y2="356"/><line x1="530" y1="324" x2="530" y2="356"/></g>`;
-s+=`<line x1="100" y1="356" x2="580" y2="356" stroke="var(--fg)" stroke-width="1.5"/>`;
-s+=T(150,374,'k','middle','lab')+T(340,374,'k+1 — общая точка','middle','lab')+T(530,374,'k+2','middle','lab');
-s+=T(340,394,'передняя подкладка шага 1 = задняя подкладка шага 2','middle','lab');
-document.getElementById('finSide').innerHTML=s;
-
 // десять положений линейки
-s=T(20,24,'← перед станка','start','lab');
+let s=T(20,24,'← перед станка','start','lab');
 MEAS.forEach(n=>{s+=`<line x1="${sx(FX[n-1])}" y1="64" x2="${sx(FX[n-1])}" y2="300" stroke="var(--accent)" stroke-opacity="0.45"/>`+T(sx(FX[n-1]),44,n,'middle','val');});
 s+=T(20,60,'опоры','start','lab');
 FX.forEach((x,i)=>{s+=wellRect(i,56);});
@@ -986,10 +878,13 @@ function comp(b){
   const hs={1:h[0],3:h[1]+r[1]*0.051,6:h[3],8:h[4]+r[4]*0.051,11:h[6],13:h[7]+r[7]*0.051,16:h[9],18:h[10]+r[9]*0.051};
   const line=X=>hs[1]+(hs[18]-hs[1])*X/FX[17];
   const dev={};MEAS.forEach(n=>{dev[n]=hs[n]-line(FX[n-1]);});
-  const c=fs.c[b].map(nm),out=c.map(v=>v*0.955);
+  const c=fs.c[b].map(nm);
+  // поправки пары опор (жёсткое сечение): наружная направляющая на прямую 1–18, поперечный в ноль
+  const fin=MEAS.map(n=>{const d=dev[n],cc=isNaN(c[MEAS.indexOf(n)])?0:c[MEAS.indexOf(n)];
+    if(isNaN(d))return {a:NaN,o:NaN};const a=-d-cc*GW/1000;return {a,o:a+cc*ROWS/1000};});
   // профиль отклонения по X для 3D: точки замера + опора 18
   const px=[...PT,FX[17]],ph=[...h,hs[18]].map((v,i)=>v-line(px[i]));
-  return {r,h,hs,dev,c,out,px,ph};
+  return {r,h,hs,dev,c,fin,px,ph};
 }
 function bedHead(b){return `<div class="bedhead"><span class="sw" style="background:${BEDC[b]}"></span><h3>${BEDN[b]}</h3></div>`;}
 function inp(b,k,i,lab,v){return `<input data-fb="${b}" data-fk="${k}" data-fi="${i}" inputmode="decimal" value="${v}" aria-label="${lab}">`;}
@@ -997,14 +892,17 @@ function render(){
   const C=[comp(0),comp(1)];
   document.getElementById('finLong').innerHTML=C.map((R,b)=>{
     let t=`<div class="xbox">${bedHead(b)}<div class="scroll"><table class="xt"><thead><tr><th>Шаг</th><th>Подкладки, мм</th><th>Показание, мкм/м</th><th>Δh, мкм</th><th>Высота точки, мкм</th></tr></thead><tbody>`;
-    for(let k=0;k<10;k++)t+=`<tr><td class="sup">${k+1}</td><td class="act">${PT[k]} → ${PT[k+1]}</td><td class="in">${inp(b,'r',k,BEDN[b]+', шаг '+(k+1)+', мкм/м',fs.r[b][k])}</td><td>${isNaN(R.r[k])?'—':fmt(R.r[k]*BASE/1000)}</td><td class="d">${isNaN(R.h[k+1])?'—':fmt(R.h[k+1])}</td></tr>`;
-    t+=`</tbody></table></div><div class="scroll"><table class="xt"><thead><tr><th>Опора</th><th>Высота, мкм</th><th>От прямой 1–18, мкм</th><th>Внутренняя опора</th></tr></thead><tbody>`;
-    MEAS.forEach(n=>{t+=`<tr><td class="sup">${n}</td><td>${isNaN(R.hs[n])?'—':fmt(R.hs[n])}</td><td class="d">${isNaN(R.dev[n])?'—':fmt(R.dev[n])}</td><td class="act">${n===1||n===18?'<span class="ok">база прямой</span>':act(R.dev[n],'поднять','опустить')}</td></tr>`;});
+    for(let k=0;k<10;k++)t+=`<tr><td class="sup">${k+1}</td><td class="act">${PT[k]} → ${PT[k+1]}<br><small>${PTNAME[k+1]}</small></td><td class="in">${inp(b,'r',k,BEDN[b]+', шаг '+(k+1)+', мкм/м',fs.r[b][k])}</td><td>${isNaN(R.r[k])?'—':fmt(R.r[k]*BASE/1000)}</td><td class="d">${isNaN(R.h[k+1])?'—':fmt(R.h[k+1])}</td></tr>`;
     t+=`</tbody></table></div><p class="note">Контрольные точки (записать до поджатия пропущенных опор и сравнить после): 2 = ${isNaN(R.h[2])?'—':fmt(R.h[2])}, 5 = ${isNaN(R.h[5])?'—':fmt(R.h[5])}, 8 = ${isNaN(R.h[8])?'—':fmt(R.h[8])} мкм.</p></div>`;
     return t;}).join('');
   document.getElementById('finCross').innerHTML=C.map((R,b)=>{
-    let t=`<div class="xbox">${bedHead(b)}<div class="scroll"><table class="xt"><thead><tr><th>Опора</th><th>Показание, мкм/м</th><th>Разность рядов, мкм</th><th>Наружная опора</th></tr></thead><tbody>`;
-    MEAS.forEach((n,j)=>{const c=R.c[j];t+=`<tr><td class="sup">${n}</td><td class="in">${inp(b,'c',j,BEDN[b]+', опора '+n+', поперечный, мкм/м',fs.c[b][j])}</td><td>${isNaN(c)?'—':fmt(R.out[j])}</td><td class="act">${act(-R.out[j],'поднять','опустить')}</td></tr>`;});
+    let t=`<div class="xbox">${bedHead(b)}<div class="scroll"><table class="xt"><thead><tr><th>Опора</th><th>Показание, мкм/м</th></tr></thead><tbody>`;
+    MEAS.forEach((n,j)=>{t+=`<tr><td class="sup">${n}</td><td class="in">${inp(b,'c',j,BEDN[b]+', опора '+n+', поперечный, мкм/м',fs.c[b][j])}</td></tr>`;});
+    return t+`</tbody></table></div></div>`;}).join('');
+  const mv=v=>isNaN(v)?'—':Math.abs(v)<0.05?'<span class="ok">0</span>':v>0?`<span class="up">↑ ${f1(v)}</span>`:`<span class="dn">↓ ${f1(-v)}</span>`;
+  document.getElementById('finFix').innerHTML=C.map((R,b)=>{
+    let t=`<div class="xbox">${bedHead(b)}<div class="scroll"><table class="xt"><thead><tr><th>Опора</th><th>От прямой 1–18, мкм</th><th>Внутренняя</th><th>Наружная</th></tr></thead><tbody>`;
+    MEAS.forEach((n,j)=>{const F=R.fin[j];t+=`<tr><td class="sup">${n}</td><td class="d">${n===1||n===18?'база':isNaN(R.dev[n])?'—':fmt(R.dev[n])}</td><td class="d">${mv(F.a)}</td><td class="d">${mv(F.o)}</td></tr>`;});
     return t+`</tbody></table></div></div>`;}).join('');
   document.querySelectorAll('#finLong input,#finCross input').forEach(el=>{
     el.addEventListener('change',()=>{fs[el.dataset.fk][+el.dataset.fb][+el.dataset.fi]=el.value;fsave();
@@ -1024,16 +922,17 @@ clrB.onclick=()=>{if(!clrT){clrB.textContent='Нажмите ещё раз — �
 // выгрузка
 function finData(){return BEDN.map((name,b)=>{const R=comp(b);return {станина:name,
   продольный:{шаги:PT.slice(1).map((x,k)=>({шаг:k+1,подкладки_мм:[PT[k],x],показание_мкм_на_м:ok(R.r[k]),dh_мкм:ok(R.r[k]*BASE/1000),высота_точки_мкм:ok(R.h[k+1])})),
-    опоры:MEAS.map(n=>({опора:n,X_мм:FX[n-1],высота_мкм:ok(R.hs[n]),от_прямой_1_18_мкм:ok(R.dev[n]),внутренняя_опора:n===1||n===18?'база прямой':actTxt(R.dev[n],'поднять','опустить')})),
     контрольные_точки_мкм:{'2':ok(R.h[2]),'5':ok(R.h[5]),'8':ok(R.h[8])}},
-  поперечный:MEAS.map((n,j)=>({опора:n,показание_мкм_на_м:ok(R.c[j]),разность_рядов_мкм:ok(R.out[j]),наружная_опора:actTxt(-R.out[j],'поднять','опустить')}))};});}
+  поперечный:MEAS.map((n,j)=>({опора:n,показание_мкм_на_м:ok(R.c[j])})),
+  поправки:MEAS.map((n,j)=>({опора:n,X_мм:FX[n-1],от_прямой_1_18_мкм:ok(R.dev[n]),внутренняя_мкм:ok(R.fin[j].a),наружная_мкм:ok(R.fin[j].o)}))};});}
 document.getElementById('finExport').onclick=async()=>{
   const now=new Date(),p2=v=>String(v).padStart(2,'0');
   const name=`TitanLevel_okonch_${now.getFullYear()}-${p2(now.getMonth()+1)}-${p2(now.getDate())}_${p2(now.getHours())}${p2(now.getMinutes())}.json`;
   const text=JSON.stringify({станок:'TITAN4020 s/n 20250035',документ:'Окончательное выставление станин X — выгрузка замеров',выгружено:now.toISOString(),
     условные_обозначения:{
-      продольный:'линейка 1 м на подкладках 669 мм по внутренней направляющей; показание в мкм/м, «+» — передняя подкладка выше задней; высота накопительно от опоры 1 (=0); опоры 3, 8, 13, 18 — с поправкой на 51 мм; отклонение от прямой через опоры 1 и 18, «+» — опора выше прямой',
-      поперечный:'линейка 0,5 м поперёк направляющих; показание в мкм/м, «+» — внутренняя сторона выше; разность рядов = показание × 0,955 (ряды опор ≈955 мм); правится наружная опора',
+      продольный:'линейка 1 м на подкладках 669 мм по наружной направляющей; показание в мкм/м, «+» — передняя подкладка выше задней; высота накопительно от опоры 1 (=0); опоры 3, 8, 13, 18 — с поправкой на 51 мм; отклонение от прямой через опоры 1 и 18, «+» — опора выше прямой',
+      поперечный:'линейка поперёк направляющих; показание в мкм/м, «+» — внутренняя сторона выше',
+      поправки:'«+» — поднять, мкм; внутр. = −откл − попер×0,4; наруж. = внутр. + попер×0,955 (жёсткое сечение)',
       X:'от оси опоры 1, мм; опоры по чертежу фундамента TITAN4020 R02'},
     станины:finData()},null,2);
   if(window.TitanAndroid&&window.TitanAndroid.saveFile){window.TitanAndroid.saveFile(name,text);return;}
@@ -1091,9 +990,9 @@ function upd3(C){lastC=C;
     bd.edges.geometry.dispose();bd.edges.geometry=new THREE.EdgesGeometry(bd.geo,25);
     bd.pads.forEach(p=>{const dy=interp(R.px,R.ph,p.userData.x)*1e-6*fac;p.scale.y=Math.max(0.2,(PADH+dy)/PADH);p.position.y=BOT-PADH+(PADH+dy)/2;});
     MEAS.forEach((n,j)=>{const X=FX[n-1],dy=interp(R.px,R.ph,X)*1e-6*fac,d=R.dev[n],c=R.c[j];
-      const t1=n===1||n===18?['база',HUD.muted]:isNaN(d)?['—',HUD.muted]:Math.abs(d)<0.05?['в линии',HUD.muted]:[(d>0?'↓ ':'↑ ')+f1(Math.abs(d)),d>0?HUD.hi:HUD.lo];
-      const t2=isNaN(c)?['',HUD.muted]:Math.abs(c)<0.05?['нар. 0',HUD.muted]:['нар. '+(c>0?'↑ ':'↓ ')+f1(Math.abs(c*0.955)),c>0?HUD.lo:HUD.hi];
-      fdraw(bd.labs[n],[[n+': '+t1[0],t1[1]],[t2[0],t2[1],'500 30px "IBM Plex Mono", monospace']]);
+      const F=R.fin[j],lab=(p,v)=>isNaN(v)?[p+' —',HUD.muted]:Math.abs(v)<0.05?[p+' 0',HUD.muted]:[p+(v>0?' ↑ ':' ↓ ')+f1(Math.abs(v)),v>0?HUD.lo:HUD.hi];
+      const t1=lab(n+' вн',F.a),t2=lab('нар',F.o);t2[2]='500 30px "IBM Plex Mono", monospace';
+      fdraw(bd.labs[n],[t1,t2]);
       bd.labs[n].position.set(XS(X),BH/2+dy+0.4,bd.z);
       const pq=bd.plq[n];pq.position.set(XS(X),BH/2+dy+0.07,bd.z);
       pq.rotation.x=isNaN(c)?0:Math.max(-0.35,Math.min(0.35,-INNER[b]*c/Math.max(20,mx)*0.25));});
