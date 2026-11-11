@@ -9,6 +9,8 @@ import android.os.Build;
 import android.os.Environment;
 import android.provider.MediaStore;
 import android.webkit.JavascriptInterface;
+import android.webkit.ValueCallback;
+import android.webkit.WebChromeClient;
 import android.webkit.WebResourceRequest;
 import android.widget.Toast;
 import java.io.File;
@@ -23,6 +25,8 @@ import android.webkit.WebViewClient;
 public class MainActivity extends Activity {
 
     private WebView web;
+    private ValueCallback<Uri[]> fileCb;
+    private static final int PICK_FILE = 42;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -40,6 +44,21 @@ public class MainActivity extends Activity {
                 Uri uri = request.getUrl();
                 if (uri.toString().startsWith("file:///android_asset/")) return false;
                 try { startActivity(new Intent(Intent.ACTION_VIEW, uri)); } catch (Exception ignored) { }
+                return true;
+            }
+        });
+
+        // «Загрузить станок из файла»: системный выбор файла
+        web.setWebChromeClient(new WebChromeClient() {
+            @Override
+            public boolean onShowFileChooser(WebView v, ValueCallback<Uri[]> cb, FileChooserParams p) {
+                if (fileCb != null) fileCb.onReceiveValue(null);
+                fileCb = cb;
+                Intent i = new Intent(Intent.ACTION_GET_CONTENT);
+                i.addCategory(Intent.CATEGORY_OPENABLE);
+                i.setType("*/*");
+                try { startActivityForResult(Intent.createChooser(i, "Файл станка"), PICK_FILE); }
+                catch (Exception e) { fileCb = null; return false; }
                 return true;
             }
         });
@@ -91,6 +110,18 @@ public class MainActivity extends Activity {
                 }
             });
         }
+    }
+
+    @Override
+    protected void onActivityResult(int req, int res, Intent data) {
+        if (req == PICK_FILE && fileCb != null) {
+            Uri[] r = null;
+            if (res == RESULT_OK && data != null && data.getData() != null) r = new Uri[]{ data.getData() };
+            fileCb.onReceiveValue(r);
+            fileCb = null;
+            return;
+        }
+        super.onActivityResult(req, res, data);
     }
 
     @Override

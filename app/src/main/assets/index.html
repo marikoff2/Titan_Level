@@ -127,7 +127,7 @@ button:disabled{opacity:.5;cursor:default}
 <div class="wrap">
   <header>
     <div>
-      <div class="eyebrow">TITAN4020 · продольный и поперечный уровень · <span id="nEyebrow">7</span> опор</div>
+      <div class="eyebrow"><span id="machEyebrow">TITAN4020</span> · продольный и поперечный уровень · <span id="nEyebrow">7</span> опор</div>
       <h1>Уровень станин X</h1>
     </div>
     <div class="controls">
@@ -139,6 +139,21 @@ button:disabled{opacity:.5;cursor:default}
       <button id="clear">Очистить</button>
     </div>
   </header>
+
+  <section class="panel" id="machPanel">
+    <div class="snaprow">
+      <label class="step" for="machSel">Станок</label><select id="machSel" aria-label="Станок"></select>
+      <button id="machNew">Новый</button><button id="machRen">Переименовать</button>
+      <button id="machSave" class="on">Сохранить станок в файл</button><button id="machLoad">Загрузить станок из файла</button>
+      <button id="machDel">Удалить</button>
+      <input type="file" id="machFile" accept=".json,application/json,text/plain,*/*" hidden>
+    </div>
+    <div class="snaprow" id="machNameRow" hidden>
+      <input id="machName" class="wide" maxlength="60" placeholder="Название станка, напр. «TITAN4020 s/n 20250035»" aria-label="Название станка">
+      <button id="machOk" class="on">Готово</button><button id="machCancel">Отмена</button>
+    </div>
+    <p class="status" id="machStatus" role="status"></p>
+  </section>
 
   <nav class="tabs" role="tablist">
     <button role="tab" data-tab="main" aria-selected="true">Ввод и 3D</button>
@@ -186,7 +201,8 @@ button:disabled{opacity:.5;cursor:default}
       <p class="note" id="snapStore"></p>
     </section>
 
-    <section class="panel">
+    <div id="mainViewSlot">
+    <section class="panel" id="viewPanel">
       <div class="viewbar">
         <h2>Станины, вид с отклонениями</h2>
         <div class="grp">
@@ -212,6 +228,7 @@ button:disabled{opacity:.5;cursor:default}
       </div>
       <p class="note">Вид от передней части станка: левая станина слева, правая справа. Номер опоры — внизу у основания. Над опорой — продольная высота, мкм; поперечный уровень — у внутреннего края станины, со знаком относительно внутренней стороны; плашка над опорой наклонена в сторону завала (наклон увеличен, станина при этом не наклоняется). Станины — по форме станин X станка (кожух сверху, скосы снизу) на фундаментной плите; на месте каждой опоры два клиновых башмака — внутренний и наружный. Отклонения увеличены (число справа), размеры станин схематичные. Пунктир — горизонталь через опору 1. Линии между станинами — размер 4130 в трёх точках; расхождение и схождение станин по ширине показано сдвигом в своём масштабе.</p>
     </section>
+    </div>
   </div>
 
   <div class="tabpane" id="tabChart" hidden>
@@ -249,38 +266,30 @@ button:disabled{opacity:.5;cursor:default}
     </section>
 
     <section class="panel">
-      <h2>1. Продольный уровень</h2>
-      <p class="note">«+» — передняя подкладка (дальше от опоры 1) выше задней.</p>
+      <h2>Продольный уровень</h2>
+      <p class="note">«+» — передняя подкладка (дальше от опоры 1) выше задней. Высота — от метки 0 (опора 1), мкм.</p>
       <div class="cross" id="finLong"></div>
     </section>
 
     <section class="panel">
-      <h2>2. Поперечный уровень</h2>
+      <h2>Поперечный уровень</h2>
       <p class="note">Линейка поперёк обеих направляющих над опорой, уровень посередине. «+» — внутренняя сторона выше.</p>
       <div class="cross" id="finCross"></div>
     </section>
 
     <section class="panel">
-      <h2>3. Что править</h2>
-      <p class="note">Поправки сразу для пары опор: наружная направляющая встаёт на прямую 1–18 и поперечный уходит в ноль. «↑» — поднять, «↓» — опустить, мкм. После правки — перемерить.</p>
-      <div class="cross" id="finFix"></div>
+      <h2>Замеры и сравнение</h2>
+      <div class="snaprow">
+        <input id="fsnapName" class="wide" maxlength="80" placeholder="Название, напр. «до затяжки анкеров»" aria-label="Название замера">
+        <button id="fsnapSave" class="on">Сохранить текущий замер</button>
+      </div>
+      <p class="status" id="fsnapStatus" role="status"></p>
+      <div class="snaprow"><label class="step" for="fcmpSel">Сравнить текущие значения с</label><select id="fcmpSel"><option value="">— не сравнивать —</option></select></div>
+      <p class="note" id="fcmpNote" hidden></p>
+      <div id="fsnapList" class="snaplist"></div>
     </section>
 
-    <section class="panel">
-      <div class="viewbar">
-        <h2>Станины на опорах, вид с отклонениями</h2>
-        <div class="grp"><button id="fvIso" class="on">Изометрия</button><button id="fvFront">Спереди</button><button id="fvSide">Сбоку</button></div>
-      </div>
-      <div id="finScene"></div>
-      <div class="viewbar">
-        <div class="legend"><span>ниже прямой 1–18</span><span class="ramp"></span><span>выше</span></div>
-        <div class="grp">
-          <label class="step" for="fexag">Масштаб отклонений <input type="range" id="fexag" min="-2" max="2" step="0.05" value="0"></label>
-          <span class="mag" id="fmag">×0</span>
-        </div>
-      </div>
-      <p class="note">Вид от передней части станка, левая станина слева. Над опорой: «вн» — внутренняя опора, «нар» — наружная.</p>
-    </section>
+    <div id="finViewSlot"></div>
 
     <section class="panel">
       <h2>Где ставить линейку</h2>
@@ -288,14 +297,11 @@ button:disabled{opacity:.5;cursor:default}
       <ul class="sumlist">
         <li>Метки 0, 669 … 6690 — на наружной направляющей, рулеткой от оси опоры 1 нарастающим итогом. Метки 2007, 4014, 6021 должны лечь на оси опор 6, 11, 16.</li>
         <li>Линейка 1 м, свесы по ≈ 165 мм, уровень посередине. Передняя подкладка шага = задняя подкладка следующего. Подкладки — по центру направляющей.</li>
-        <li>Выставляем синие опоры 1, 3, 6, 8, 11, 13, 16, 18. Серые — после этого до касания под индикатором; затем сравнить контрольные точки 2, 5, 8 — изменились, значит опору перетянули.</li>
+        <li>Выставляем синие опоры 1, 3, 6, 8, 11, 13, 16, 18. Серые — после этого до касания под индикатором; затем сравнить контрольные точки 4–5, 9–10, 14–15 — изменились, значит опору перетянули.</li>
         <li>4130 — толкателями на X ≈ 934 и ≈ 5807 мм, двигать только левую станину, после толкания перемерить её.</li>
-        <li>Поправки считаются для жёсткого сечения: внутренняя направляющая над внутренним рядом, наружная — в 400 мм от него, ряды в 955 мм (по скану R02). Проверить: поднять одну наружную опору на известную величину и сравнить показания.</li>
       </ul>
     </section>
   </div>
-
-</div>
 
 <script src="three.min.js"></script>
 <script src="OrbitControls.js"></script>
@@ -319,7 +325,7 @@ if(state.cmp==null)state.cmp='';
 if(!state.adj)state.adj={base:'auto',line:'lsq',w:'400',L:'4200',mut:true,tol:'2'};
 function save(){try{localStorage.setItem(KEY,JSON.stringify(state));}catch(e){}}
 
-let N=7;
+let N=7,VIEW='main',NUMLBL=null; // VIEW='final' — 3D показывает вкладку «Окончательное»
 function pad(a,len){a=Array.isArray(a)?a:[];while(a.length<len)a.push('');return a;}
 function ensure(){ // лишние значения не удаляем — при возврате к большему числу опор они вернутся
   N=Math.max(2,Math.min(NMAX,Math.round(Number(state.n))||7));state.n=N;
@@ -488,7 +494,7 @@ function measBlock(d){const C=computeAll(d),n=d.n;
     расстояние_4130_отклонение_мкм:{начало:C.WD[0],середина:C.WD[1],конец:C.WD[2]},
     взаимный_уровень_мкм_на_м:C.MU};}
 function buildExport(){const now=new Date();
-  return {станок:'TITAN4020 s/n 20250035',документ:'Уровень станин X — выгрузка замеров',выгружено:now.toISOString(),
+  return {станок:window.MACHINE?window.MACHINE():'TITAN4020',документ:'Уровень станин X — выгрузка замеров',выгружено:now.toISOString(),
     условные_обозначения:{
       станины:'левая/правая — вид от передней части станка; опора 1 — перед станка',
       продольный:'показание уровня в мкм/м на промежутке опора i → i+1; «+» — следующая опора выше; высота накопительно от опоры 1 (=0)',
@@ -670,7 +676,7 @@ function devCol(t){const a=Math.sign(t)*Math.pow(Math.min(1,Math.abs(t)),0.6);
   for(let k=0;k<DEV.length-1;k++){const [c0,p0]=DEV[k],[c1,p1]=DEV[k+1];if(a<=p1)return c0.clone().lerp(c1,(a-p0)/(p1-p0));}
   return DEV[DEV.length-1][0].clone();}
 function update3D(){
-  const V=state.vis,P=pitch();
+  const V=VIEW==='final'?{...state.vis,dist:false,mut:false}:state.vis,P=pitch();
   const hs=H.map(h=>V.long?filled(h):Array(N).fill(0)),ds=D.map(d=>d.map(v=>v==null||!V.cross?0:v));
   const CB=CBASE,ghs=CB?CB.H.map(h=>V.long?filled(h):Array(N).fill(0)):null,gds=CB?CB.D.map(d=>d.map(v=>v==null||!V.cross?0:v)):null,gwd=CB?CB.WD.map(v=>v==null||!V.dist?0:v):null;
   let maxAbs=5;[[hs,ds],...(CB?[[ghs,gds]]:[])].forEach(([HH,DD])=>HH.forEach((h,b)=>h.forEach((v,i)=>{maxAbs=Math.max(maxAbs,Math.abs(v+DD[b][i]/2),Math.abs(v-DD[b][i]/2));})));
@@ -739,7 +745,7 @@ function update3D(){
         const r2=CB&&dl(H[b][i],CB.H[b][i]);if(r2)rows.push(r2);}
       drawLabel(l,rows,true);l.visible=rows.length>0;
       const n=bd.nums[i];n.position.set(x,FLOOR+0.04,zz-INNER[b]*(FLW/2+0.2));
-      drawLabel(n,[[String(i+1),mu,'600 52px "IBM Plex Mono", monospace']]);
+      drawLabel(n,[[NUMLBL?NUMLBL[i]:String(i+1),mu,'600 52px "IBM Plex Mono", monospace']]);
       // плашка: наклон в сторону завала, «+» — внутренняя выше
       {const pq=bd.plq[i],dv0=D[b][i];pq.visible=V.cross&&dv0!=null;
         if(pq.visible){const mx=Math.max(10,...D.flat().filter(v=>v!=null).map(Math.abs)),ang=Math.max(-1,Math.min(1,dv0/mx))*0.32;
@@ -773,6 +779,7 @@ function update3D(){
 }
 
 function update(){
+  if(VIEW==='final'){const F=window.finCtx();H=F.H;D=F.D;WD=[null,null,null];MU=Array(N).fill(null);CBASE=F.CB;update3D();return;}
   recomputeBase();
   H=[heights(0),heights(1)];D=[crossDiff(0),crossDiff(1)];
   WD=nums(state.w);
@@ -822,8 +829,18 @@ function showTab(t){
   document.getElementById('tabFinal').hidden=t!=='final';
   document.querySelector('header .controls').hidden=t==='final'; // шаг и число опор к этой вкладке не относятся
   document.querySelectorAll('.tabs button').forEach(b=>b.setAttribute('aria-selected',String(b.dataset.tab===t)));
-  if(t==='main')resize();
+  setCtx(t==='final'?'final':'main');
+  if(t!=='chart')resize();
 }
+// одна 3D-сцена на две вкладки: при переходе переносим панель и меняем данные
+const FLBL=['1','3','4–5','6','8','9–10','11','13','14–15','16','18'];
+function setCtx(v){if(v===VIEW)return;VIEW=v;
+  const panel=document.getElementById('viewPanel');
+  document.getElementById(v==='final'?'finViewSlot':'mainViewSlot').appendChild(panel);
+  ['dist','mut'].forEach(k=>document.querySelector(`label[for="tg-${k}"]`).hidden=v==='final');
+  document.getElementById('cmp3dNote').hidden=true;
+  if(v==='final'){N=11;NUMLBL=FLBL;}else{NUMLBL=null;ensure();}
+  build3D();update();requestAnimationFrame(resize);}
 document.querySelectorAll('.tabs button').forEach(b=>b.onclick=()=>showTab(b.dataset.tab));
 // --- 3D на весь экран (кнопка «Назад» на телефоне тоже сворачивает)
 const fsBtn=document.getElementById('fsBtn'),fsViews=document.getElementById('fsViews');
@@ -840,20 +857,14 @@ buildInputs();build3D();renderSnaps();refreshChip();setView('vIso');resize();upd
 // --- вкладка «Окончательное выставление станин X» (чертёж фундамента TITAN4020 R02)
 (function(){
 const FX=[0,360,720,1148.5,1578.5,2007,2367,2727,3155.5,3585.5,4014,4374,4734,5162.5,5592.5,6021,6381,6741];
-const ROWS=955,GW=400; // ряды опор и наружная направляющая от внутреннего ряда, мм
 const MEAS=[1,3,6,8,11,13,16,18],OUTONLY=[2,7,12,17],BASE=669,PUSH=[934.25,5806.75];
 const PT=Array.from({length:11},(_,k)=>k*BASE);
 const PTNAME=['опора 1','опора 3 (−51)','контроль между 4 и 5','опора 6','опора 8 (−51)','контроль между 9 и 10','опора 11','опора 13 (−51)','контроль между 14 и 15','опора 16','опора 18 (−51)'];
 const sx=X=>120+X*500/6741;
 const f1=n=>String(Math.round(n*10)/10).replace('.',',');
-const FKEY='titan-x-final-v1';
-let fs={r:[Array(10).fill(''),Array(10).fill('')],c:[Array(8).fill(''),Array(8).fill('')]};
-try{const s=JSON.parse(localStorage.getItem(FKEY));if(s&&s.r&&s.c)fs=s;}catch(e){}
-const fsave=()=>{try{localStorage.setItem(FKEY,JSON.stringify(fs));}catch(e){}};
 const T=(x,y,t,a,cls)=>`<text x="${x}" y="${y}"${a?` text-anchor="${a}"`:''}${cls?` class="${cls}"`:''}>${t}</text>`;
 const wellRect=(i,y)=>{const n=i+1,m=MEAS.includes(n);
   return `<rect x="${sx(FX[i])-6}" y="${y-6}" width="12" height="12" rx="2" fill="${m?'var(--accent)':'none'}" fill-opacity="${m?0.3:1}" stroke="${m?'var(--accent)':'var(--muted)'}" stroke-width="${m?1.5:1}"/>`;};
-
 // десять положений линейки
 let s=T(20,24,'← перед станка','start','lab');
 MEAS.forEach(n=>{s+=`<line x1="${sx(FX[n-1])}" y1="64" x2="${sx(FX[n-1])}" y2="300" stroke="var(--accent)" stroke-opacity="0.45"/>`+T(sx(FX[n-1]),44,n,'middle','val');});
@@ -866,146 +877,158 @@ s+=`<circle cx="26" cy="326" r="3.5" fill="var(--accent)"/>`+T(36,330,'подк�
 s+=`<line x1="200" y1="326" x2="220" y2="326" stroke="var(--accent)" stroke-opacity="0.45"/>`+T(228,330,'ось опоры, которую выставляем','start','lab');
 document.getElementById('finSteps2').innerHTML=s;
 
-// расчёт
+
+// замеры: линейка по наружной направляющей, 11 меток через 669 мм; поперечный — на выставляемых опорах
+const FKEY='titan-x-final-v1',FSNAPKEY='titan-x-final-snaps';
+const FMARK=[0,1,3,4,6,7,9,10]; // опоры 1,3,6,8,11,13,16,18 -> ближайшая метка
+const empty=()=>({r:[Array(10).fill(''),Array(10).fill('')],c:[Array(8).fill(''),Array(8).fill('')],cmp:''});
+let fs=empty();
+try{const s=JSON.parse(localStorage.getItem(FKEY));if(s&&s.r&&s.c){fs={...empty(),...s};}}catch(e){}
+const fsave=()=>{try{localStorage.setItem(FKEY,JSON.stringify(fs));}catch(e){}};
+let FSN=[];try{FSN=JSON.parse(localStorage.getItem(FSNAPKEY))||[];}catch(e){FSN=[];}
+const snsave=()=>{try{localStorage.setItem(FSNAPKEY,JSON.stringify(FSN));return true;}catch(e){return false;}};
 const nm=v=>{const t=String(v??'').trim().replace(',','.');return t===''?NaN:Number(t);};
-const ok=v=>isNaN(v)?null:Math.round(v*10)/10;
-const act=(d,up,dn)=>isNaN(d)?'—':Math.abs(d)<0.05?'<span class="ok">в линии</span>':d>0?`<span class="dn">${dn} ${f1(Math.abs(d))}</span>`:`<span class="up">${up} ${f1(Math.abs(d))}</span>`;
-const actTxt=(d,up,dn)=>isNaN(d)?null:Math.abs(d)<0.05?'в линии':(d>0?dn:up)+' '+f1(Math.abs(d));
+const ok=v=>v==null||isNaN(v)?null:Math.round(v*10)/10;
 const BEDN=['Левая станина','Правая станина'],BEDC=['var(--accent)','var(--bed2)'];
-// всё по одной станине: высоты точек, высоты опор, отклонения от прямой 1–18, поперечный
-function comp(b){
-  const r=fs.r[b].map(nm),h=[0];for(let k=0;k<10;k++)h.push(isNaN(h[k])||isNaN(r[k])?NaN:h[k]+r[k]*BASE/1000);
-  const hs={1:h[0],3:h[1]+r[1]*0.051,6:h[3],8:h[4]+r[4]*0.051,11:h[6],13:h[7]+r[7]*0.051,16:h[9],18:h[10]+r[9]*0.051};
-  const line=X=>hs[1]+(hs[18]-hs[1])*X/FX[17];
-  const dev={};MEAS.forEach(n=>{dev[n]=hs[n]-line(FX[n-1]);});
-  const c=fs.c[b].map(nm);
-  // поправки пары опор (жёсткое сечение): наружная направляющая на прямую 1–18, поперечный в ноль
-  const fin=MEAS.map(n=>{const d=dev[n],cc=isNaN(c[MEAS.indexOf(n)])?0:c[MEAS.indexOf(n)];
-    if(isNaN(d))return {a:NaN,o:NaN};const a=-d-cc*GW/1000;return {a,o:a+cc*ROWS/1000};});
-  // профиль отклонения по X для 3D: точки замера + опора 18
-  const px=[...PT,FX[17]],ph=[...h,hs[18]].map((v,i)=>v-line(px[i]));
-  return {r,h,hs,dev,c,fin,px,ph};
-}
+function calc(d){return [0,1].map(b=>{
+  const r=(d.r[b]||[]).map(nm),h=[0];for(let k=0;k<10;k++)h.push(h[k]==null||isNaN(r[k])?null:h[k]+r[k]*BASE/1000);
+  const c=(d.c[b]||[]).map(nm),D=Array(11).fill(null);FMARK.forEach((m,j)=>{if(!isNaN(c[j]))D[m]=c[j];});
+  return {r,h,c,D};});}
+function base(){const s=FSN.find(x=>x.id===fs.cmp);return s?{s,C:calc(s.data)}:null;}
+window.finCtx=()=>{const C=calc(fs),B=base();
+  return {H:C.map(x=>x.h),D:C.map(x=>x.D),CB:B?{H:B.C.map(x=>x.h),D:B.C.map(x=>x.D),WD:[null,null,null],MU:Array(11).fill(null)}:null};};
+const dd=(a,b)=>a==null||b==null||isNaN(a)||isNaN(b)?'—':fmt(a-b);
 function bedHead(b){return `<div class="bedhead"><span class="sw" style="background:${BEDC[b]}"></span><h3>${BEDN[b]}</h3></div>`;}
-function inp(b,k,i,lab,v){return `<input data-fb="${b}" data-fk="${k}" data-fi="${i}" inputmode="decimal" value="${v}" aria-label="${lab}">`;}
+function inp(b,k,i,lab,v){return `<input data-fb="${b}" data-fk="${k}" data-fi="${i}" inputmode="decimal" value="${esc(v??'')}" aria-label="${lab}">`;}
 function render(){
-  const C=[comp(0),comp(1)];
+  const C=calc(fs),B=base();
   document.getElementById('finLong').innerHTML=C.map((R,b)=>{
-    let t=`<div class="xbox">${bedHead(b)}<div class="scroll"><table class="xt"><thead><tr><th>Шаг</th><th>Подкладки, мм</th><th>Показание, мкм/м</th><th>Δh, мкм</th><th>Высота точки, мкм</th></tr></thead><tbody>`;
-    for(let k=0;k<10;k++)t+=`<tr><td class="sup">${k+1}</td><td class="act">${PT[k]} → ${PT[k+1]}<br><small>${PTNAME[k+1]}</small></td><td class="in">${inp(b,'r',k,BEDN[b]+', шаг '+(k+1)+', мкм/м',fs.r[b][k])}</td><td>${isNaN(R.r[k])?'—':fmt(R.r[k]*BASE/1000)}</td><td class="d">${isNaN(R.h[k+1])?'—':fmt(R.h[k+1])}</td></tr>`;
-    t+=`</tbody></table></div><p class="note">Контрольные точки (записать до поджатия пропущенных опор и сравнить после): 2 = ${isNaN(R.h[2])?'—':fmt(R.h[2])}, 5 = ${isNaN(R.h[5])?'—':fmt(R.h[5])}, 8 = ${isNaN(R.h[8])?'—':fmt(R.h[8])} мкм.</p></div>`;
-    return t;}).join('');
-  document.getElementById('finCross').innerHTML=C.map((R,b)=>{
-    let t=`<div class="xbox">${bedHead(b)}<div class="scroll"><table class="xt"><thead><tr><th>Опора</th><th>Показание, мкм/м</th></tr></thead><tbody>`;
-    MEAS.forEach((n,j)=>{t+=`<tr><td class="sup">${n}</td><td class="in">${inp(b,'c',j,BEDN[b]+', опора '+n+', поперечный, мкм/м',fs.c[b][j])}</td></tr>`;});
+    let t=`<div class="xbox">${bedHead(b)}<div class="scroll"><table class="xt"><thead><tr><th>Шаг</th><th>Подкладки, мм</th><th>Показание, мкм/м</th><th>Δh, мкм</th><th>Высота точки, мкм</th>${B?'<th>Δ к сравнению</th>':''}</tr></thead><tbody>`;
+    for(let k=0;k<10;k++)t+=`<tr><td class="sup">${k+1}</td><td class="act">${PT[k]} → ${PT[k+1]}<br><small>${PTNAME[k+1]}</small></td><td class="in">${inp(b,'r',k,BEDN[b]+', шаг '+(k+1)+', мкм/м',fs.r[b][k])}</td><td>${isNaN(R.r[k])?'—':fmt(R.r[k]*BASE/1000)}</td><td class="d">${R.h[k+1]==null?'—':fmt(R.h[k+1])}</td>${B?`<td>${dd(R.h[k+1],B.C[b].h[k+1])}</td>`:''}</tr>`;
     return t+`</tbody></table></div></div>`;}).join('');
-  const mv=v=>isNaN(v)?'—':Math.abs(v)<0.05?'<span class="ok">0</span>':v>0?`<span class="up">↑ ${f1(v)}</span>`:`<span class="dn">↓ ${f1(-v)}</span>`;
-  document.getElementById('finFix').innerHTML=C.map((R,b)=>{
-    let t=`<div class="xbox">${bedHead(b)}<div class="scroll"><table class="xt"><thead><tr><th>Опора</th><th>От прямой 1–18, мкм</th><th>Внутренняя</th><th>Наружная</th></tr></thead><tbody>`;
-    MEAS.forEach((n,j)=>{const F=R.fin[j];t+=`<tr><td class="sup">${n}</td><td class="d">${n===1||n===18?'база':isNaN(R.dev[n])?'—':fmt(R.dev[n])}</td><td class="d">${mv(F.a)}</td><td class="d">${mv(F.o)}</td></tr>`;});
+  document.getElementById('finCross').innerHTML=C.map((R,b)=>{
+    let t=`<div class="xbox">${bedHead(b)}<div class="scroll"><table class="xt"><thead><tr><th>Опора</th><th>Показание, мкм/м</th>${B?'<th>Δ к сравнению</th>':''}</tr></thead><tbody>`;
+    MEAS.forEach((n,j)=>{t+=`<tr><td class="sup">${n}</td><td class="in">${inp(b,'c',j,BEDN[b]+', опора '+n+', поперечный, мкм/м',fs.c[b][j])}</td>${B?`<td>${dd(R.c[j],B.C[b].c[j])}</td>`:''}</tr>`;});
     return t+`</tbody></table></div></div>`;}).join('');
   document.querySelectorAll('#finLong input,#finCross input').forEach(el=>{
     el.addEventListener('change',()=>{fs[el.dataset.fk][+el.dataset.fb][+el.dataset.fi]=el.value;fsave();
-      // пересчёт после перехода фокуса (Tab/Enter), фокус возвращаем на то же поле
       setTimeout(()=>{const a=document.activeElement,q=a&&a.dataset&&a.dataset.fk?`input[data-fb="${a.dataset.fb}"][data-fk="${a.dataset.fk}"][data-fi="${a.dataset.fi}"]`:null;
         render();if(q){const n=document.querySelector(q);if(n)n.focus();}},0);});});
-  upd3(C);
+  renderSn();
+  if(VIEW==='final')update();
 }
-const fstat=t=>{const el=document.getElementById('finStatus');el.textContent=t;setTimeout(()=>{el.textContent='';},5000);};
+// сохранённые замеры и сравнение
+let sT;const sflash=t=>{const el=document.getElementById('fsnapStatus');el.textContent=t;clearTimeout(sT);sT=setTimeout(()=>{el.textContent='';},5000);};
+function renderSn(){
+  if(fs.cmp&&!FSN.some(s=>s.id===fs.cmp)){fs.cmp='';fsave();}
+  const sel=document.getElementById('fcmpSel');
+  sel.innerHTML='<option value="">— не сравнивать —</option>'+FSN.map(s=>`<option value="${esc(s.id)}">${esc(s.name)} · ${fmtDate(s.savedAt)}</option>`).join('');
+  sel.value=fs.cmp||'';
+  const B=base(),note=document.getElementById('fcmpNote');note.hidden=!B;
+  if(B)note.textContent=`Сравнение с «${B.s.name}» (${fmtDate(B.s.savedAt)}): в таблицах — столбец Δ, в 3D — светлый контур и Δ под значением. Δ = сейчас − было.`;
+  document.getElementById('fsnapList').innerHTML=FSN.length?FSN.map(s=>`<div class="snapitem${s.id===fs.cmp?' cmp':''}"><span class="nm">${esc(s.name)}</span><span class="dt">${fmtDate(s.savedAt)}</span><button data-open="${esc(s.id)}">Открыть</button><button data-cmp="${esc(s.id)}">${s.id===fs.cmp?'Не сравнивать':'Сравнить'}</button><button data-del="${esc(s.id)}">Удалить</button></div>`).join('')
+    :'<p class="note">Сохранённых замеров пока нет. Введите показания и нажмите «Сохранить текущий замер».</p>';
+}
+document.getElementById('fsnapSave').onclick=()=>{const el=document.getElementById('fsnapName'),now=new Date();
+  const name=el.value.trim()||('Замер '+fmtDate(now.toISOString()));
+  FSN.unshift({id:'f'+now.getTime(),name,savedAt:now.toISOString(),data:{r:fs.r.map(a=>[...a]),c:fs.c.map(a=>[...a])}});
+  if(!snsave()){FSN.shift();sflash('Место для замеров закончилось — удалите старые.');return;}
+  el.value='';renderSn();sflash(`Сохранено: «${name}»`);};
+document.getElementById('fcmpSel').addEventListener('change',e=>{fs.cmp=e.target.value;fsave();render();});
+document.getElementById('fsnapList').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;
+  if(b.dataset.cmp){fs.cmp=fs.cmp===b.dataset.cmp?'':b.dataset.cmp;fsave();render();return;}
+  if(b.dataset.open){if(b.dataset.armed!=='1'){arm(b,'Заменить текущие значения?');return;}
+    const s=FSN.find(x=>x.id===b.dataset.open);if(!s)return;fs.r=s.data.r.map(a=>[...a]);fs.c=s.data.c.map(a=>[...a]);if(fs.cmp===s.id)fs.cmp='';fsave();render();sflash(`Открыт замер «${s.name}»`);return;}
+  if(b.dataset.del){if(b.dataset.armed!=='1'){arm(b,'Точно удалить?');return;}
+    FSN=FSN.filter(x=>x.id!==b.dataset.del);snsave();render();sflash('Замер удалён');}});
 // очистка в два нажатия (confirm() в приложении Android не показывается)
+const fstat=t=>{const el=document.getElementById('finStatus');el.textContent=t;setTimeout(()=>{el.textContent='';},5000);};
 let clrT=0;const clrB=document.getElementById('finClear');
 clrB.onclick=()=>{if(!clrT){clrB.textContent='Нажмите ещё раз — очистить';clrB.classList.add('danger');
   clrT=setTimeout(()=>{clrT=0;clrB.textContent='Очистить';clrB.classList.remove('danger');},3000);return;}
   clearTimeout(clrT);clrT=0;clrB.textContent='Очистить';clrB.classList.remove('danger');
-  fs={r:[Array(10).fill(''),Array(10).fill('')],c:[Array(8).fill(''),Array(8).fill('')]};fsave();render();};
-
+  const cmp=fs.cmp;fs=empty();fs.cmp=cmp;fsave();render();};
 // выгрузка
-function finData(){return BEDN.map((name,b)=>{const R=comp(b);return {станина:name,
-  продольный:{шаги:PT.slice(1).map((x,k)=>({шаг:k+1,подкладки_мм:[PT[k],x],показание_мкм_на_м:ok(R.r[k]),dh_мкм:ok(R.r[k]*BASE/1000),высота_точки_мкм:ok(R.h[k+1])})),
-    контрольные_точки_мкм:{'2':ok(R.h[2]),'5':ok(R.h[5]),'8':ok(R.h[8])}},
-  поперечный:MEAS.map((n,j)=>({опора:n,показание_мкм_на_м:ok(R.c[j])})),
-  поправки:MEAS.map((n,j)=>({опора:n,X_мм:FX[n-1],от_прямой_1_18_мкм:ok(R.dev[n]),внутренняя_мкм:ok(R.fin[j].a),наружная_мкм:ok(R.fin[j].o)}))};});}
+function block(d){const C=calc(d);return BEDN.map((name,b)=>({станина:name,
+  продольный:PT.slice(1).map((x,k)=>({шаг:k+1,подкладки_мм:[PT[k],x],к_опоре:PTNAME[k+1],показание_мкм_на_м:ok(C[b].r[k]),высота_точки_мкм:ok(C[b].h[k+1])})),
+  поперечный:MEAS.map((n,j)=>({опора:n,показание_мкм_на_м:ok(C[b].c[j])}))}));}
 document.getElementById('finExport').onclick=async()=>{
   const now=new Date(),p2=v=>String(v).padStart(2,'0');
   const name=`TitanLevel_okonch_${now.getFullYear()}-${p2(now.getMonth()+1)}-${p2(now.getDate())}_${p2(now.getHours())}${p2(now.getMinutes())}.json`;
-  const text=JSON.stringify({станок:'TITAN4020 s/n 20250035',документ:'Окончательное выставление станин X — выгрузка замеров',выгружено:now.toISOString(),
+  const text=JSON.stringify({станок:window.MACHINE?window.MACHINE():'TITAN4020',документ:'Окончательное выставление станин X — выгрузка замеров',выгружено:now.toISOString(),
     условные_обозначения:{
-      продольный:'линейка 1 м на подкладках 669 мм по наружной направляющей; показание в мкм/м, «+» — передняя подкладка выше задней; высота накопительно от опоры 1 (=0); опоры 3, 8, 13, 18 — с поправкой на 51 мм; отклонение от прямой через опоры 1 и 18, «+» — опора выше прямой',
-      поперечный:'линейка поперёк направляющих; показание в мкм/м, «+» — внутренняя сторона выше',
-      поправки:'«+» — поднять, мкм; внутр. = −откл − попер×0,4; наруж. = внутр. + попер×0,955 (жёсткое сечение)',
-      X:'от оси опоры 1, мм; опоры по чертежу фундамента TITAN4020 R02'},
-    станины:finData()},null,2);
+      продольный:'линейка 1 м на подкладках 669 мм по наружной направляющей; показание в мкм/м, «+» — передняя подкладка выше задней; высота накопительно от метки 0 (опора 1)',
+      поперечный:'линейка поперёк направляющих над опорой; показание в мкм/м, «+» — внутренняя сторона выше'},
+    текущие_значения:block(fs),
+    сохранённые_замеры:FSN.map(s=>({название:s.name,сохранён:s.savedAt,станины:block(s.data)}))},null,2);
   if(window.TitanAndroid&&window.TitanAndroid.saveFile){window.TitanAndroid.saveFile(name,text);return;}
   let dl=null;try{dl=window.claude&&window.claude.use?await window.claude.use('downloads'):null;}catch(e){dl=null;}
   if(dl){try{await dl.save({filename:name,data:text});fstat(`Выгружено: ${name}`);}catch(e){if(e&&e.code!=='declined')fstat('Не удалось выгрузить файл. Попробуйте ещё раз.');}return;}
   const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([text],{type:'application/json'}));a.download=name;
   document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove();},2000);fstat(`Выгружено: ${name}`);};
-
-// --- 3D: станины на опорах фундамента
-const fhost=document.getElementById('finScene');
-const frend=new THREE.WebGLRenderer({antialias:true,alpha:true});frend.setClearColor(0x000000,0);
-frend.setPixelRatio(Math.min(devicePixelRatio,2));fhost.appendChild(frend.domElement);
-const fsc=new THREE.Scene(),fcam=new THREE.PerspectiveCamera(9,2,1,200),fctl=new THREE.OrbitControls(fcam,frend.domElement);
-fctl.enableDamping=true;
-fsc.add(new THREE.HemisphereLight(0xffffff,0x667788,0.75));
-{const d=new THREE.DirectionalLight(0xffffff,0.7);d.position.set(-4,8,5);fsc.add(d);const r2=new THREE.DirectionalLight(0x9db4cf,0.35);r2.position.set(6,3,-6);fsc.add(r2);}
-const XS=X=>-LEN/2+X/FX[17]*LEN; // X мм -> сцена
-const PADH=0.12,BOT=-BH/2;
-{const g=new THREE.GridHelper(14,56,0x34465c,0x1e2836);g.material.transparent=true;g.material.opacity=.9;g.position.y=BOT-PADH;fsc.add(g);}
-function fsprite(w,hh){const c=document.createElement('canvas');c.width=256;c.height=hh;const t=new THREE.CanvasTexture(c);
-  const s=new THREE.Sprite(new THREE.SpriteMaterial({map:t,depthTest:false,transparent:true}));s.scale.set(w,w*hh/256,1);s.renderOrder=5;s.userData={c,t};fsc.add(s);return s;}
-function fdraw(s,rows){const {c,t}=s.userData,g=c.getContext('2d');g.clearRect(0,0,c.width,c.height);g.textAlign='center';
-  rows.forEach((r,k)=>{if(!r[0])return;g.font=r[2]||'600 34px "IBM Plex Mono", monospace';const y=44+k*52,w=Math.min(250,g.measureText(r[0]).width+26);
-    g.fillStyle=HUD.pill;g.fillRect(128-w/2,y-34,w,44);g.globalAlpha=.6;g.strokeStyle=r[1];g.lineWidth=2;g.strokeRect(128-w/2,y-34,w,44);g.globalAlpha=1;
-    g.fillStyle=r[1];g.fillText(r[0],128,y);});t.needsUpdate=true;}
-const fbeds=ZS.map((z,b)=>{
-  const geo=bedGeo(b),orig=geo.attributes.position.array.slice(),onorm=geo.attributes.normal.array.slice();
-  geo.setAttribute('color',new THREE.BufferAttribute(new Float32Array(orig.length),3));
-  const mesh=new THREE.Mesh(geo,new THREE.MeshStandardMaterial({vertexColors:true,roughness:.7,metalness:.1}));mesh.position.z=z;fsc.add(mesh);
-  const edges=new THREE.LineSegments(new THREE.EdgesGeometry(geo,25),new THREE.LineBasicMaterial({color:HUD.edge,transparent:true,opacity:.6}));edges.position.z=z;fsc.add(edges);
-  const zin=z+0.27*BW*INNER[b],zout=z-1.02*BW*INNER[b]; // ряды опор: внутренний под внутренней направляющей, наружный под основанием
-  const pads=[],nums=[];
-  FX.forEach((x,i)=>{const n=i+1,m=MEAS.includes(n);
-    [zin,zout].forEach((zz,j)=>{if(j===0&&OUTONLY.includes(n))return;
-      const p=new THREE.Mesh(new THREE.BoxGeometry(0.11,PADH,0.11),new THREE.MeshStandardMaterial({color:m?HUD.lo:'#5d6676',roughness:.6,metalness:.25,emissive:m?HUD.lo:'#000000',emissiveIntensity:m?.25:0}));
-      p.position.set(XS(x),BOT-PADH/2,zz);p.userData={x,i};fsc.add(p);pads.push(p);});
-    const ns=fsprite(0.5,64);ns.position.set(XS(x),BOT-PADH-0.08,zout-INNER[b]*0.22);fdraw(ns,[[String(n),m?HUD.text:HUD.muted,'600 34px "IBM Plex Mono", monospace']]);nums.push(ns);});
-  const labs={},plq={};
-  MEAS.forEach(n=>{labs[n]=fsprite(0.8,120);
-    const q=new THREE.Mesh(new THREE.BoxGeometry(0.06,0.02,BW*0.9),new THREE.MeshStandardMaterial({color:HUD.hi,roughness:.4,metalness:.2,emissive:HUD.hi,emissiveIntensity:.15}));fsc.add(q);plq[n]=q;});
-  const name=fsprite(1.3,64);name.position.set(0,BOT-PADH,z-INNER[b]*2.3*BW);fdraw(name,[[BEDN[b],b?HUD.hi:HUD.lo,'600 30px "IBM Plex Sans", sans-serif']]);
-  return {geo,orig,onorm,mesh,edges,z,pads,labs,plq};});
-{const f=fsprite(1.2,64);f.position.set(-LEN/2-0.8,BOT,0);fdraw(f,[['перед станка',HUD.muted,'500 28px "IBM Plex Sans", sans-serif']]);}
-function interp(px,ph,X){if(ph.some(v=>isNaN(v)))return 0;let k=0;while(k<px.length-2&&X>px[k+1])k++;return ph[k]+(ph[k+1]-ph[k])*(X-px[k])/(px[k+1]-px[k]);}
-let lastC=null;
-function upd3(C){lastC=C;
-  let mx=5;C.forEach(R=>R.ph.forEach(v=>{if(!isNaN(v))mx=Math.max(mx,Math.abs(v));}));
-  const mult=Math.pow(2,Number(document.getElementById('fexag').value)),fac=0.13/(mx*1e-6)*mult;
-  const q=fac>1e5?1000:100;document.getElementById('fmag').textContent='×'+(Math.round(fac/q)*q).toLocaleString('ru-RU');
-  fbeds.forEach((bd,b)=>{const R=C[b],pos=bd.geo.attributes.position,col=bd.geo.attributes.color,o=bd.orig;
-    for(let k=0;k<pos.count;k++){const X=(o[3*k]+LEN/2)/LEN*FX[17],v=interp(R.px,R.ph,X);
-      pos.array[3*k+1]=o[3*k+1]+v*1e-6*fac;
-      const c=bd.onorm[3*k+1]>0.7?devCol(Math.max(-1,Math.min(1,v/mx))):SIDE_C;col.array[3*k]=c.r;col.array[3*k+1]=c.g;col.array[3*k+2]=c.b;}
-    pos.needsUpdate=true;col.needsUpdate=true;bd.geo.computeVertexNormals();
-    bd.edges.geometry.dispose();bd.edges.geometry=new THREE.EdgesGeometry(bd.geo,25);
-    bd.pads.forEach(p=>{const dy=interp(R.px,R.ph,p.userData.x)*1e-6*fac;p.scale.y=Math.max(0.2,(PADH+dy)/PADH);p.position.y=BOT-PADH+(PADH+dy)/2;});
-    MEAS.forEach((n,j)=>{const X=FX[n-1],dy=interp(R.px,R.ph,X)*1e-6*fac,d=R.dev[n],c=R.c[j];
-      const F=R.fin[j],lab=(p,v)=>isNaN(v)?[p+' —',HUD.muted]:Math.abs(v)<0.05?[p+' 0',HUD.muted]:[p+(v>0?' ↑ ':' ↓ ')+f1(Math.abs(v)),v>0?HUD.lo:HUD.hi];
-      const t1=lab(n+' вн',F.a),t2=lab('нар',F.o);t2[2]='500 30px "IBM Plex Mono", monospace';
-      fdraw(bd.labs[n],[t1,t2]);
-      bd.labs[n].position.set(XS(X),BH/2+dy+0.4,bd.z);
-      const pq=bd.plq[n];pq.position.set(XS(X),BH/2+dy+0.07,bd.z);
-      pq.rotation.x=isNaN(c)?0:Math.max(-0.35,Math.min(0.35,-INNER[b]*c/Math.max(20,mx)*0.25));});
-  });}
-function fview(v){['fvIso','fvFront','fvSide'].forEach(id=>document.getElementById(id).classList.toggle('on',id===v));
-  if(v==='fvSide')fcam.position.set(0,0.25,52);else if(v==='fvFront')fcam.position.set(-46,0.4,0);else fcam.position.set(-30,21,24);
-  fctl.target.set(0,0,0);fctl.update();}
-['fvIso','fvFront','fvSide'].forEach(id=>document.getElementById(id).onclick=()=>fview(id));
-document.getElementById('fexag').addEventListener('input',()=>lastC&&upd3(lastC));
-function fresize(){const w=fhost.clientWidth,h=fhost.clientHeight;if(!w||!h)return;frend.setSize(w,h,false);frend.domElement.style.width=w+'px';frend.domElement.style.height=h+'px';fcam.aspect=w/h;fcam.updateProjectionMatrix();}
-new ResizeObserver(fresize).observe(fhost);
-fview('fvIso');render();
-(function floop(){if(fhost.clientWidth){fctl.update();frend.render(fsc,fcam);}requestAnimationFrame(floop);})();
+render();
+})();
+</script>
+<script>
+// --- станки: у каждого свои значения, замеры и окончательное выставление; переключение, файл станка
+(function(){
+const PKEY='titan-machines-v1',K=['titan-x-level-v1','titan-x-level-snaps','titan-x-final-v1','titan-x-final-snaps'];
+const grab=()=>{const o={};K.forEach(k=>{const v=localStorage.getItem(k);if(v!=null)o[k]=v;});return o;};
+const put=d=>K.forEach(k=>{if(d&&d[k]!=null)localStorage.setItem(k,d[k]);else localStorage.removeItem(k);});
+let P=null;try{P=JSON.parse(localStorage.getItem(PKEY));}catch(e){P=null;}
+if(!P||!Array.isArray(P.list)||!P.list.length)P={cur:'m1',list:[{id:'m1',name:'TITAN4020 s/n 20250035',data:{}}]};
+const cur=()=>P.list.find(m=>m.id===P.cur)||P.list[0];
+let mT;const mstat=t=>{const el=document.getElementById('machStatus');el.textContent=t;clearTimeout(mT);mT=setTimeout(()=>{el.textContent='';},6000);};
+const psave=()=>{try{localStorage.setItem(PKEY,JSON.stringify(P));return true;}catch(e){mstat('Не хватает места в памяти. Сохраните станки в файлы и удалите лишние.');return false;}};
+P.cur=cur().id;psave();
+window.MACHINE=()=>cur().name;
+// значения текущего станка живут в обычных ключах; в списке — копия для остальных
+const stash=()=>{cur().data=grab();return psave();};
+function switchTo(id){if(!stash())return;P.cur=id;put(cur().data);psave();location.reload();}
+const esc2=t=>String(t).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+function draw(){const sel=document.getElementById('machSel');
+  sel.innerHTML=P.list.map(m=>`<option value="${esc2(m.id)}">${esc2(m.name)}</option>`).join('');sel.value=cur().id;
+  document.getElementById('machEyebrow').textContent=cur().name;document.getElementById('machDel').disabled=P.list.length<2;}
+draw();
+document.getElementById('machSel').addEventListener('change',e=>switchTo(e.target.value));
+// ввод названия (prompt() в приложении Android не показывается)
+let mode='';const row=document.getElementById('machNameRow'),nameEl=document.getElementById('machName');
+const ask=(m,v)=>{mode=m;row.hidden=false;nameEl.value=v;nameEl.focus();};
+document.getElementById('machNew').onclick=()=>ask('new','');
+document.getElementById('machRen').onclick=()=>ask('ren',cur().name);
+document.getElementById('machCancel').onclick=()=>{row.hidden=true;mode='';};
+const uniq=n=>{let x=n,k=2;while(P.list.some(m=>m.name===x))x=`${n} (${k++})`;return x;};
+document.getElementById('machOk').onclick=()=>{const v=nameEl.value.trim();if(!v){mstat('Введите название станка.');nameEl.focus();return;}
+  row.hidden=true;
+  if(mode==='ren'){cur().name=v;psave();draw();mstat('Станок переименован.');}
+  else if(mode==='new'){const id='m'+Date.now();P.list.push({id,name:uniq(v),data:{}});switchTo(id);}
+  mode='';};
+nameEl.addEventListener('keydown',e=>{if(e.key==='Enter')document.getElementById('machOk').click();});
+// удаление в два нажатия
+const del=document.getElementById('machDel');let dT=0;
+del.onclick=()=>{if(P.list.length<2)return;
+  if(!dT){del.textContent=`Удалить «${cur().name}»? Ещё раз`;del.classList.add('danger');dT=setTimeout(()=>{dT=0;del.textContent='Удалить';del.classList.remove('danger');},4000);return;}
+  clearTimeout(dT);dT=0;P.list=P.list.filter(m=>m.id!==P.cur);P.cur=P.list[0].id;put(P.list[0].data);psave();location.reload();};
+// файл станка
+document.getElementById('machSave').onclick=async()=>{stash();const m=cur(),now=new Date(),p2=v=>String(v).padStart(2,'0');
+  const safe=m.name.replace(/[^\p{L}\p{N}._-]+/gu,'_').slice(0,40);
+  const name=`TitanLevel_stanok_${safe}_${now.getFullYear()}-${p2(now.getMonth()+1)}-${p2(now.getDate())}.json`;
+  const text=JSON.stringify({формат:'TitanLevel-станок',версия:1,станок:m.name,сохранено:now.toISOString(),данные:m.data});
+  if(window.TitanAndroid&&window.TitanAndroid.saveFile){window.TitanAndroid.saveFile(name,text);return;}
+  let dl=null;try{dl=window.claude&&window.claude.use?await window.claude.use('downloads'):null;}catch(e){dl=null;}
+  if(dl){try{await dl.save({filename:name,data:text});mstat(`Сохранено: ${name}`);}catch(e){if(e&&e.code!=='declined')mstat('Не удалось сохранить файл.');}return;}
+  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([text],{type:'application/json'}));a.download=name;
+  document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove();},2000);mstat(`Сохранено: ${name}`);};
+const fileEl=document.getElementById('machFile');
+document.getElementById('machLoad').onclick=()=>{fileEl.value='';fileEl.click();};
+fileEl.addEventListener('change',()=>{const f=fileEl.files&&fileEl.files[0];if(!f)return;
+  const rd=new FileReader();
+  rd.onload=()=>{let j=null;try{j=JSON.parse(rd.result);}catch(e){}
+    if(!j||j.формат!=='TitanLevel-станок'||!j.данные||typeof j.данные!=='object'){mstat('Это не файл станка. Нужен файл, сохранённый кнопкой «Сохранить станок в файл».');return;}
+    const data={};K.forEach(k=>{if(typeof j.данные[k]==='string')data[k]=j.данные[k];});
+    const id='m'+Date.now();P.list.push({id,name:uniq(String(j.станок||'Станок из файла')),data});switchTo(id);};
+  rd.onerror=()=>mstat('Не удалось прочитать файл.');
+  rd.readAsText(f,'utf-8');});
 })();
 </script>
 </body>
