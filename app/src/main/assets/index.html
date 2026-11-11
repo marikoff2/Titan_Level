@@ -156,9 +156,10 @@ button:disabled{opacity:.5;cursor:default}
   </section>
 
   <nav class="tabs" role="tablist">
-    <button role="tab" data-tab="main" aria-selected="true">Ввод и 3D</button>
+    <button role="tab" data-tab="main" aria-selected="true">Предварительное выставление</button>
     <button role="tab" data-tab="chart" aria-selected="false">График</button>
     <button role="tab" data-tab="final" aria-selected="false">Окончательное выставление станин X</button>
+    <button role="tab" data-tab="fchart" aria-selected="false">График</button>
   </nav>
 
   <div class="tabpane" id="tabMain">
@@ -278,6 +279,18 @@ button:disabled{opacity:.5;cursor:default}
     </section>
 
     <section class="panel">
+      <h2>Расстояние между станинами</h2>
+      <div class="scroll"><table class="xt dist"><thead><tr><th>Точка замера</th><th>Отклонение по индикатору, мкм</th><th>Размер, мм</th></tr></thead><tbody id="finDist"></tbody></table></div>
+      <p class="note">Номинал 4130,000 мм (по калибру). «+» — станины дальше друг от друга, чем калибр, «−» — ближе. Размер = 4130 + отклонение.</p>
+    </section>
+
+    <section class="panel">
+      <h2>Взаимный уровень станин</h2>
+      <div class="scroll"><table class="xt mut"><thead><tr><th>Опоры (левая — правая)</th><th>Показание уровня на балке, мкм/м</th><th>Какая выше</th></tr></thead><tbody id="finMut"></tbody></table></div>
+      <p class="note">Балка поперёк на обеих станинах на одинаковом X, уровень посередине. «+» — правая станина выше.</p>
+    </section>
+
+    <section class="panel">
       <h2>Замеры и сравнение</h2>
       <div class="snaprow">
         <input id="fsnapName" class="wide" maxlength="80" placeholder="Название, напр. «до затяжки анкеров»" aria-label="Название замера">
@@ -301,6 +314,30 @@ button:disabled{opacity:.5;cursor:default}
         <li>4130 — толкателями на X ≈ 934 и ≈ 5807 мм, двигать только левую станину, после толкания перемерить её.</li>
       </ul>
     </section>
+  </div>
+
+  <div class="tabpane" id="tabFChart" hidden>
+    <section class="panel">
+      <div class="bedhead"><span class="sw" style="background:var(--accent)"></span><h2>Левая станина — продольная высота, мкм (окончательное)</h2></div>
+      <div class="scroll"><svg class="chart" id="fchart0" viewBox="0 0 720 300" width="100%" style="min-width:520px" role="img" aria-label="Левая станина, высота точек"></svg></div>
+    </section>
+    <section class="panel">
+      <div class="bedhead"><span class="sw" style="background:var(--bed2)"></span><h2>Правая станина — продольная высота, мкм (окончательное)</h2></div>
+      <div class="scroll"><svg class="chart" id="fchart1" viewBox="0 0 720 300" width="100%" style="min-width:520px" role="img" aria-label="Правая станина, высота точек"></svg></div>
+    </section>
+    <section class="panel">
+      <h2>Обе станины вместе — продольная высота, мкм</h2>
+      <div class="scroll"><svg class="chart" id="fchartAll" viewBox="0 0 720 300" width="100%" style="min-width:520px" role="img" aria-label="Высота точек обеих станин"></svg></div>
+    </section>
+    <section class="panel">
+      <h2>Поперечный уровень, мкм/м («+» — внутренняя выше)</h2>
+      <div class="scroll"><svg class="chart" id="fchartCross" viewBox="0 0 720 300" width="100%" style="min-width:520px" role="img" aria-label="Поперечный уровень по опорам"></svg></div>
+    </section>
+    <section class="panel">
+      <h2>Взаимный уровень станин, мкм/м («+» — правая выше)</h2>
+      <div class="scroll"><svg class="chart" id="fchartMut" viewBox="0 0 720 300" width="100%" style="min-width:520px" role="img" aria-label="Взаимный уровень"></svg></div>
+    </section>
+    <p class="note">Позиции по оси — метки линейки через 669 мм: 1, 3, 6, 8 … — опоры, 4–5, 9–10, 14–15 — контрольные точки между опорами. Высота — от опоры 1 своей станины. Поперечный и взаимный — только на выставляемых опорах. При сравнении прошлый замер — пунктиром.</p>
   </div>
 
 <script src="three.min.js"></script>
@@ -518,7 +555,7 @@ async function doExport(){const now=new Date(),pad2=v=>String(v).padStart(2,'0')
 document.getElementById('exportBtn').onclick=doExport;
 
 // --- графики
-function drawChart(id,series,labels){
+function drawChart(id,series,labels,XL){
   const svg=document.getElementById(id);const multi=series.length>1;const n=series[0].h.length;
   const showVals=labels&&n<=13;
   const W=720,Ht=300,L=56,R=24,T=showVals?(multi?44:34):(multi?30:20),B=multi&&showVals?52:40;
@@ -530,8 +567,8 @@ function drawChart(id,series,labels){
   const every=Math.ceil(n/16);
   let s='';
   for(let v=lo;v<=hi+1e-9;v+=st){s+=`<line x1="${L}" x2="${W-R}" y1="${y(v)}" y2="${y(v)}" stroke="var(--line)" stroke-width="${Math.abs(v)<1e-9?1.6:1}"/><text x="${L-8}" y="${y(v)+4}" text-anchor="end">${fmt(v,0).replace('+','')}</text>`;}
-  for(let i=0;i<n;i++)if(i%every===0||i===n-1)s+=`<text x="${x(i)}" y="${Ht-B+18}" text-anchor="middle">${i+1}</text>`;
-  s+=`<text x="${(L+W-R)/2}" y="${Ht-B+34}" text-anchor="middle">опора (1 — перед станка)</text>`;
+  for(let i=0;i<n;i++)if(i%every===0||i===n-1)s+=`<text x="${x(i)}" y="${Ht-B+18}" text-anchor="middle">${XL?XL[i]:i+1}</text>`;
+  s+=`<text x="${(L+W-R)/2}" y="${Ht-B+34}" text-anchor="middle">${XL?'позиция линейки — опора (1 — перед станка)':'опора (1 — перед станка)'}</text>`;
   const r=n>25?2.5:4;
   series.forEach((se,k)=>{const col=se.col;let d='';
     se.h.forEach((v,i)=>{if(v==null)return;d+=(d?'L':'M')+x(i)+' '+y(v);});
@@ -676,7 +713,7 @@ function devCol(t){const a=Math.sign(t)*Math.pow(Math.min(1,Math.abs(t)),0.6);
   for(let k=0;k<DEV.length-1;k++){const [c0,p0]=DEV[k],[c1,p1]=DEV[k+1];if(a<=p1)return c0.clone().lerp(c1,(a-p0)/(p1-p0));}
   return DEV[DEV.length-1][0].clone();}
 function update3D(){
-  const V=VIEW==='final'?{...state.vis,dist:false,mut:false}:state.vis,P=pitch();
+  const V=state.vis,P=pitch();
   const hs=H.map(h=>V.long?filled(h):Array(N).fill(0)),ds=D.map(d=>d.map(v=>v==null||!V.cross?0:v));
   const CB=CBASE,ghs=CB?CB.H.map(h=>V.long?filled(h):Array(N).fill(0)):null,gds=CB?CB.D.map(d=>d.map(v=>v==null||!V.cross?0:v)):null,gwd=CB?CB.WD.map(v=>v==null||!V.dist?0:v):null;
   let maxAbs=5;[[hs,ds],...(CB?[[ghs,gds]]:[])].forEach(([HH,DD])=>HH.forEach((h,b)=>h.forEach((v,i)=>{maxAbs=Math.max(maxAbs,Math.abs(v+DD[b][i]/2),Math.abs(v-DD[b][i]/2));})));
@@ -779,7 +816,7 @@ function update3D(){
 }
 
 function update(){
-  if(VIEW==='final'){const F=window.finCtx();H=F.H;D=F.D;WD=[null,null,null];MU=Array(N).fill(null);CBASE=F.CB;update3D();return;}
+  if(VIEW==='final'){const F=window.finCtx();H=F.H;D=F.D;WD=F.WD;MU=F.MU;CBASE=F.CB;update3D();return;}
   recomputeBase();
   H=[heights(0),heights(1)];D=[crossDiff(0),crossDiff(1)];
   WD=nums(state.w);
@@ -826,8 +863,9 @@ document.fonts&&document.fonts.ready.then(update3D);
 
 function showTab(t){
   document.getElementById('tabMain').hidden=t!=='main';document.getElementById('tabChart').hidden=t!=='chart';
-  document.getElementById('tabFinal').hidden=t!=='final';
-  document.querySelector('header .controls').hidden=t==='final'; // шаг и число опор к этой вкладке не относятся
+  document.getElementById('tabFinal').hidden=t!=='final';document.getElementById('tabFChart').hidden=t!=='fchart';
+  if(t==='fchart'&&window.finCharts)window.finCharts();
+  document.querySelector('header .controls').hidden=t==='final'||t==='fchart'; // шаг и число опор к этой вкладке не относятся
   document.querySelectorAll('.tabs button').forEach(b=>b.setAttribute('aria-selected',String(b.dataset.tab===t)));
   setCtx(t==='final'?'final':'main');
   if(t!=='chart')resize();
@@ -837,7 +875,6 @@ const FLBL=['1','3','4–5','6','8','9–10','11','13','14–15','16','18'];
 function setCtx(v){if(v===VIEW)return;VIEW=v;
   const panel=document.getElementById('viewPanel');
   document.getElementById(v==='final'?'finViewSlot':'mainViewSlot').appendChild(panel);
-  ['dist','mut'].forEach(k=>document.querySelector(`label[for="tg-${k}"]`).hidden=v==='final');
   document.getElementById('cmp3dNote').hidden=true;
   if(v==='final'){N=11;NUMLBL=FLBL;}else{NUMLBL=null;ensure();}
   build3D();update();requestAnimationFrame(resize);}
@@ -881,9 +918,10 @@ document.getElementById('finSteps2').innerHTML=s;
 // замеры: линейка по наружной направляющей, 11 меток через 669 мм; поперечный — на выставляемых опорах
 const FKEY='titan-x-final-v1',FSNAPKEY='titan-x-final-snaps';
 const FMARK=[0,1,3,4,6,7,9,10]; // опоры 1,3,6,8,11,13,16,18 -> ближайшая метка
-const empty=()=>({r:[Array(10).fill(''),Array(10).fill('')],c:[Array(8).fill(''),Array(8).fill('')],cmp:''});
+const empty=()=>({r:[Array(10).fill(''),Array(10).fill('')],c:[Array(8).fill(''),Array(8).fill('')],w:['','',''],m:Array(8).fill(''),cmp:''});
 let fs=empty();
 try{const s=JSON.parse(localStorage.getItem(FKEY));if(s&&s.r&&s.c){fs={...empty(),...s};}}catch(e){}
+if(!Array.isArray(fs.w))fs.w=['','',''];if(!Array.isArray(fs.m))fs.m=Array(8).fill('');
 const fsave=()=>{try{localStorage.setItem(FKEY,JSON.stringify(fs));}catch(e){}};
 let FSN=[];try{FSN=JSON.parse(localStorage.getItem(FSNAPKEY))||[];}catch(e){FSN=[];}
 const snsave=()=>{try{localStorage.setItem(FSNAPKEY,JSON.stringify(FSN));return true;}catch(e){return false;}};
@@ -894,9 +932,22 @@ function calc(d){return [0,1].map(b=>{
   const r=(d.r[b]||[]).map(nm),h=[0];for(let k=0;k<10;k++)h.push(h[k]==null||isNaN(r[k])?null:h[k]+r[k]*BASE/1000);
   const c=(d.c[b]||[]).map(nm),D=Array(11).fill(null);FMARK.forEach((m,j)=>{if(!isNaN(c[j]))D[m]=c[j];});
   return {r,h,c,D};});}
-function base(){const s=FSN.find(x=>x.id===fs.cmp);return s?{s,C:calc(s.data)}:null;}
-window.finCtx=()=>{const C=calc(fs),B=base();
-  return {H:C.map(x=>x.h),D:C.map(x=>x.D),CB:B?{H:B.C.map(x=>x.h),D:B.C.map(x=>x.D),WD:[null,null,null],MU:Array(11).fill(null)}:null};};
+// расстояние 4130 — начало, середина, конец; взаимный — на выставляемых опорах
+const nn=v=>{const x=nm(v);return isNaN(x)?null:x;};
+function wm(d){const WD=[0,1,2].map(k=>nn((d.w||[])[k])),m=MEAS.map((_,j)=>nn((d.m||[])[j])),MU=Array(11).fill(null);FMARK.forEach((k,j)=>{MU[k]=m[j];});return {WD,m,MU};}
+function base(){const s=FSN.find(x=>x.id===fs.cmp);return s?{s,C:calc(s.data),X:wm(s.data)}:null;}
+window.finCtx=()=>{const C=calc(fs),X=wm(fs),B=base();
+  return {H:C.map(x=>x.h),D:C.map(x=>x.D),WD:X.WD,MU:X.MU,CB:B?{H:B.C.map(x=>x.h),D:B.C.map(x=>x.D),WD:B.X.WD,MU:B.X.MU}:null};};
+const XL=['1','3','4–5','6','8','9–10','11','13','14–15','16','18'];
+const FCOL=['var(--accent)','var(--bed2)'];
+function finCharts(){const C=calc(fs),X=wm(fs),B=base();
+  const was=(h,col,name)=>B?[{h,col,name,dash:true}]:[];
+  drawChart('fchart0',[{h:C[0].h,col:FCOL[0],name:BEDN[0]},...was(B&&B.C[0].h,FCOL[0],'было')],true,XL);
+  drawChart('fchart1',[{h:C[1].h,col:FCOL[1],name:BEDN[1]},...was(B&&B.C[1].h,FCOL[1],'было')],true,XL);
+  drawChart('fchartAll',[{h:C[0].h,col:FCOL[0],name:BEDN[0]},{h:C[1].h,col:FCOL[1],name:BEDN[1]},...was(B&&B.C[0].h,FCOL[0],'левая, было'),...was(B&&B.C[1].h,FCOL[1],'правая, было')],false,XL);
+  drawChart('fchartCross',[{h:C[0].D,col:FCOL[0],name:BEDN[0]},{h:C[1].D,col:FCOL[1],name:BEDN[1]},...was(B&&B.C[0].D,FCOL[0],'левая, было'),...was(B&&B.C[1].D,FCOL[1],'правая, было')],true,XL);
+  drawChart('fchartMut',[{h:X.MU,col:'var(--fg)',name:'Взаимный уровень'},...was(B&&B.X.MU,'var(--fg)','было')],true,XL);}
+window.finCharts=finCharts;
 const dd=(a,b)=>a==null||b==null||isNaN(a)||isNaN(b)?'—':fmt(a-b);
 function bedHead(b){return `<div class="bedhead"><span class="sw" style="background:${BEDC[b]}"></span><h3>${BEDN[b]}</h3></div>`;}
 function inp(b,k,i,lab,v){return `<input data-fb="${b}" data-fk="${k}" data-fi="${i}" inputmode="decimal" value="${esc(v??'')}" aria-label="${lab}">`;}
@@ -910,11 +961,14 @@ function render(){
     let t=`<div class="xbox">${bedHead(b)}<div class="scroll"><table class="xt"><thead><tr><th>Опора</th><th>Показание, мкм/м</th>${B?'<th>Δ к сравнению</th>':''}</tr></thead><tbody>`;
     MEAS.forEach((n,j)=>{t+=`<tr><td class="sup">${n}</td><td class="in">${inp(b,'c',j,BEDN[b]+', опора '+n+', поперечный, мкм/м',fs.c[b][j])}</td>${B?`<td>${dd(R.c[j],B.C[b].c[j])}</td>`:''}</tr>`;});
     return t+`</tbody></table></div></div>`;}).join('');
-  document.querySelectorAll('#finLong input,#finCross input').forEach(el=>{
-    el.addEventListener('change',()=>{fs[el.dataset.fk][+el.dataset.fb][+el.dataset.fi]=el.value;fsave();
+  const X=wm(fs),DL=['Начало (опора 1)','Середина (опоры 9–10)','Конец (опора 18)'];
+  document.getElementById('finDist').innerHTML=DL.map((t,k)=>`<tr><td class="sup">${t}</td><td class="in">${inp(0,'w',k,'Расстояние, '+t+', мкм',fs.w[k])}</td><td class="d">${X.WD[k]==null?'—':(4130+X.WD[k]/1000).toFixed(3).replace('.',',')}${B&&B.X.WD[k]!=null&&X.WD[k]!=null?` <small>Δ ${fmt(X.WD[k]-B.X.WD[k],0)}</small>`:''}</td></tr>`).join('');
+  document.getElementById('finMut').innerHTML=MEAS.map((n,j)=>{const v=X.m[j];return `<tr><td class="sup">${n}</td><td class="in">${inp(0,'m',j,'Взаимный уровень, опоры '+n+', мкм/м',fs.m[j])}</td><td class="d">${v==null?'—':v>0?'правая':v<0?'левая':'ровно'}${B&&B.X.m[j]!=null&&v!=null?` <small>Δ ${fmt(v-B.X.m[j],0)}</small>`:''}</td></tr>`;}).join('');
+  document.querySelectorAll('#finLong input,#finCross input,#finDist input,#finMut input').forEach(el=>{
+    el.addEventListener('change',()=>{const k=el.dataset.fk;if(k==='w'||k==='m')fs[k][+el.dataset.fi]=el.value;else fs[k][+el.dataset.fb][+el.dataset.fi]=el.value;fsave();
       setTimeout(()=>{const a=document.activeElement,q=a&&a.dataset&&a.dataset.fk?`input[data-fb="${a.dataset.fb}"][data-fk="${a.dataset.fk}"][data-fi="${a.dataset.fi}"]`:null;
         render();if(q){const n=document.querySelector(q);if(n)n.focus();}},0);});});
-  renderSn();
+  renderSn();finCharts();
   if(VIEW==='final')update();
 }
 // сохранённые замеры и сравнение
@@ -931,14 +985,14 @@ function renderSn(){
 }
 document.getElementById('fsnapSave').onclick=()=>{const el=document.getElementById('fsnapName'),now=new Date();
   const name=el.value.trim()||('Замер '+fmtDate(now.toISOString()));
-  FSN.unshift({id:'f'+now.getTime(),name,savedAt:now.toISOString(),data:{r:fs.r.map(a=>[...a]),c:fs.c.map(a=>[...a])}});
+  FSN.unshift({id:'f'+now.getTime(),name,savedAt:now.toISOString(),data:{r:fs.r.map(a=>[...a]),c:fs.c.map(a=>[...a]),w:[...fs.w],m:[...fs.m]}});
   if(!snsave()){FSN.shift();sflash('Место для замеров закончилось — удалите старые.');return;}
   el.value='';renderSn();sflash(`Сохранено: «${name}»`);};
 document.getElementById('fcmpSel').addEventListener('change',e=>{fs.cmp=e.target.value;fsave();render();});
 document.getElementById('fsnapList').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;
   if(b.dataset.cmp){fs.cmp=fs.cmp===b.dataset.cmp?'':b.dataset.cmp;fsave();render();return;}
   if(b.dataset.open){if(b.dataset.armed!=='1'){arm(b,'Заменить текущие значения?');return;}
-    const s=FSN.find(x=>x.id===b.dataset.open);if(!s)return;fs.r=s.data.r.map(a=>[...a]);fs.c=s.data.c.map(a=>[...a]);if(fs.cmp===s.id)fs.cmp='';fsave();render();sflash(`Открыт замер «${s.name}»`);return;}
+    const s=FSN.find(x=>x.id===b.dataset.open);if(!s)return;fs.r=s.data.r.map(a=>[...a]);fs.c=s.data.c.map(a=>[...a]);fs.w=[...(s.data.w||['','',''])];fs.m=[...(s.data.m||Array(8).fill(''))];if(fs.cmp===s.id)fs.cmp='';fsave();render();sflash(`Открыт замер «${s.name}»`);return;}
   if(b.dataset.del){if(b.dataset.armed!=='1'){arm(b,'Точно удалить?');return;}
     FSN=FSN.filter(x=>x.id!==b.dataset.del);snsave();render();sflash('Замер удалён');}});
 // очистка в два нажатия (confirm() в приложении Android не показывается)
@@ -949,18 +1003,22 @@ clrB.onclick=()=>{if(!clrT){clrB.textContent='Нажмите ещё раз — �
   clearTimeout(clrT);clrT=0;clrB.textContent='Очистить';clrB.classList.remove('danger');
   const cmp=fs.cmp;fs=empty();fs.cmp=cmp;fsave();render();};
 // выгрузка
-function block(d){const C=calc(d);return BEDN.map((name,b)=>({станина:name,
+function block(d){const C=calc(d),X=wm(d);return {станины:BEDN.map((name,b)=>({станина:name,
   продольный:PT.slice(1).map((x,k)=>({шаг:k+1,подкладки_мм:[PT[k],x],к_опоре:PTNAME[k+1],показание_мкм_на_м:ok(C[b].r[k]),высота_точки_мкм:ok(C[b].h[k+1])})),
-  поперечный:MEAS.map((n,j)=>({опора:n,показание_мкм_на_м:ok(C[b].c[j])}))}));}
+  поперечный:MEAS.map((n,j)=>({опора:n,показание_мкм_на_м:ok(C[b].c[j])}))})),
+  расстояние_4130_отклонение_мкм:{начало_опора_1:X.WD[0],середина_опоры_9_10:X.WD[1],конец_опора_18:X.WD[2]},
+  взаимный_уровень_мкм_на_м:MEAS.map((n,j)=>({опора:n,показание:X.m[j]}))};}
 document.getElementById('finExport').onclick=async()=>{
   const now=new Date(),p2=v=>String(v).padStart(2,'0');
   const name=`TitanLevel_okonch_${now.getFullYear()}-${p2(now.getMonth()+1)}-${p2(now.getDate())}_${p2(now.getHours())}${p2(now.getMinutes())}.json`;
   const text=JSON.stringify({станок:window.MACHINE?window.MACHINE():'TITAN4020',документ:'Окончательное выставление станин X — выгрузка замеров',выгружено:now.toISOString(),
     условные_обозначения:{
       продольный:'линейка 1 м на подкладках 669 мм по наружной направляющей; показание в мкм/м, «+» — передняя подкладка выше задней; высота накопительно от метки 0 (опора 1)',
-      поперечный:'линейка поперёк направляющих над опорой; показание в мкм/м, «+» — внутренняя сторона выше'},
+      поперечный:'линейка поперёк направляющих над опорой; показание в мкм/м, «+» — внутренняя сторона выше',
+      расстояние:'отклонение по индикатору от калибра 4130 мм, мкм; «+» — станины дальше',
+      взаимный:'уровень на балке поперёк обеих станин, мкм/м; «+» — правая выше'},
     текущие_значения:block(fs),
-    сохранённые_замеры:FSN.map(s=>({название:s.name,сохранён:s.savedAt,станины:block(s.data)}))},null,2);
+    сохранённые_замеры:FSN.map(s=>({название:s.name,сохранён:s.savedAt,...block(s.data)}))},null,2);
   if(window.TitanAndroid&&window.TitanAndroid.saveFile){window.TitanAndroid.saveFile(name,text);return;}
   let dl=null;try{dl=window.claude&&window.claude.use?await window.claude.use('downloads'):null;}catch(e){dl=null;}
   if(dl){try{await dl.save({filename:name,data:text});fstat(`Выгружено: ${name}`);}catch(e){if(e&&e.code!=='declined')fstat('Не удалось выгрузить файл. Попробуйте ещё раз.');}return;}
