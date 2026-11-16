@@ -282,8 +282,8 @@ button:disabled{opacity:.5;cursor:default}
 
     <section class="panel">
       <h2>Расстояние между станинами</h2>
-      <table class="xt fx dist"><thead><tr><th>Точка</th><th>Отклонение, мкм</th><th>Размер, мм</th></tr></thead><tbody id="finDist"></tbody></table>
-      <p class="note">Номинал 4130,000 мм (по калибру). «+» — станины дальше друг от друга, чем калибр, «−» — ближе. Размер = 4130 + отклонение.</p>
+      <table class="xt fx dist"><thead><tr><th>Точка</th><th>Отклонение, мм</th><th>Размер, мм</th></tr></thead><tbody id="finDist"></tbody></table>
+      <p class="note">Отклонение — в мм, как на индикаторе (например −0,04). Номинал 4130,000 мм (по калибру). «+» — станины дальше друг от друга, чем калибр, «−» — ближе. Размер = 4130 + отклонение.</p>
     </section>
 
     <section class="panel">
@@ -809,7 +809,7 @@ function update3D(){
     d.sp.position.set(x,y-0.05,0);d.ln.visible=V.dist;d.sp.visible=V.dist;
     const r2=CB&&dl(WD[k],CB.WD[k],0);
     const mm=v=>(4130+v/1000).toFixed(3).replace('.',',');
-    if(VIEW==='final')drawLabel(d.sp,[[WD[k]==null?'—':mm(WD[k]),ac,'600 40px "IBM Plex Mono", monospace'],...(WD[k]==null?[]:[[fmt(WD[k],0)+' мкм',ac,'500 32px "IBM Plex Mono", monospace']]),...(r2?[r2]:[])],true);
+    if(VIEW==='final')drawLabel(d.sp,[[WD[k]==null?'—':mm(WD[k]),ac,'600 40px "IBM Plex Mono", monospace'],...(WD[k]==null?[]:[[(WD[k]>0?'+':WD[k]<0?'−':'')+Math.abs(WD[k]/1000).toFixed(3).replace('.',',')+' мм',ac,'500 32px "IBM Plex Mono", monospace']]),...(r2?[r2]:[])],true);
     else drawLabel(d.sp,[[WD[k]==null?'—':fmt(WD[k],0),ac,'600 44px "IBM Plex Mono", monospace'],...(r2?[r2]:[])],true);});
   const mv=MU.map(v=>v==null?0:v),fM=0.3/Math.max(10,...mv.map(Math.abs)),off=Math.min(0.16,0.4*P);
   beams.forEach((bm,i)=>{const x=-LEN/2+i*P+off,yc=BH/2-0.04+(hs[0][i]+hs[1][i])/2*1e-6*factor;
@@ -942,11 +942,12 @@ function calc(d){return [0,1].map(b=>{
   return {r,h,c,D};});}
 // расстояние 4130 — начало, середина, конец; взаимный — на выставляемых опорах
 const nn=v=>{const x=nm(v);return isNaN(x)?null:x;};
-function wm(d){const WD=[0,1,2].map(k=>nn((d.w||[])[k])),m=to11([...(d.m||[])]).map(nn);return {WD,m,MU:m};}
+function wm(d){const WD=[0,1,2].map(k=>{const v=nn((d.w||[])[k]);return v==null?null:v*1000;}),m=to11([...(d.m||[])]).map(nn);return {WD,m,MU:m};}
 function base(){const s=FSN.find(x=>x.id===fs.cmp);return s?{s,C:calc(s.data),X:wm(s.data)}:null;}
 window.finCtx=()=>{const C=calc(fs),X=wm(fs),B=base();
   return {H:C.map(x=>x.h),D:C.map(x=>x.D),WD:X.WD,MU:X.MU,CB:B?{H:B.C.map(x=>x.h),D:B.C.map(x=>x.D),WD:B.X.WD,MU:B.X.MU}:null};};
 const XL=null;
+const sgn3=v=>(v>0?'+':v<0?'−':'')+Math.abs(v).toFixed(3).replace('.',',');
 const FCOL=['var(--accent)','var(--bed2)'];
 function finCharts(){const C=calc(fs),X=wm(fs),B=base();
   const was=(h,col,name)=>B?[{h,col,name,dash:true}]:[];
@@ -971,7 +972,7 @@ function render(){
     for(let j=0;j<11;j++)t+=`<tr><td class="sup">${j+1}</td><td class="in">${inp(b,'c',j,BEDN[b]+', опора '+(j+1)+', поперечный, мкм/м',fs.c[b][j])}</td>${B?`<td>${dd(R.c[j],B.C[b].c[j])}</td>`:''}</tr>`;
     return t+`</tbody></table></div>`;}).join('');
   const X=wm(fs),DL=['Начало (опора 1)','Середина (опора 6)','Конец (опора 11)'];
-  document.getElementById('finDist').innerHTML=DL.map((t,k)=>`<tr><td class="sup">${t}</td><td class="in">${inp(0,'w',k,'Расстояние, '+t+', мкм',fs.w[k])}</td><td class="d">${X.WD[k]==null?'—':(4130+X.WD[k]/1000).toFixed(3).replace('.',',')}${B&&B.X.WD[k]!=null&&X.WD[k]!=null?` <small>Δ ${fmt(X.WD[k]-B.X.WD[k],0)}</small>`:''}</td></tr>`).join('');
+  document.getElementById('finDist').innerHTML=DL.map((t,k)=>`<tr><td class="sup">${t}</td><td class="in">${inp(0,'w',k,'Расстояние, '+t+', отклонение, мм',fs.w[k])}</td><td class="d">${X.WD[k]==null?'—':(4130+X.WD[k]/1000).toFixed(3).replace('.',',')}${B&&B.X.WD[k]!=null&&X.WD[k]!=null?` <small>Δ ${sgn3((X.WD[k]-B.X.WD[k])/1000)}</small>`:''}</td></tr>`).join('');
   document.getElementById('finMut').innerHTML=X.m.map((v,j)=>{const n=j+1;return `<tr><td class="sup">${n}</td><td class="in">${inp(0,'m',j,'Взаимный уровень, опора '+n+', мкм/м',fs.m[j])}</td><td class="d">${v==null?'—':v>0?'правая':v<0?'левая':'ровно'}${B&&B.X.m[j]!=null&&v!=null?` <small>Δ ${fmt(v-B.X.m[j],0)}</small>`:''}</td></tr>`;}).join('');
   document.querySelectorAll('#finLong input,#finCross input,#finDist input,#finMut input').forEach(el=>{
     el.addEventListener('change',()=>{const k=el.dataset.fk;if(k==='w'||k==='m')fs[k][+el.dataset.fi]=el.value;else fs[k][+el.dataset.fb][+el.dataset.fi]=el.value;fsave();
@@ -1015,7 +1016,7 @@ clrB.onclick=()=>{if(!clrT){clrB.textContent='Нажмите ещё раз — �
 function block(d){const C=calc(d),X=wm(d);return {станины:BEDN.map((name,b)=>({станина:name,
   продольный:PT.slice(1).map((x,k)=>({шаг:`${k+1} → ${k+2}`,показание_мкм_на_м:ok(C[b].r[k]),высота_опоры_мкм:ok(C[b].h[k+1])})),
   поперечный:C[b].c.map((v,j)=>({опора:j+1,показание_мкм_на_м:ok(v)}))})),
-  расстояние_4130_отклонение_мкм:{начало_опора_1:X.WD[0],середина_опора_6:X.WD[1],конец_опора_11:X.WD[2]},
+  расстояние_4130_отклонение_мм:{начало_опора_1:X.WD[0]==null?null:X.WD[0]/1000,середина_опора_6:X.WD[1]==null?null:X.WD[1]/1000,конец_опора_11:X.WD[2]==null?null:X.WD[2]/1000},
   взаимный_уровень_мкм_на_м:X.m.map((v,j)=>({опора:j+1,показание:v}))};}
 document.getElementById('finExport').onclick=async()=>{
   const now=new Date(),p2=v=>String(v).padStart(2,'0');
@@ -1025,7 +1026,7 @@ document.getElementById('finExport').onclick=async()=>{
       опоры:'11 опор = метки линейки через 669 мм по наружной направляющей, опора 1 — перед станка',
       продольный:'линейка 1 м на подкладках 669 мм; показание в мкм/м, «+» — следующая опора выше; высота накопительно от опоры 1',
       поперечный:'линейка поперёк направляющих над опорой; показание в мкм/м, «+» — внутренняя сторона выше',
-      расстояние:'отклонение по индикатору от калибра 4130 мм, мкм; «+» — станины дальше',
+      расстояние:'отклонение по индикатору от калибра 4130 мм, мм; «+» — станины дальше',
       взаимный:'уровень на балке поперёк обеих станин, мкм/м; «+» — правая выше'},
     текущие_значения:block(fs),
     сохранённые_замеры:FSN.map(s=>({название:s.name,сохранён:s.savedAt,...block(s.data)}))},null,2);
