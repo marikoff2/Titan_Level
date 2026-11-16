@@ -2,11 +2,12 @@
 // Данные и замеры хранятся в профиле Windows (%APPDATA%\TitanLevel).
 const { app, BrowserWindow, Menu, shell } = require('electron');
 const path = require('path');
+const fs = require('fs');
 
 function createWindow() {
   const win = new BrowserWindow({
     width: 1400, height: 900, minWidth: 800, minHeight: 600,
-    backgroundColor: '#eef1f3',
+    backgroundColor: '#070b12',
     icon: path.join(__dirname, 'app', 'icon.png'),
     webPreferences: { contextIsolation: true, sandbox: true }
   });
@@ -20,6 +21,10 @@ function createWindow() {
     if (input.key === 'F11') { win.setFullScreen(!win.isFullScreen()); e.preventDefault(); }
     if (input.key === 'F5') { win.reload(); e.preventDefault(); }
   });
+  // оформление «командный пульт» — только для Windows, поверх той же страницы, что в APK
+  let skin = '';
+  try { skin = fs.readFileSync(path.join(__dirname, 'titan-skin.css'), 'utf8'); } catch (e) { skin = ''; }
+  if (skin) win.webContents.on('dom-ready', () => { win.webContents.insertCSS(skin).catch(() => {}); });
   win.loadFile(path.join(__dirname, 'app', 'index.html'));
 }
 

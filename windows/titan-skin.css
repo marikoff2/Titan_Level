@@ -1,0 +1,133 @@
+/* TITAN LEVEL — оболочка «Командный пульт» для Windows-версии.
+   Подключается поверх index.html (Electron insertCSS); логика и разметка не меняются. */
+:root:root,:root:root[data-theme]{
+  --bg:#070b12!important; --panel:rgba(14,22,34,.78)!important; --fg:#e6f1fb!important; --muted:#7f93ab!important;
+  --line:rgba(98,178,255,.16)!important; --accent:#38d1ff!important; --bed2:#ffb547!important; --steel:#5d7088!important;
+  --hi:#ff8a3d!important; --lo:#38d1ff!important; --input:rgba(4,9,16,.85)!important; color-scheme:dark!important;
+  --glow:0 0 0 1px rgba(56,209,255,.35),0 0 18px rgba(56,209,255,.18);
+  --edge:rgba(56,209,255,.55);
+}
+html{background:#05080d}
+body{
+  background:
+    radial-gradient(1200px 700px at 78% -10%,rgba(56,209,255,.10),transparent 60%),
+    radial-gradient(900px 600px at -10% 110%,rgba(255,181,71,.07),transparent 60%),
+    linear-gradient(rgba(98,178,255,.045) 1px,transparent 1px) 0 0/40px 40px,
+    linear-gradient(90deg,rgba(98,178,255,.045) 1px,transparent 1px) 0 0/40px 40px,
+    #070b12!important;
+  background-attachment:fixed!important;
+  padding:22px 28px 48px!important;
+  letter-spacing:.005em;
+}
+::selection{background:rgba(56,209,255,.35)}
+::-webkit-scrollbar{width:10px;height:10px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:rgba(56,209,255,.22);border-radius:10px;border:2px solid #070b12}
+::-webkit-scrollbar-thumb:hover{background:rgba(56,209,255,.4)}
+
+/* каркас: слева навигация, справа рабочая зона */
+.wrap{max-width:1680px!important;gap:16px!important}
+@media (min-width:1100px){
+  .wrap{display:grid!important;grid-template-columns:250px minmax(0,1fr);align-items:start;column-gap:22px!important}
+  .wrap>header,.wrap>#machPanel{grid-column:1/-1}
+  .wrap>nav.tabs{grid-column:1;grid-row:3/span 20;position:sticky;top:22px;flex-direction:column!important;border:none!important;gap:6px;
+    padding:14px 10px;background:var(--panel);border:1px solid var(--line)!important;border-radius:14px;backdrop-filter:blur(14px)}
+  .wrap>.tabpane{grid-column:2}
+  .wrap>nav.tabs::before{content:"НАВИГАЦИЯ";font:600 11px var(--f-mono);letter-spacing:.24em;color:var(--muted);padding:4px 12px 10px;border-bottom:1px solid var(--line);margin-bottom:6px}
+  .wrap>nav.tabs button{text-align:left!important;border:1px solid transparent!important;border-radius:10px!important;padding:11px 14px 11px 34px!important;position:relative;
+    font:600 14px var(--f-display)!important;letter-spacing:.06em;text-transform:uppercase}
+  .wrap>nav.tabs button::before{content:"";position:absolute;left:14px;top:50%;width:8px;height:8px;margin-top:-4px;border:1.5px solid var(--muted);transform:rotate(45deg);transition:.2s}
+  .wrap>nav.tabs button[aria-selected="true"]{background:linear-gradient(90deg,rgba(56,209,255,.18),rgba(56,209,255,.02))!important;border-color:rgba(56,209,255,.45)!important;color:#fff!important;box-shadow:inset 3px 0 0 var(--accent)}
+  .wrap>nav.tabs button[aria-selected="true"]::before{background:var(--accent);border-color:var(--accent);box-shadow:0 0 10px var(--accent)}
+  .wrap>nav.tabs button:hover{background:rgba(56,209,255,.07)!important;color:var(--fg)!important}
+}
+
+/* шапка */
+header{padding:18px 22px;border-radius:16px;background:linear-gradient(120deg,rgba(56,209,255,.10),rgba(14,22,34,.6) 40%,rgba(255,181,71,.06));
+  border:1px solid var(--line);position:relative;overflow:hidden;backdrop-filter:blur(14px)}
+header::after{content:"";position:absolute;left:0;right:0;bottom:0;height:1px;background:linear-gradient(90deg,transparent,var(--accent),transparent);opacity:.7}
+header::before{content:"◆ TITAN LEVEL  ·  ГЕОМЕТРИЯ СТАНИН";position:absolute;right:22px;top:12px;font:500 10px var(--f-mono);letter-spacing:.22em;color:#5ff0b0;text-shadow:0 0 8px rgba(95,240,176,.6)}
+h1{font-size:34px!important;text-transform:uppercase;letter-spacing:.08em!important;
+  background:linear-gradient(90deg,#fff,#9fe6ff 55%,#38d1ff);-webkit-background-clip:text;background-clip:text;color:transparent}
+h2{text-transform:uppercase;letter-spacing:.09em;font-size:15px!important;color:#cfe9ff;display:flex;align-items:center;gap:10px}
+h2::before{content:"";width:4px;height:16px;border-radius:2px;background:var(--accent);box-shadow:0 0 10px var(--accent);flex:none}
+.bedhead h2::before{display:none}
+h3{text-transform:uppercase;letter-spacing:.08em;font-size:14px!important}
+.eyebrow{color:var(--accent)!important;letter-spacing:.2em!important;opacity:.9}
+
+/* панели: стекло, угловые скобы */
+.panel{background:var(--panel)!important;border:1px solid var(--line)!important;border-radius:14px!important;padding:18px 20px!important;
+  backdrop-filter:blur(14px);position:relative;box-shadow:0 10px 40px rgba(0,0,0,.35)}
+.panel::before,.panel::after{content:"";position:absolute;width:14px;height:14px;pointer-events:none;border-color:var(--edge);border-style:solid;opacity:.9}
+.panel::before{left:-1px;top:-1px;border-width:2px 0 0 2px;border-top-left-radius:14px}
+.panel::after{right:-1px;bottom:-1px;border-width:0 2px 2px 0;border-bottom-right-radius:14px}
+#machPanel{padding:10px 16px!important;border-radius:12px!important}
+#machPanel label.step{font:600 11px var(--f-mono);letter-spacing:.2em;text-transform:uppercase;color:var(--accent)}
+
+/* элементы управления */
+input,select{background:var(--input)!important;border:1px solid rgba(98,178,255,.22)!important;border-radius:8px!important;color:#eaf6ff!important;
+  transition:border-color .15s,box-shadow .15s}
+input:hover,select:hover{border-color:rgba(56,209,255,.45)!important}
+input:focus,select:focus{outline:none!important;border-color:var(--accent)!important;box-shadow:var(--glow)}
+button{background:rgba(20,32,48,.8)!important;border:1px solid rgba(98,178,255,.25)!important;border-radius:9px!important;color:#d8eaff!important;
+  padding:8px 14px!important;font-weight:500;letter-spacing:.02em;transition:.15s}
+button:hover{border-color:var(--accent)!important;box-shadow:var(--glow);color:#fff!important}
+button.on{background:linear-gradient(180deg,#45dcff,#169fd6)!important;color:#03121c!important;border-color:#7fe6ff!important;font-weight:600;box-shadow:0 0 18px rgba(56,209,255,.35)}
+button.on:hover{color:#000!important}
+button.danger{color:#ff9a6a!important;border-color:rgba(255,138,61,.6)!important}
+.chip{border-color:rgba(255,181,71,.55)!important;color:#ffcf85!important;background:rgba(255,181,71,.07)}
+label.tg input,.adjset label.step input[type=checkbox]{accent-color:#38d1ff}
+input[type=range]{accent-color:#38d1ff;border:none!important;box-shadow:none!important;background:none!important}
+
+/* таблицы и сетки ввода */
+.xt th{color:#86a6c6!important;text-transform:uppercase;font-size:11px!important;letter-spacing:.1em;border-bottom:1px solid rgba(56,209,255,.25)!important}
+.xt td{border-bottom:1px solid rgba(98,178,255,.08)!important}
+.xt tbody tr{transition:background .12s}
+.xt tbody tr:hover{background:rgba(56,209,255,.06)}
+.xt td.d,.grid .h{color:#9fe6ff!important;text-shadow:0 0 10px rgba(56,209,255,.35)}
+.xt td.sup,.grid .sup{color:#7f93ab!important}
+.xbox{padding:12px 14px;border-radius:12px;background:rgba(4,9,16,.35);border:1px solid rgba(98,178,255,.10)}
+.sw{height:6px!important;width:22px!important;box-shadow:0 0 10px currentColor}
+
+/* 3D — главный экран */
+#scene{border:1px solid rgba(56,209,255,.35)!important;border-radius:14px!important;aspect-ratio:16/7.5!important;min-height:420px!important;
+  box-shadow:0 0 0 1px rgba(0,0,0,.6),0 0 40px rgba(56,209,255,.12),inset 0 0 80px rgba(0,0,0,.6);
+  background:radial-gradient(120% 90% at 50% 25%,#13233a 0%,#0a1322 55%,#04070d 100%)!important}
+#scene::after{content:"";position:absolute;inset:0;pointer-events:none;border-radius:14px;
+  background:linear-gradient(rgba(56,209,255,.05) 1px,transparent 1px) 0 0/100% 4px;mix-blend-mode:screen;opacity:.35}
+.fsbar button{background:rgba(4,10,18,.85)!important;border-color:rgba(56,209,255,.4)!important}
+.ramp{height:8px!important;border-radius:8px!important;background:linear-gradient(90deg,#38d1ff,#8fe3ff,#c7ccd4,#ffcf85,#ff8a3d)!important;box-shadow:0 0 12px rgba(56,209,255,.25)}
+.legend,.mag{color:#9fb7cf!important}
+
+/* графики и схемы */
+.chart text{fill:#7f93ab!important}
+.chart text.val{fill:#e6f1fb!important}
+.chart line{stroke:rgba(98,178,255,.14)!important}
+.fin text{fill:#cfe2f5!important}
+.fin text.lab{fill:#7f93ab!important}
+
+/* списки, статусы */
+.snapitem{border-top:1px solid rgba(98,178,255,.12)!important;padding:10px 4px!important}
+.snapitem.cmp{background:linear-gradient(90deg,rgba(56,209,255,.10),transparent);border-radius:8px}
+.status{color:#5ff0b0!important;text-shadow:0 0 8px rgba(95,240,176,.35)}
+.note{color:#8ea3ba!important}
+.up{color:#38d1ff!important}.dn{color:#ffb547!important}
+
+/* мягкое появление */
+@media (prefers-reduced-motion:no-preference){
+  .tabpane:not([hidden]) .panel{animation:rise .35s ease both}
+  .tabpane:not([hidden]) .panel:nth-child(2){animation-delay:.04s}
+  .tabpane:not([hidden]) .panel:nth-child(3){animation-delay:.08s}
+  @keyframes rise{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+}
+
+/* мелочи */
+#machPanel .status:empty,#machPanel{min-height:0}
+#machPanel .status:empty{display:none}
+@media (min-width:1100px){
+  .wrap>nav.tabs button[data-tab="chart"]::after,.wrap>nav.tabs button[data-tab="fchart"]::after{display:block;font:500 10px var(--f-mono);letter-spacing:.14em;color:var(--muted);margin-top:3px;text-transform:uppercase}
+  .wrap>nav.tabs button[data-tab="chart"]::after{content:"предварительное"}
+  .wrap>nav.tabs button[data-tab="fchart"]::after{content:"окончательное"}
+  .wrap>nav.tabs button[data-tab="fchart"]{margin-left:14px}
+  .wrap>nav.tabs button[data-tab="chart"]{margin-left:14px}
+}
