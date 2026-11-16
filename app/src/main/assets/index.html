@@ -160,7 +160,7 @@ button:disabled{opacity:.5;cursor:default}
   <nav class="tabs" role="tablist">
     <button role="tab" data-tab="main" aria-selected="true">Предварительное выставление</button>
     <button role="tab" data-tab="chart" aria-selected="false">График</button>
-    <button role="tab" data-tab="final" aria-selected="false">Окончательное выставление станин X</button>
+    <button role="tab" data-tab="final" aria-selected="false">Окончательное выставление</button>
     <button role="tab" data-tab="fchart" aria-selected="false">График</button>
   </nav>
 
@@ -261,7 +261,7 @@ button:disabled{opacity:.5;cursor:default}
   <div class="tabpane" id="tabFinal" hidden>
     <section class="panel">
       <div class="viewbar">
-        <h2>Окончательное выставление станин X</h2>
+        <h2>Окончательное выставление</h2>
         <div class="grp"><button id="finExport" class="on">Выгрузить замеры</button><button id="finClear">Очистить</button></div>
       </div>
       <p class="status" id="finStatus" role="status"></p>
@@ -808,13 +808,15 @@ function update3D(){
     d.ln.geometry.attributes.position.needsUpdate=true;d.ln.geometry.computeBoundingSphere();
     d.sp.position.set(x,y-0.05,0);d.ln.visible=V.dist;d.sp.visible=V.dist;
     const r2=CB&&dl(WD[k],CB.WD[k],0);
-    drawLabel(d.sp,[[WD[k]==null?'—':fmt(WD[k],0),ac,'600 44px "IBM Plex Mono", monospace'],...(r2?[r2]:[])],true);});
+    const mm=v=>(4130+v/1000).toFixed(3).replace('.',',');
+    if(VIEW==='final')drawLabel(d.sp,[[WD[k]==null?'—':mm(WD[k]),ac,'600 40px "IBM Plex Mono", monospace'],...(WD[k]==null?[]:[[fmt(WD[k],0)+' мкм',ac,'500 32px "IBM Plex Mono", monospace']]),...(r2?[r2]:[])],true);
+    else drawLabel(d.sp,[[WD[k]==null?'—':fmt(WD[k],0),ac,'600 44px "IBM Plex Mono", monospace'],...(r2?[r2]:[])],true);});
   const mv=MU.map(v=>v==null?0:v),fM=0.3/Math.max(10,...mv.map(Math.abs)),off=Math.min(0.16,0.4*P);
   beams.forEach((bm,i)=>{const x=-LEN/2+i*P+off,yc=BH/2-0.04+(hs[0][i]+hs[1][i])/2*1e-6*factor;
     bm.mesh.position.set(x,yc,0);bm.mesh.rotation.x=-Math.atan(mv[i]*fM/SPAN);bm.mesh.visible=V.mut&&MU[i]!=null;
     bm.sp.position.set(x,yc-0.4,0);bm.sp.visible=V.mut&&MU[i]!=null;
     const r2=CB&&dl(MU[i],CB.MU[i],0);
-    drawLabel(bm.sp,[[MU[i]==null?'—':String(Math.abs(MU[i])).replace('.',','),HUD.mut,'600 44px "IBM Plex Mono", monospace'],...(r2?[r2]:[])],true);});
+    drawLabel(bm.sp,[[MU[i]==null?'—':VIEW==='final'?(MU[i]>0?'+':'')+String(MU[i]).replace('.',',').replace('-','−'):String(Math.abs(MU[i])).replace('.',','),HUD.mut,'600 44px "IBM Plex Mono", monospace'],...(r2?[r2]:[])],true);});
 }
 
 function update(){
