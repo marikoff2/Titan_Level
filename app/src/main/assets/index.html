@@ -219,7 +219,6 @@ button:disabled{opacity:.5;cursor:default}
         <label class="tg" for="tg-cross"><input type="checkbox" id="tg-cross" checked> Поперечный уровень</label>
         <label class="tg" for="tg-dist"><input type="checkbox" id="tg-dist" checked> Расстояние между станинами</label>
         <label class="tg" for="tg-mut"><input type="checkbox" id="tg-mut" checked> Взаимный уровень станин</label>
-        <label class="tg" for="tg-gantry"><input type="checkbox" id="tg-gantry" checked> Траверса, ось Z, голова</label>
       </div>
       <p class="note" id="cmp3dNote" hidden></p>
       <div id="scene"><div class="fsbar"><span id="fsViews" hidden style="display:contents"><button data-v="vIso">Изометрия</button><button data-v="vFront">Спереди</button><button data-v="vSide">Сбоку</button></span><button id="fsBtn" aria-label="Открыть 3D на весь экран">⛶ На весь экран</button></div></div>
@@ -660,41 +659,6 @@ const dims=[0,1,2].map(()=>{const g=new THREE.BufferGeometry();g.setAttribute('p
   const ln=new THREE.Line(g,new THREE.LineBasicMaterial());scene.add(ln);const sp=labelSprite(3);sp.scale.set(0.8,0.8*180/256,1);return {ln,sp};});
 let beams=[];
 
-// --- траверса, ось Z и фрезерная голова — по 3D-модели TITAN4020 (размеры по модели, мм; узлы упрощены)
-// модель: X — поперёк станка (левая станина −1406…−406, правая 3696…4696), Y — вверх (верх станин 3738), Z — вдоль (перед = 8805)
-const GMX=xm=>ZS[0]+(xm+906)*(ZS[1]-ZS[0])/5102;   // поперёк → z сцены (центры станин −906 и 4196)
-const GMY=ym=>BH/2+(ym-3738)*BH/1356;              // высота → y сцены (верх станин)
-const GMZ=zm=>-LEN/2+(8805-zm)*LEN/7200;           // вдоль → x сцены (перед станка)
-const gantry=new THREE.Group();scene.add(gantry);
-const GCOL={trav:'#7f8996',cart:'#939daa',ram:'#a3adb9',head:'#5f6976',spin:'#c3ccd6',tool:'#d4a25e'};
-function gBox(x0,x1,y0,y1,z0,z1,col){
-  const a=GMZ(z1),b=GMZ(z0),w=Math.abs(b-a),h=GMY(y1)-GMY(y0),d=GMX(x1)-GMX(x0);
-  const g=new THREE.BoxGeometry(w,h,d),m=new THREE.Mesh(g,new THREE.MeshStandardMaterial({color:col,roughness:.6,metalness:.25}));
-  m.position.set((a+b)/2,(GMY(y0)+GMY(y1))/2,(GMX(x0)+GMX(x1))/2);gantry.add(m);
-  const e=new THREE.LineSegments(new THREE.EdgesGeometry(g),new THREE.LineBasicMaterial({color:HUD.edge,transparent:true,opacity:.45}));e.position.copy(m.position);gantry.add(e);return m;}
-function gCyl(xc,zc,r,y0,y1,col){
-  const rs=r*(ZS[1]-ZS[0])/5102,h=GMY(y1)-GMY(y0),g=new THREE.CylinderGeometry(rs,rs,h,28);
-  const m=new THREE.Mesh(g,new THREE.MeshStandardMaterial({color:col,roughness:.4,metalness:.5}));m.position.set(GMZ(zc),(GMY(y0)+GMY(y1))/2,GMX(xc));gantry.add(m);
-  const e=new THREE.LineSegments(new THREE.EdgesGeometry(g,30),new THREE.LineBasicMaterial({color:HUD.edge,transparent:true,opacity:.35}));e.position.copy(m.position);gantry.add(e);return m;}
-// траверса: коробка 5130×1337×1560 с проёмом сверху, лежит на станинах от центра левой до центра правой
-gBox(-920,4210,3738,4040,4228,5788,GCOL.trav);        // дно
-gBox(-920,4210,4040,5075,4228,4478,GCOL.trav);        // задняя стенка
-gBox(-920,4210,4040,5075,5538,5788,GCOL.trav);        // передняя стенка
-gBox(-920,-420,4040,5075,4478,5538,GCOL.trav);        // левый торец
-gBox(3710,4210,4040,5075,4478,5538,GCOL.trav);        // правый торец
-// каретка Y на траверсе
-gBox(988,1868,4900,5294,4358,5658,GCOL.cart);
-// ползун Z
-gBox(1178,1678,3656,6056,4758,5258,GCOL.ram);
-// голова A/C: корпус оси C, вилка, шпиндель с инструментом
-gCyl(1428,5008,300,3380,3656,GCOL.head);
-gBox(1150,1706,3150,3380,4800,5216,GCOL.head);
-gBox(1150,1240,2780,3150,4800,5216,GCOL.head);        // щека вилки
-gBox(1616,1706,2780,3150,4800,5216,GCOL.head);        // щека вилки
-gCyl(1428,5008,120,2700,3120,GCOL.spin);              // шпиндель
-gCyl(1428,5008,40,2480,2700,GCOL.tool);               // инструмент
-const GXC=GMZ(5008); // середина траверсы вдоль станка
-
 const pitch=()=>LEN/(N-1);
 const lsc=()=>Math.min(1,Math.sqrt(7/N)); // уменьшение подписей при большом числе опор
 function build3D(){
@@ -762,9 +726,6 @@ function update3D(){
   document.getElementById('mag').textContent='×'+(Math.round(factor/q)*q).toLocaleString('ru-RU');
   const cHi=new THREE.Color(HUD.hi),cLo=new THREE.Color(HUD.lo),cMid=new THREE.Color(HUD.mid);
   const fg=HUD.text,mu=HUD.muted,hiC=HUD.hi;
-  // траверса лежит на станинах: поднимаем её на высоту станин под ней (в том же масштабе)
-  {const sg=(GXC+LEN/2)/LEN*(N-1);gantry.visible=V.gantry!==false;
-    gantry.position.y=Math.max(lin(hs[0],sg),lin(hs[1],sg))*1e-6*factor;}
   const wd=WD.map(v=>v==null||!V.dist?0:v);const fW=0.2/(Math.max(20,...wd.map(Math.abs),...(gwd||[]).map(Math.abs))*1e-6);
   beds.forEach((bd,b)=>{
     const h=hs[b],dd=ds[b],pos=bd.geo.attributes.position,col=bd.geo.attributes.color,o=bd.orig;
@@ -895,7 +856,7 @@ function setView(v){
 }
 ['vIso','vFront','vSide'].forEach(id=>document.getElementById(id).onclick=()=>setView(id));
 document.getElementById('exag').addEventListener('input',update3D);
-['long','cross','dist','mut','gantry'].forEach(k=>{const el=document.getElementById('tg-'+k);el.checked=state.vis[k]!==false;
+['long','cross','dist','mut'].forEach(k=>{const el=document.getElementById('tg-'+k);el.checked=state.vis[k]!==false;
   el.addEventListener('change',()=>{state.vis[k]=el.checked;save();update3D();});});
 
 function resize(){const w=host.clientWidth,h=host.clientHeight;if(!w||!h)return;renderer.setSize(w,h,false);renderer.domElement.style.width=w+'px';renderer.domElement.style.height=h+'px';camera.aspect=w/h;camera.updateProjectionMatrix();}
