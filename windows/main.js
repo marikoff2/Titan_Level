@@ -25,6 +25,12 @@ function createWindow() {
   let skin = '';
   try { skin = fs.readFileSync(path.join(__dirname, 'titan-skin.css'), 'utf8'); } catch (e) { skin = ''; }
   if (skin) win.webContents.on('dom-ready', () => { win.webContents.insertCSS(skin).catch(() => {}); });
+  // вкладка «Геометрия» — только в Windows-версии (APK не меняется)
+  let geom = '';
+  try { geom = fs.readFileSync(path.join(__dirname, 'titan-geom.js'), 'utf8'); } catch (e) { geom = ''; }
+  if (geom) win.webContents.on('dom-ready', () => {
+    if (win.webContents.getURL().endsWith('index.html')) win.webContents.executeJavaScript(geom).catch(() => {});
+  });
   win.loadFile(path.join(__dirname, 'app', 'index.html'));
 }
 

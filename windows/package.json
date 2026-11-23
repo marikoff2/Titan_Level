@@ -1,6 +1,6 @@
 {
   "name": "titan-level",
-  "version": "1.6.0",
+  "version": "1.7.0",
   "description": "Уровень станин X — TITAN4020",
   "author": "TITAN4020 PNR",
   "main": "main.js",
@@ -22,6 +22,7 @@
     "files": [
       "main.js",
       "titan-skin.css",
+      "titan-geom.js",
       "app/**/*"
     ],
     "win": {

@@ -1,0 +1,685 @@
+<!doctype html>
+<html lang="ru" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<style>
+@font-face{font-family:"IBM Plex Sans";src:url("fonts/IBMPlexSans-Regular.woff2") format("woff2");font-weight:400}
+@font-face{font-family:"IBM Plex Sans";src:url("fonts/IBMPlexSans-Medium.woff2") format("woff2");font-weight:500}
+@font-face{font-family:"IBM Plex Sans";src:url("fonts/IBMPlexSans-SemiBold.woff2") format("woff2");font-weight:600}
+@font-face{font-family:"IBM Plex Mono";src:url("fonts/IBMPlexMono-Regular.woff2") format("woff2");font-weight:400}
+@font-face{font-family:"IBM Plex Mono";src:url("fonts/IBMPlexMono-Medium.woff2") format("woff2");font-weight:500}
+[hidden]{display:none!important}
+body{margin:0}
+</style>
+</head>
+<body>
+<title>Геометрия TITAN4020</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<style>
+/* Layout: шапка, вкладки по видам расчёта; в каждой вкладке слева ввод, справа результат со схемой; на телефоне — в одну колонку */
+:root{
+  --bg:#f3f5f7; --panel:#ffffff; --fg:#17202b; --muted:#5d6b7b; --line:#d5dce4; --accent:#2f6690;
+  --accent-soft:#e3edf5; --ok:#2e7d4f; --ok-soft:#e2f2e8; --bad:#b4442f; --bad-soft:#f8e5e0; --grind:#b5761f; --grind-soft:#f6ecdc;
+  --f-ui:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif; --f-mono:"IBM Plex Mono",ui-monospace,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#10161e; --panel:#18212c; --fg:#dfe6ee; --muted:#93a2b3; --line:#2d3a4a; --accent:#7fb0d6;
+  --accent-soft:#1d2f40; --ok:#6cc08f; --ok-soft:#183026; --bad:#e58b77; --bad-soft:#3a201b; --grind:#e0a85a; --grind-soft:#382a17; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#10161e; --panel:#18212c; --fg:#dfe6ee; --muted:#93a2b3; --line:#2d3a4a; --accent:#7fb0d6;
+  --accent-soft:#1d2f40; --ok:#6cc08f; --ok-soft:#183026; --bad:#e58b77; --bad-soft:#3a201b; --grind:#e0a85a; --grind-soft:#382a17; color-scheme:dark}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{background:var(--bg);color:var(--fg);font-family:var(--f-ui);font-size:15px;line-height:1.45;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:18px 40px}
+.wrap{max-width:1080px;margin:0 auto;display:flex;flex-direction:column;gap:16px}
+header{display:flex;flex-wrap:wrap;align-items:baseline;gap:6px 14px}
+h1{font-size:21px;font-weight:600;margin:0;text-wrap:balance}
+header p{margin:0;color:var(--muted);font-size:13px}
+.tabs{display:flex;flex-wrap:wrap;gap:6px}
+.tabs button{font:500 14px var(--f-ui);color:var(--fg);background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:8px 14px;cursor:pointer}
+.tabs button[aria-selected="true"]{background:var(--accent);border-color:var(--accent);color:var(--panel)}
+.tabs button:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.grid{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,6fr);gap:16px;align-items:start}
+@media (max-width:820px){.grid{grid-template-columns:minmax(0,1fr)}}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:16px;display:flex;flex-direction:column;gap:14px;min-width:0}
+h2{font-size:15px;font-weight:600;margin:0}
+h3{font-size:12px;font-weight:600;margin:0;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
+.fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px 12px}
+.fields.three{grid-template-columns:repeat(3,minmax(0,1fr))}
+@media (max-width:460px){.fields,.fields.three{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}}
+label{display:flex;flex-direction:column;gap:4px;font-size:13px;color:var(--muted);min-width:0}
+input,select{font:500 15px var(--f-mono);color:var(--fg);background:var(--bg);border:1px solid var(--line);border-radius:5px;padding:7px 9px;width:100%;font-variant-numeric:tabular-nums}
+select{font-family:var(--f-ui)}
+.note{font-size:12.5px;color:var(--muted);margin:0}
+.tag{font:600 11px var(--f-mono);padding:1px 5px;border-radius:3px;background:var(--accent-soft);color:var(--accent);white-space:nowrap}
+table{border-collapse:collapse;width:100%;font-variant-numeric:tabular-nums}
+th,td{text-align:left;padding:7px 8px;border-bottom:1px solid var(--line);font-size:14px}
+th{font-size:12px;color:var(--muted);font-weight:500}
+td.num{font-family:var(--f-mono);text-align:right}
+.chip{display:inline-block;font:600 12px var(--f-ui);padding:2px 8px;border-radius:10px}
+.chip.ok{background:var(--ok-soft);color:var(--ok)} .chip.bad{background:var(--bad-soft);color:var(--bad)}
+.big{display:flex;flex-wrap:wrap;gap:10px}
+.big>div{flex:1 1 140px;border:1px solid var(--line);border-radius:6px;padding:10px 12px;min-width:0}
+.big b{display:block;font:500 20px var(--f-mono);font-variant-numeric:tabular-nums}
+.big span{font-size:12px;color:var(--muted)}
+.svgbox{overflow-x:auto}
+svg text{font-family:var(--f-ui)}
+.row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.btn{font:500 13px var(--f-ui);color:var(--accent);background:transparent;border:1px solid var(--accent);border-radius:5px;padding:6px 12px;cursor:pointer}
+.copied{font-size:12px;color:var(--ok)}
+.sq{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:12px;align-items:stretch}
+.sq svg{width:100%;max-width:240px;display:block;justify-self:center}
+.sqf{display:flex;flex-direction:column;justify-content:space-between;gap:8px;padding-block:14px}
+.res{margin:0;font-size:14px;padding:8px 10px;border-radius:5px;background:var(--accent-soft)}
+.res b{font-family:var(--f-mono)}
+.wide{grid-column:1/-1}
+.iso{position:relative;height:480px;border:1px solid var(--line);border-radius:6px;background:radial-gradient(120% 90% at 50% 30%,#1c2636 0%,#111823 55%,#0a0e15 100%);overflow:hidden}
+.iso canvas{display:block}
+@media (max-width:600px){.iso{height:340px}}
+.seg{display:flex;border:1px solid var(--line);border-radius:6px;overflow:hidden}
+.seg button{font:500 13px var(--f-ui);background:var(--panel);color:var(--fg);border:0;padding:7px 12px;cursor:pointer}
+.seg button[aria-pressed="true"]{background:var(--accent);color:var(--panel)}
+.warn{border-left:3px solid var(--grind);padding:6px 10px;background:var(--grind-soft);font-size:13px;border-radius:0 4px 4px 0}
+</style>
+
+<div class="wrap">
+  <header>
+    <h1>Геометрия TITAN4020</h1>
+    <p>s/n 20250035 · расчёт подкладок по замерам · все величины в мм</p>
+  </header>
+  <div class="tabs" role="tablist">
+    <button role="tab" id="t-sec" aria-selected="true">Сектора оси C · п. 12</button>
+    <button role="tab" id="t-bas" aria-selected="false">Пластины корзины · XZ / YZ</button>
+    <button role="tab" id="t-tilt" aria-selected="false">Пересчёт наклона и угла</button>
+  </div>
+
+  <!-- ===== СЕКТОРА C ===== -->
+  <section id="p-sec" class="grid">
+    <div class="card">
+      <h2>Замер плоскости оси C</h2>
+      <p class="note">A = +90, оправка горизонтально, индикатор на столе смотрит вверх в нижнюю образующую. Шпиндель сориентирован и не вращается. Показания относительно нуля, взятого в C0. Индикатор при вдавливании идёт в «+».</p>
+      <h3>Показания индикатора</h3>
+      <div class="fields">
+        <label>C0 · оправка влево (Y+)<input id="sC0" type="number" step="0.001"></label>
+        <label>C+180 · оправка вправо (Y−)<input id="sC180" type="number" step="0.001"></label>
+        <label>C+90 · оправка вперёд (X−)<input id="sC90" type="number" step="0.001"></label>
+        <label>C−90 · оправка назад (X+)<input id="sCm90" type="number" step="0.001"></label>
+      </div>
+      <h3>Размеры</h3>
+      <div class="fields three">
+        <label>Плечо от оси C<input id="sL" type="number" step="1"></label>
+        <label>Ø средней линии отверстий<input id="sD" type="number" step="0.1"></label>
+        <label>Ширина пластин<input id="sW" type="number" step="1"></label>
+        <label>Угол одного сектора, °<input id="sAng" type="number" step="1"></label>
+        <label>Допуск, мм<input id="sTol" type="number" step="0.001"></label>
+        <label>на длине, мм<input id="sTolL" type="number" step="1"></label>
+      </div>
+      <p class="note">Сектора стоят между ползуном Z и фланцем оси C, центр каждого сектора на своей оси, стыки на диагоналях. Допуск по умолчанию 0,02/500 — сверить с протоколом.</p>
+    </div>
+    <div class="card">
+      <h2>Результат</h2>
+      <div class="big" id="sBig"></div>
+      <div class="svgbox"><svg id="sSvg" viewBox="0 0 360 330" width="100%" style="max-width:420px;display:block;margin:0 auto" role="img" aria-label="Схема секторов, вид сверху"></svg></div>
+      <table id="sTab"></table>
+      <div id="sMsg"></div>
+      <div class="row"><button class="btn" id="sCopy">Скопировать для журнала</button><span class="copied" id="sCopied" hidden>Скопировано</span></div>
+      <p class="note">Правило: шлифуется сектор той стороны, где показание больше (там оправка ниже). Съём = наклон × расстояние от оси C до центра опоры сектора; потом из всех вычитается наименьший, чтобы один сектор не трогать. Проверка плоскости: Передний + Задний = Левый + Правый. Знаки <span class="tag">ВЕРОЯТНО</span> — подтвердить первым пробным замером.</p>
+    </div>
+    <div class="card wide">
+      <div class="row" style="justify-content:space-between">
+        <h2>Изометрия замера оси C</h2>
+        <div class="seg" role="group" aria-label="Положение оси C">
+          <button id="cPos0" aria-pressed="true">C0</button><button id="cPos1" aria-pressed="false">C+180</button><button id="cPos2" aria-pressed="false">C+90</button><button id="cPos3" aria-pressed="false">C−90</button><button id="cZoom" aria-pressed="false">Весь станок</button>
+        </div>
+      </div>
+      <div id="isoC" class="iso"><p class="note" id="isoCFail" hidden>Не загрузилась библиотека 3D — схема недоступна, расчёт работает.</p></div>
+      <p class="note">A = +90, в шпинделе контрольная оправка, стойка с индикатором на плите смотрит вверх в нижнюю образующую оправки. Голова повёрнута в выбранное положение C; у точек касания — ваши показания. Сектора между ползуном и фланцем окрашены по съёму. Белый пунктир — вертикаль, голубой — фактическая ось C, наклон сильно преувеличен. Голубой круг — путь конца оправки при повороте C, бледный пунктирный круг — горизонталь; оранжевая точка — куда заваливается плоскость оси C. Точка касания на оправке — схематично.</p>
+    </div>
+  </section>
+
+  <!-- ===== КОРЗИНА ===== -->
+  <section id="p-bas" class="grid" hidden>
+    <div class="card">
+      <h2>Перпендикулярность оси Z</h2>
+      <p class="note">Уголок на столе. Внизу обнуляемся, едем по Z вверх и снимаем показание. Индикатор при вдавливании идёт в «+». Знак показаний учитывается, направление наклона считается само.</p>
+      <h3>Плоскость XZ · гипотенуза к переду (X−)</h3>
+      <div class="sq">
+        <svg id="sqX" viewBox="0 0 220 230" role="img" aria-label="Уголок в плоскости XZ, вид слева"></svg>
+        <div class="sqf">
+          <label>Вверху<input id="bXt" type="number" step="0.001"></label>
+          <label>Длина по Z<input id="bLx" type="number" step="1"></label>
+          <label>Внизу (ноль)<input id="bXb" type="number" step="0.001"></label>
+        </div>
+      </div>
+      <p class="res" id="rX"></p>
+      <h3>Плоскость YZ · гипотенуза к Y− (вправо)</h3>
+      <div class="sq">
+        <div class="sqf">
+          <label>Вверху<input id="bYt" type="number" step="0.001"></label>
+          <label>Длина по Z<input id="bLy" type="number" step="1"></label>
+          <label>Внизу (ноль)<input id="bYb" type="number" step="0.001"></label>
+        </div>
+        <svg id="sqY" viewBox="0 0 220 230" role="img" aria-label="Уголок в плоскости YZ, вид спереди"></svg>
+      </div>
+      <p class="res" id="rY"></p>
+      <h3>Расстояния между пластинами и допуск</h3>
+      <div class="fields">
+        <label>Перед — зад<input id="bBx" type="number" step="1"></label>
+        <label>Лево — право<input id="bBy" type="number" step="1"></label>
+        <label>Допуск, мм<input id="bTol" type="number" step="0.001"></label>
+        <label>на длине, мм<input id="bTolL" type="number" step="1"></label>
+      </div>
+    </div>
+    <div class="card">
+      <h2>Результат</h2>
+      <div class="big" id="bBig"></div>
+      <div class="svgbox"><svg id="bSvg" viewBox="0 0 360 300" width="100%" style="max-width:420px;display:block;margin:0 auto" role="img" aria-label="Схема пластин корзины, вид сверху"></svg></div>
+      <table id="bTab"></table>
+      <div id="bMsg"></div>
+      <div class="row"><button class="btn" id="bCopy">Скопировать для журнала</button><span class="copied" id="bCopied" hidden>Скопировано</span></div>
+      <p class="note">Правило: шлифуются пластины той стороны, куда уходит низ оси Z <span class="tag">ВЕРОЯТНО</span>. Разница толщин = отклонение × расстояние между пластинами / длина замера. Одна пластина остаётся без съёма.</p>
+    </div>
+    <div class="card wide">
+      <div class="row" style="justify-content:space-between">
+        <h2>Изометрия замера</h2>
+        <div class="seg" role="group" aria-label="Какой замер показать">
+          <button id="isoX" aria-pressed="true">Замер XZ</button><button id="isoY" aria-pressed="false">Замер YZ</button><button id="isoZ" aria-pressed="false">Крупно уголок</button>
+        </div>
+      </div>
+      <div id="iso" class="iso"><p class="note" id="isoFail" hidden>Не загрузилась библиотека 3D — схема недоступна, расчёт работает.</p></div>
+      <p class="note">Модель станка та же, что в 3D-модели. Уголок стоит на линейке 2 м, линейка — на двух опорах, ими её выставляют в ноль. Наклон оси Z показан сильно преувеличенным. Шпиндель стоит в нижней точке (ноль), бледный индикатор — верхняя точка. Пунктир белый — идеальная вертикаль, оранжевый — фактическая ось Z. Пластины под корзиной окрашены по съёму. Вращать мышью или пальцем.</p>
+    </div>
+  </section>
+
+  <!-- ===== ПЕРЕСЧЁТ ===== -->
+  <section id="p-tilt" class="grid" hidden>
+    <div class="card">
+      <h2>Наклон на другую длину</h2>
+      <div class="fields">
+        <label>Отклонение, мм<input id="tE" type="number" step="0.001"></label>
+        <label>на длине, мм<input id="tL" type="number" step="1"></label>
+      </div>
+      <table id="tTab"></table>
+      <p class="note">Например, XY: допуск 0,02/700, а меряете на 500 — допустимо 0,014.</p>
+    </div>
+    <div class="card">
+      <h2>Угол по разнице на плече</h2>
+      <p class="note">Для нуля A (п. 11) и C (п. 13): разница показаний и расстояние между точками замера.</p>
+      <div class="fields">
+        <label>Разница показаний, мм<input id="aD" type="number" step="0.001"></label>
+        <label>Расстояние между точками, мм<input id="aL" type="number" step="1"></label>
+      </div>
+      <div class="big" id="aBig"></div>
+      <p class="note">Если точки симметричны относительно оси вращения (как ±90), сдвиг нуля — это угол из этой разницы; направление сдвига проверяется пробным поворотом <span class="tag">ВЕРОЯТНО</span>.</p>
+    </div>
+  </section>
+</div>
+
+<script src="three.min.js"></script>
+<script src="OrbitControls.js"></script>
+<script>
+const $=id=>document.getElementById(id);
+const DEF={sC0:0,sC180:0.010,sC90:0.004,sCm90:0,sL:300,sD:452.5,sW:25,sAng:90,sTol:0.02,sTolL:500,
+  bXb:0,bXt:0.012,bLx:500,bYb:0,bYt:-0.006,bLy:500,bBx:1100,bBy:820,bTol:0.02,bTolL:500,tE:0.02,tL:700,aD:0.010,aL:600};
+let saved={};try{saved=JSON.parse(localStorage.getItem('titanGeom')||'{}')}catch(e){}
+Object.keys(DEF).forEach(k=>{$(k).value=(saved[k]!==undefined?saved[k]:DEF[k]);$(k).addEventListener('input',calc);});
+const v=k=>parseFloat(String($(k).value).replace(',','.'));
+const f=(x,d=4)=>isFinite(x)?(Math.abs(x)<5e-7?0:x).toFixed(d).replace('.',','):'—';
+const um=x=>isFinite(x)?Math.round(x*1000)+' мкм':'—';
+function save(){const o={};Object.keys(DEF).forEach(k=>o[k]=$(k).value);try{localStorage.setItem('titanGeom',JSON.stringify(o))}catch(e){}}
+
+// вкладки
+const TABS=[['t-sec','p-sec'],['t-bas','p-bas'],['t-tilt','p-tilt']];
+function showTab(t){TABS.forEach(([b,p])=>{$(b).setAttribute('aria-selected',b===t);$(p).hidden=b!==t;});try{localStorage.setItem('titanGeomTab',t)}catch(e){}}
+TABS.forEach(([b])=>$(b).onclick=()=>showTab(b));
+try{const t=localStorage.getItem('titanGeomTab');if(t&&$(t))showTab(t)}catch(e){}
+
+function chip(ok){return `<span class="chip ${ok?'ok':'bad'}">${ok?'в допуске':'вне допуска'}</span>`}
+function copyText(btn,msg,text){btn.onclick=()=>{const done=()=>{msg.hidden=false;setTimeout(()=>msg.hidden=true,1500)};
+  try{navigator.clipboard.writeText(text()).then(done).catch(()=>prompt2(text()))}catch(e){prompt2(text())}};}
+function prompt2(t){const ta=document.createElement('textarea');ta.value=t;ta.style.cssText='width:100%;height:120px;font:12px monospace';
+  document.querySelector('section:not([hidden]) .card:last-child').appendChild(ta);ta.select();}
+
+// ===== СЕКТОРА =====
+let secText='';
+function calcSec(){
+  const L=v('sL'),R=v('sD')/2,W=v('sW'),phi=v('sAng')/2*Math.PI/180;
+  const r1=R-W/2,r2=R+W/2,rc=(2/3)*(r2**3-r1**3)/(r2**2-r1**2),xb=rc*Math.sin(phi)/phi; // центр опоры сектора от оси C
+  const dY=v('sC0')-v('sC180'),dX=v('sC90')-v('sCm90');
+  const aY=dY/(2*L),aX=dX/(2*L);                // наклон, мм/мм; «+» — сторона C0 (Y+) / C+90 (X−) ниже
+  const raw={Лев:aY*xb,Прав:-aY*xb,Пер:aX*xb,Зад:-aX*xb};
+  const mn=Math.min(...Object.values(raw)),cut={};Object.keys(raw).forEach(k=>cut[k]=raw[k]-mn);
+  const tol=v('sTol')/v('sTolL'),okY=Math.abs(aY)<=tol+1e-12,okX=Math.abs(aX)<=tol+1e-12;
+  const per=v('sTolL');
+  $('sBig').innerHTML=`<div><span>YZ · C0 / C+180</span><b>${f(aY*per)}</b><span>мм на ${per} ${chip(okY)}</span></div>
+    <div><span>XZ · C+90 / C−90</span><b>${f(aX*per)}</b><span>мм на ${per} ${chip(okX)}</span></div>
+    <div><span>Центр опоры сектора</span><b>${f(xb,1)}</b><span>мм от оси C · k = ${f(xb/(2*L),3)}</span></div>`;
+  const names=[['Пер','Передний','X−'],['Зад','Задний','X+'],['Лев','Левый','Y+'],['Прав','Правый','Y−']];
+  $('sTab').innerHTML='<tr><th>Сектор</th><th>Сторона</th><th style="text-align:right">Снять, мм</th><th style="text-align:right">мкм</th></tr>'+
+    names.map(([k,n,s])=>`<tr><td>${n}</td><td>${s}</td><td class="num">${f(cut[k])}</td><td class="num">${Math.round(cut[k]*1000)}</td></tr>`).join('');
+  const chk=(cut.Пер+cut.Зад)-(cut.Лев+cut.Прав);
+  const mx=Math.max(...Object.values(cut));
+  $('sMsg').innerHTML=(okX&&okY?'<div class="warn">Оба наклона в допуске — сектора можно не трогать.</div>':'')+
+    (mx>0&&mx<0.004?'<div class="warn">Съём меньше 4 мкм — на практике сравним с точностью шлифовки и затяжки.</div>':'')+
+    `<p class="note">Проверка: (Пер + Зад) − (Лев + Прав) = ${f(chk)}</p>`;
+  drawSec(cut);
+  ISOC.last={cut,aY,aX};ISOC.update();
+  secText=`П.12 плоскость оси C. Плечо ${L} мм. C0=${$('sC0').value}, C+180=${$('sC180').value}, C+90=${$('sC90').value}, C−90=${$('sCm90').value}.\n`+
+    `YZ: ${f(aY*per)}/${per}; XZ: ${f(aX*per)}/${per}. Снять: Передний ${f(cut.Пер)}, Задний ${f(cut.Зад)}, Левый ${f(cut.Лев)}, Правый ${f(cut.Прав)} мм.`;
+}
+function arc(cx,cy,r,a0,a1){const p=a=>[cx+r*Math.cos(a),cy-r*Math.sin(a)];const [x0,y0]=p(a0),[x1,y1]=p(a1);
+  return `M${x0.toFixed(1)},${y0.toFixed(1)} A${r},${r} 0 0 0 ${x1.toFixed(1)},${y1.toFixed(1)}`;}
+function drawSec(cut){
+  // вид сверху: перед — внизу, левая сторона (Y+) — слева, как стоя перед станком
+  const cx=180,cy=160,r=100,g=(90-Math.min(89,v('sAng')))/2*Math.PI/180+0.03,D=Math.PI/180;
+  const sec=[['Зад',90],['Лев',180],['Пер',270],['Прав',0]];
+  const mx=Math.max(...Object.values(cut),1e-9);
+  let s=`<circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="var(--line)" stroke-dasharray="3 4"/>`;
+  sec.forEach(([k,c])=>{const a0=(c-45)*D+g,a1=(c+45)*D-g,hot=cut[k]>5e-7;
+    s+=`<path d="${arc(cx,cy,r,a0,a1)}" fill="none" stroke="${hot?'var(--grind)':'var(--muted)'}" stroke-width="${hot?14:10}" stroke-linecap="butt" opacity="${hot?0.55+0.45*cut[k]/mx:0.5}"/>`;
+    const lx=cx+(r+38)*Math.cos(c*D),ly=cy-(r+38)*Math.sin(c*D);
+    s+=`<text x="${lx}" y="${ly-4}" text-anchor="middle" font-size="12" fill="var(--muted)">${{Зад:'Задний',Лев:'Левый',Пер:'Передний',Прав:'Правый'}[k]}</text>
+        <text x="${lx}" y="${ly+12}" text-anchor="middle" font-size="13" font-weight="600" fill="${hot?'var(--grind)':'var(--fg)'}">${hot?'−'+Math.round(cut[k]*1000)+' мкм':'0'}</text>`;});
+  s+=`<circle cx="${cx}" cy="${cy}" r="3" fill="var(--fg)"/><text x="${cx+8}" y="${cy-6}" font-size="11" fill="var(--muted)">ось C</text>
+     <text x="${cx}" y="322" text-anchor="middle" font-size="11" fill="var(--muted)">ПЕРЕД (X−) · вид сверху</text>`;
+  $('sSvg').innerHTML=s;}
+
+// ===== КОРЗИНА =====
+let basText='';
+function calcBas(){
+  // XZ: уголок гипотенузой к переду, мерим наружную грань вертикального катета (она смотрит назад), индикатор сзади, шток смотрит вперёд.
+  //   «+» вверху → вверху шпиндель ближе к уголку → верх Z наклонён вперёд → низ Z уходит назад (X+).
+  // YZ: гипотенуза к Y−, грань катета смотрит к Y+, индикатор слева, шток смотрит вправо.
+  //   «+» вверху → верх Z наклонён вправо (Y−) → низ Z уходит влево (Y+).
+  const dX=v('bXt')-v('bXb'),dY=v('bYt')-v('bYb');
+  const ax=-dX/v('bLx'), ay=dY/v('bLy'); // «+»: низ Z уходит вперёд (X−) / влево (Y+)
+  const dirX=Math.abs(dX)<5e-7?'наклона нет':(ax>0?'низ Z уходит <b>вперёд (X−)</b>, верх — назад':'низ Z уходит <b>назад (X+)</b>, верх — вперёд');
+  const dirY=Math.abs(dY)<5e-7?'наклона нет':(ay>0?'низ Z уходит <b>влево (Y+)</b>, верх — вправо':'низ Z уходит <b>вправо (Y−)</b>, верх — влево');
+  $('rX').innerHTML=`XZ: <b>${f(Math.abs(dX))}</b> на ${$('bLx').value} мм — ${dirX}`;
+  $('rY').innerHTML=`YZ: <b>${f(Math.abs(dY))}</b> на ${$('bLy').value} мм — ${dirY}`;
+  drawSq('sqX',false,dX,'ПЕРЕД X−','X+ зад');
+  drawSq('sqY',true,dY,'Y+ лево','Y− право');
+  const Bx=v('bBx'),By=v('bBy');
+  // шлифуется сторона, куда уходит низ Z: вперёд → передние пластины, влево → левые
+  const raw={ПЛ:ax*Bx/2+ay*By/2,ПП:ax*Bx/2-ay*By/2,ЗЛ:-ax*Bx/2+ay*By/2,ЗП:-ax*Bx/2-ay*By/2};
+  const mn=Math.min(...Object.values(raw)),cut={};Object.keys(raw).forEach(k=>cut[k]=raw[k]-mn);
+  const tol=v('bTol')/v('bTolL'),per=v('bTolL'),okX=Math.abs(ax)<=tol+1e-12,okY=Math.abs(ay)<=tol+1e-12;
+  $('bBig').innerHTML=`<div><span>XZ</span><b>${f(Math.abs(ax)*per)}</b><span>мм на ${per} ${chip(okX)}</span></div>
+    <div><span>YZ</span><b>${f(Math.abs(ay)*per)}</b><span>мм на ${per} ${chip(okY)}</span></div>
+    <div><span>Разница перед/зад · лево/право</span><b>${f(Math.abs(ax)*Bx,3)} · ${f(Math.abs(ay)*By,3)}</b><span>мм</span></div>`;
+  const N={ПЛ:'Передняя левая',ПП:'Передняя правая',ЗЛ:'Задняя левая',ЗП:'Задняя правая'};
+  $('bTab').innerHTML='<tr><th>Пластина</th><th></th><th style="text-align:right">Снять, мм</th><th style="text-align:right">мкм</th></tr>'+
+    Object.keys(N).map(k=>`<tr><td>${k}</td><td>${N[k]}</td><td class="num">${f(cut[k])}</td><td class="num">${Math.round(cut[k]*1000)}</td></tr>`).join('');
+  $('bMsg').innerHTML=(okX&&okY?'<div class="warn">Обе плоскости в допуске — пластины можно не трогать.</div>':'');
+  drawBas(cut);
+  ISO.last={cut,ax,ay,dX,dY};ISO.update();
+  basText=`Перпендикулярность Z (внизу ноль, вверху показание). XZ: низ ${$('bXb').value}, верх ${$('bXt').value} на ${$('bLx').value} мм, низ Z ${ax>0?'вперёд':ax<0?'назад':'—'}; YZ: низ ${$('bYb').value}, верх ${$('bYt').value} на ${$('bLy').value} мм, низ Z ${ay>0?'влево':ay<0?'вправо':'—'}.\n`+
+    `Снять: ПЛ ${f(cut.ПЛ)}, ПП ${f(cut.ПП)}, ЗЛ ${f(cut.ЗЛ)}, ЗП ${f(cut.ЗП)} мм.`;
+}
+function drawSq(id,mir,d,lt,rt){
+  // уголок: катет у стола и вертикальный катет; XZ — вид слева (перед слева), YZ — вид спереди (Y+ слева)
+  const X=x=>mir?220-x:x, top=46, bot=196, face=140;
+  const tri=[[40,206],[face,206],[face,top-16]].map(([x,y])=>X(x)+','+y).join(' ');
+  const sh=Math.max(-14,Math.min(14,(isFinite(d)?Math.sign(d)*Math.min(14,4+Math.abs(d)*600):0))); // наглядный сдвиг верха (утрировано)
+  const ix=face+30, plTop=face+2-sh*0; // индикатор: корпус справа от грани (для YZ — слева)
+  const ind=(y,dx,lab)=>`<rect x="${Math.min(X(ix+dx),X(ix+dx+26))}" y="${y-9}" width="26" height="18" rx="4" fill="var(--panel)" stroke="var(--accent)"/>
+     <line x1="${X(ix+dx)}" y1="${y}" x2="${X(face+2)}" y2="${y}" stroke="var(--accent)" stroke-width="2"/>
+     <text x="${X(ix+dx+13)}" y="${y+4}" text-anchor="middle" font-size="9" fill="var(--accent)">${lab}</text>`;
+  let s=`<line x1="10" y1="206" x2="210" y2="206" stroke="var(--muted)"/>
+    <polygon points="${tri}" fill="var(--accent-soft)" stroke="var(--fg)" stroke-width="1.5"/>
+    <line x1="${X(face)}" y1="${top-16}" x2="${X(face)}" y2="206" stroke="var(--fg)" stroke-width="3"/>
+    <line x1="${X(ix+13)}" y1="${bot}" x2="${X(ix+13-sh)}" y2="${top}" stroke="var(--grind)" stroke-dasharray="4 3"/>
+    ${ind(bot,0,'0')}${ind(top,-sh,'верх')}
+    <text x="${X(ix+30)}" y="${(top+bot)/2}" text-anchor="middle" font-size="11" fill="var(--muted)">Z↑</text>
+    <text x="12" y="224" font-size="10" fill="var(--muted)">${lt}</text><text x="208" y="224" text-anchor="end" font-size="10" fill="var(--muted)">${rt}</text>`;
+  $(id).innerHTML=s;}
+function drawBas(cut){
+  const x0=90,x1=270,y0=50,y1=230,mx=Math.max(...Object.values(cut),1e-9);
+  let s=`<rect x="${x0}" y="${y0}" width="${x1-x0}" height="${y1-y0}" rx="6" fill="var(--accent-soft)" stroke="var(--accent)" stroke-opacity=".5"/>
+    <rect x="160" y="120" width="40" height="40" fill="var(--panel)" stroke="var(--muted)"/><text x="180" y="176" text-anchor="middle" font-size="10" fill="var(--muted)">ползун Z</text>
+    <text x="180" y="290" text-anchor="middle" font-size="11" fill="var(--muted)">ПЕРЕД (X−) · вид сверху</text>
+    <text x="180" y="${y1+20}" text-anchor="middle" font-size="11" fill="var(--muted)">${$('bBy').value} мм</text>
+    <text x="${x1+16}" y="${(y0+y1)/2}" font-size="11" fill="var(--muted)" transform="rotate(90 ${x1+16} ${(y0+y1)/2})" text-anchor="middle">${$('bBx').value} мм</text>`;
+  const P={ЗЛ:[x0,y0],ЗП:[x1,y0],ПЛ:[x0,y1],ПП:[x1,y1]};
+  Object.entries(P).forEach(([k,[x,y]])=>{const hot=cut[k]>5e-7;
+    s+=`<rect x="${x-16}" y="${y-16}" width="32" height="32" rx="3" fill="${hot?'var(--grind)':'var(--panel)'}" fill-opacity="${hot?0.35+0.65*cut[k]/mx:1}" stroke="${hot?'var(--grind)':'var(--muted)'}"/>
+      <text x="${x}" y="${y+4}" text-anchor="middle" font-size="11" font-weight="600" fill="var(--fg)">${k}</text>
+      <text x="${x<180?x-24:x+24}" y="${y+4}" text-anchor="${x<180?'end':'start'}" font-size="12" font-weight="600" fill="${hot?'var(--grind)':'var(--muted)'}">${hot?'−'+Math.round(cut[k]*1000):'0'}</text>`;});
+  $('bSvg').innerHTML=s;}
+
+// ===== ПЕРЕСЧЁТ =====
+function calcTilt(){
+  const a=v('tE')/v('tL');
+  $('tTab').innerHTML='<tr><th>Длина</th><th style="text-align:right">Отклонение, мм</th></tr>'+
+    [300,500,600,700,1000].map(l=>`<tr><td>${l} мм</td><td class="num">${f(a*l)}</td></tr>`).join('')+
+    `<tr><td>мкм/м</td><td class="num">${f(a*1e6,1)}</td></tr><tr><td>угловые секунды</td><td class="num">${f(Math.atan(a)*180/Math.PI*3600,2)}</td></tr>`;
+  const ang=Math.atan(v('aD')/v('aL'))*180/Math.PI;
+  $('aBig').innerHTML=`<div><span>Угол</span><b>${f(ang,5)}°</b><span>для сдвига нуля</span></div><div><span>То же</span><b>${f(ang*3600,1)}″</b><span>угловых секунд</span></div>`;}
+
+
+// ===== 3D-МОДЕЛЬ СТАНКА (общая для вкладок) =====
+// та же модель, что в «Станок TITAN4020»: x — вдоль станка (+ к заду = X+), y — вверх, z — поперёк (Y+ → z<0)
+function buildModel(host,DZmm){
+  const renderer=new THREE.WebGLRenderer({antialias:true,alpha:true});renderer.setClearColor(0x000000,0);
+  renderer.setPixelRatio(Math.min(devicePixelRatio,2));host.appendChild(renderer.domElement);
+  const scene=new THREE.Scene();
+  const camera=new THREE.PerspectiveCamera(22,2,0.05,300);
+  const controls=new THREE.OrbitControls(camera,renderer.domElement);controls.enableDamping=true;
+  scene.add(new THREE.HemisphereLight(0xffffff,0x667788,0.75));
+  const dl=new THREE.DirectionalLight(0xffffff,0.7);dl.position.set(-4,8,5);scene.add(dl);
+  const rim=new THREE.DirectionalLight(0x9db4cf,0.35);rim.position.set(6,3,-6);scene.add(rim);
+const BH=1.245,BW=0.35,FLOOR=-BH/2-0.1,LEN=6,ZS=[-(3.585*BW+BW/2),3.585*BW+BW/2],INNER=[1,-1],SHOE=0.05;
+const EDGE='#8eabc8';
+// профиль станины спереди: внутренняя сторона вертикальная, наружная — вниз и скосом к широкому основанию
+const PROF=[[-0.5,0],[0.5,0],[0.5,0.233],[1.246,0.78],[1.246,1],[-0.5,1]];
+function bedGeo(b){const sh=new THREE.Shape(),P=PROF.map(([o,t])=>[o*BW*INNER[b],BH/2-t*BH]);
+  sh.moveTo(P[0][0],P[0][1]);for(let k=1;k<P.length;k++)sh.lineTo(P[k][0],P[k][1]);sh.lineTo(P[0][0],P[0][1]);
+  const g=new THREE.ExtrudeGeometry(sh,{depth:LEN,bevelEnabled:false});g.translate(0,0,-LEN/2);g.rotateY(Math.PI/2);return g;}
+function addMesh(g,col,rough=.6,metal=.25,pos){const m=new THREE.Mesh(g,new THREE.MeshStandardMaterial({color:col,roughness:rough,metalness:metal}));
+  if(pos)m.position.copy(pos);scene.add(m);
+  const e=new THREE.LineSegments(new THREE.EdgesGeometry(g,25),new THREE.LineBasicMaterial({color:EDGE,transparent:true,opacity:.45}));e.position.copy(m.position);scene.add(e);return m;}
+
+// плита фундамента и пол
+{const sl=new THREE.BoxGeometry(LEN+1.6,0.3,ZS[1]-ZS[0]+BW+1.6);addMesh(sl,'#4a5059',.95,0,new THREE.Vector3(0,FLOOR-0.151,0));
+ const grid=new THREE.GridHelper(16,64,0x34465c,0x1e2836);grid.position.y=FLOOR-0.3;scene.add(grid);}
+
+// станины, направляющие, башмаки
+const N=11,O_IN=-0.5*BW+0.035,O_OUT=1.246*BW-0.04;
+ZS.forEach((z,b)=>{
+  const g=bedGeo(b);addMesh(g,'#2b3038',.7,.1,new THREE.Vector3(0,0,z));
+  [-1,1].forEach(sd=>addMesh(new THREE.BoxGeometry(LEN,0.045,0.06),'#c9d3df',.45,.4,new THREE.Vector3(0,BH/2+0.0225,z+sd*BW*0.27)));
+  for(let i=0;i<N;i++){const x=-LEN/2+i*LEN/(N-1);
+    [O_IN,O_OUT].forEach(o=>addMesh(new THREE.BoxGeometry(0.1,0.1,SHOE),'#3a4555',.6,.25,new THREE.Vector3(x,FLOOR+0.05,z-INNER[b]*o)));}
+});
+
+// траверса, каретка Y, ползун Z, голова — по 3D-модели (мм)
+// модель: X — поперёк (центры станин −906 и 4196), Y — вверх (верх станин 3738), Z — вдоль (перед = 8805)
+const KH=0.5; // траверса и ось Z ниже в 2 раза
+const GX=xm=>ZS[0]+(xm+906)*(ZS[1]-ZS[0])/5102;
+const GY=ym=>BH/2+(ym-3738)*BH/1356;
+const LIFT=(1337*KH*BH/1356)/2;            // салазки X: высота — половина толщины траверсы
+const GYk=ym=>GY(3738+(ym-3738)*KH)+LIFT;   // всё, что на траверсе, поднято на высоту салазок
+const GZ=zm=>-LEN/2+(8805-zm)*LEN/7200;
+function box(x0,x1,y0,y1,z0,z1,col,yf=GYk){const a=GZ(z1),b=GZ(z0);
+  return addMesh(new THREE.BoxGeometry(Math.abs(b-a),yf(y1)-yf(y0),GX(x1)-GX(x0)),col,.6,.25,new THREE.Vector3((a+b)/2,(yf(y0)+yf(y1))/2,(GX(x0)+GX(x1))/2));}
+function cyl(xc,zc,r,y0,y1,col){const rs=r*(ZS[1]-ZS[0])/5102,h=GY(y1)-GY(y0);
+  return addMesh(new THREE.CylinderGeometry(rs,rs,h,28),col,.4,.5,new THREE.Vector3(GZ(zc),(GY(y0)+GY(y1))/2,GX(xc)));}
+const C={trav:'#7f8996',cart:'#939daa',ram:'#a3adb9',head:'#5f6976',spin:'#c3ccd6',tool:'#d4a25e'};
+// траверса: коробка с проёмом сверху, на всю ширину верха обеих станин — стоит на обеих направляющих
+box(-1218,4508,3738,4040,4228,5788,C.trav);
+box(-1218,4508,4040,5075,4228,4478,C.trav);
+box(-1218,4508,4040,5075,5538,5788,C.trav);
+box(-1218,-718,4040,5075,4478,5538,C.trav);
+box(4008,4508,4040,5075,4478,5538,C.trav);
+// направляющие Y на траверсе: 2 сверху на стенках и 2 на внутренних гранях стенок (смотрят друг на друга)
+const RAIL='#c9d3df',RW=0.06,RH=0.045;
+const yTop=GYk(5075),zA=GX(-718),zB=GX(4008),zL=zB-zA,zC=(zA+zB)/2;
+[4353,5663].forEach(zm=>addMesh(new THREE.BoxGeometry(RW,RH,zL),RAIL,.45,.4,new THREE.Vector3(GZ(zm),yTop+RH/2,zC)));     // сверху
+const xRearIn=GZ(4478),xFrontIn=GZ(5538),yIn=GYk(4800);
+addMesh(new THREE.BoxGeometry(RH,RW,zL),RAIL,.45,.4,new THREE.Vector3(xRearIn-RH/2,yIn,zC));    // на внутренней грани задней стенки
+addMesh(new THREE.BoxGeometry(RH,RW,zL),RAIL,.45,.4,new THREE.Vector3(xFrontIn+RH/2,yIn,zC));   // на внутренней грани передней стенки
+// корзина оси Z (каретка Y): 1320 мм поперёк, по глубине — на всю траверсу; плита лежит на верхних направляющих,
+// корпус опущен в полость траверсы между боковыми направляющими
+{const z0=GX(768),z1=GX(2088),zc=(z0+z1)/2,zw=z1-z0;
+ const pa=GZ(5788),pb=GZ(4228),py0=yTop+RH+0.025,py1=py0+0.16;
+ addMesh(new THREE.BoxGeometry(Math.abs(pb-pa),py1-py0,zw),C.cart,.6,.25,new THREE.Vector3((pa+pb)/2,(py0+py1)/2,zc));   // верхняя плита
+ const ba=xFrontIn+RH+0.02,bb=xRearIn-RH-0.02,by0=GYk(4250);
+ addMesh(new THREE.BoxGeometry(Math.abs(bb-ba),py0-by0,zw*0.96),C.cart,.6,.25,new THREE.Vector3((ba+bb)/2,(by0+py0)/2,zc)); // корпус в полости
+ // каретки на направляющих
+ [GZ(4353),GZ(5663)].forEach(x=>[zc-zw*0.32,zc+zw*0.32].forEach(z=>addMesh(new THREE.BoxGeometry(0.09,0.025,0.14),'#4a535e',.5,.4,new THREE.Vector3(x,yTop+RH+0.0125,z))));
+ [[xRearIn-RH-0.01],[xFrontIn+RH+0.01]].forEach(([x])=>[zc-zw*0.32,zc+zw*0.32].forEach(z=>addMesh(new THREE.BoxGeometry(0.02,0.09,0.14),'#4a535e',.5,.4,new THREE.Vector3(x,yIn,z))));}
+// салазки X: на каждой станине под траверсой, по обеим направляющим, на всю глубину траверсы
+ZS.forEach(z=>{const a=GZ(5788),b=GZ(4228),y0=BH/2+0.045,y1=BH/2+LIFT;
+  addMesh(new THREE.BoxGeometry(Math.abs(b-a),y1-y0,BW*0.92),'#5d6773',.55,.35,new THREE.Vector3((a+b)/2,(y0+y1)/2,z));
+  [-1,1].forEach(sd=>[GZ(5600),GZ(4416)].forEach(x=>addMesh(new THREE.BoxGeometry(0.16,0.05,0.09),'#4a535e',.5,.4,new THREE.Vector3(x,BH/2+0.07,z+sd*BW*0.27))));});
+  const nZ=scene.children.length; // дальше — ползун, направляющие Z, голова: наклоняются вместе
+// ползун Z 500×500 — квадратный, в одном масштабе с головой
+const SU=BH/1356;                          // мм → сцена для ползуна и головы: тот же масштаб, что высота станин
+const RX=GZ(5008),RZ=GX(1428);             // ось ползуна в сцене
+const DZ=(DZmm==null?(GYk(3656)-866*SU-FLOOR-170*SU)/SU:DZmm)*SU;                           // ось Z опущена на половину хода (1200/2 = 600 мм)
+const ramBot=GYk(3656)-DZ,ramTop=ramBot+2*(GYk(6056)-GYk(3656)); // ползун Z удлинён в 2 раза
+addMesh(new THREE.BoxGeometry(500*SU,ramTop-ramBot,500*SU),C.ram,.55,.3,new THREE.Vector3(RX,(ramTop+ramBot)/2,RZ));
+// направляющие Z: 4 штуки, 2 на передней грани ползуна и 2 на задней, по краям
+{const h=ramTop-ramBot-0.04,yc=(ramTop+ramBot)/2,t=0.035,w=0.05,off=(250-35)*SU;
+ [-1,1].forEach(f=>[-1,1].forEach(sd=>addMesh(new THREE.BoxGeometry(t,h,w),'#c9d3df',.45,.4,
+   new THREE.Vector3(RX+f*(250*SU+t/2),yc,RZ+sd*off))));}
+
+// голова — по 3D-модели (вилочная A/C), локально в мм: y вверх от торца шпинделя, x поперёк, z вперёд
+function headGroup(){
+  const g=new THREE.Group();
+  const M=(col,r=.5,m=.35)=>new THREE.MeshStandardMaterial({color:col,roughness:r,metalness:m});
+  const add=(geo,mat,x,y,z,rx=0,ry=0,rz=0)=>{const o=new THREE.Mesh(geo,mat);o.position.set(x,y,z);o.rotation.set(rx,ry,rz);g.add(o);
+    const e=new THREE.LineSegments(new THREE.EdgesGeometry(geo,35),new THREE.LineBasicMaterial({color:'#55606d',transparent:true,opacity:.6}));
+    e.position.copy(o.position);e.rotation.copy(o.rotation);g.add(e);return o;};
+  const body=M('#c9ced5',.55,.25),cover=M('#8e959e',.6,.2),metal=M('#b9c1ca',.35,.6),dark=M('#3b4149',.5,.4),red=M('#c0392b',.5,.2),green=M('#3fbf4f',.5,.1);
+  // щёки вилки: профиль сбоку 465×590, низ сильно скруглён, верх со снятыми углами
+  const cheek=()=>{const sh=new THREE.Shape(),D=465/2,H0=104,H1=694,R=190,C=45;
+    sh.moveTo(-D,H0+R);sh.lineTo(-D,H1-C);sh.lineTo(-D+C,H1);sh.lineTo(D-C,H1);sh.lineTo(D,H1-C);sh.lineTo(D,H0+R);
+    sh.quadraticCurveTo(D,H0,D-R,H0);sh.lineTo(-D+R,H0);sh.quadraticCurveTo(-D,H0,-D,H0+R);
+    const geo=new THREE.ExtrudeGeometry(sh,{depth:188,bevelEnabled:true,bevelThickness:10,bevelSize:10,bevelSegments:2,curveSegments:10});
+    geo.translate(0,0,-94);geo.rotateY(Math.PI/2);return geo;};
+  add(cheek(),cover,-224,0,0);           // левая щека
+  add(cheek(),cover, 224,0,0);           // правая щека
+  add(new THREE.BoxGeometry(260,150,465),body,0,619,0);                       // перемычка сверху
+  // корпус оси A: цилиндр R190, срезанный с двух сторон хордами (по 20 % диаметра) параллельно Z —
+  // вытянутый прямоугольник со скруглённым верхом; ось A проходит по центру скругления
+  {const R=190,cz=300,hw=R*0.6,ya=Math.sqrt(R*R-hw*hw),yb=110,sh=new THREE.Shape();
+   sh.moveTo(-hw,yb);sh.lineTo(hw,yb);sh.lineTo(hw,cz+ya);sh.absarc(0,cz,R,Math.atan2(ya,hw),Math.atan2(ya,-hw),false);sh.lineTo(-hw,yb);
+   const g=new THREE.ExtrudeGeometry(sh,{depth:250,bevelEnabled:false,curveSegments:24});g.translate(0,0,-125);g.rotateY(Math.PI/2);
+   add(g,body,0,0,0);}
+  add(new THREE.CylinderGeometry(105,105,170,28),body,0,190,0);               // корпус шпинделя
+  add(new THREE.CylinderGeometry(90,90,30,28),dark,0,90,0);                   // торец шпинделя
+  add(new THREE.CylinderGeometry(78,70,75,28),dark,0,37,0);                   // нос шпинделя (HSK)
+  // оправка с инструментом
+  add(new THREE.CylinderGeometry(32,32,90,20),M('#d4a25e',.4,.5),0,-45,0);
+  // зелёный кабельный канал по внутренней кромке левой щеки спереди
+  // ось C: фланец, кольца, корпус, верхний фланец, мотор
+  add(new THREE.CylinderGeometry(236,236,100,40),body,0,744,0);
+  add(new THREE.TorusGeometry(232,7,8,48),red,0,796,0,Math.PI/2);
+  add(new THREE.CylinderGeometry(178,178,312,40),metal,0,950,0);
+  add(new THREE.CylinderGeometry(200,200,36,40),metal,0,1124,0);
+  add(new THREE.TorusGeometry(196,6,8,48),red,0,1143,0,Math.PI/2);
+  add(new THREE.CylinderGeometry(97,97,225,28),metal,0,1257,0);
+  add(new THREE.BoxGeometry(70,40,90),dark,0,1389,0);                          // разъём мотора
+  return g;}
+const head=headGroup();
+head.scale.set(SU*0.85,SU,SU);head.rotation.y=0; // C0: ось A параллельна X (щёки спереди и сзади), голова уже на 15 % по оси A
+// низ головы — на 776 мм ниже торца ползуна (как в модели); верх головы (мотор) уходит внутрь ползуна
+head.position.set(RX,ramBot-776*SU,RZ);
+scene.add(head);
+// оси вращения пунктиром: A — сквозь щёки (параллельна X при C0), C — вертикально по оси шпинделя
+const AX={A:'#b8955a',C:'#5f93b0',S:'#9a7fc4'}; // приглушённые цвета осей: A — охра, C — голубой, шпиндель — сиреневый
+{const mk=(pts,col)=>{const g=new THREE.BufferGeometry().setFromPoints(pts.map(p=>new THREE.Vector3(...p)));
+   const l=new THREE.Line(g,new THREE.LineDashedMaterial({color:col,dashSize:40,gapSize:28,depthTest:false,transparent:true,opacity:.55}));
+   l.computeLineDistances();l.renderOrder=3;head.add(l);return l;};
+ mk([[-520,300,0],[520,300,0]],AX.A);              // ось A
+ mk([[0,300,0],[0,1900,0]],AX.C);                  // ось C — от оси A вверх
+ mk([[0,-420,0],[0,300,0]],AX.S);}                 // ось шпинделя — от оси A вниз через инструмент (при A0 совпадает с C)
+  head.updateMatrixWorld(true);
+  const zG=new THREE.Group();zG.position.set(RX,GYk(5075),RZ);scene.add(zG);
+  scene.children.slice(nZ).filter(o=>o!==zG).forEach(o=>zG.attach(o));
+  const M=(c,o=1)=>new THREE.MeshStandardMaterial({color:c,roughness:.55,metalness:.25,transparent:o<1,opacity:o});
+  const mesh=(g,m,par,x,y,z)=>{const o=new THREE.Mesh(g,m);o.position.set(x,y,z);par.add(o);
+    const e=new THREE.LineSegments(new THREE.EdgesGeometry(g,25),new THREE.LineBasicMaterial({color:0x2a3340,transparent:true,opacity:.6}));o.add(e);return o;};
+  const SPR=[];
+  function spr(w=320,h=110,sc=0.27){const c=document.createElement('canvas');c.width=w;c.height=h;const t=new THREE.CanvasTexture(c);
+    const s=new THREE.Sprite(new THREE.SpriteMaterial({map:t,depthTest:false,transparent:true}));s.renderOrder=9;s.scale.set(w/h*sc,sc,1);s.base=s.scale.clone();scene.add(s);SPR.push(s);
+    s.draw=lines=>{const g=c.getContext('2d');g.clearRect(0,0,w,h);g.textAlign='center';
+      lines.forEach(([txt,col,sz,y])=>{g.fillStyle=col;g.font=`600 ${sz}px "IBM Plex Sans",sans-serif`;g.fillText(txt,w/2,y);});t.needsUpdate=true;};return s;}
+  const dash=(a,b,col,par)=>{const l=new THREE.Line(new THREE.BufferGeometry().setFromPoints([a,b]),new THREE.LineDashedMaterial({color:col,dashSize:.035,gapSize:.025,depthTest:false,transparent:true,opacity:.9}));
+    l.computeLineDistances();l.renderOrder=6;par.add(l);return l;};
+  // полупрозрачность, как в модели станка; keep — объекты, которые не трогать
+  const transp=keep=>scene.traverse(o=>{if(!o.isMesh||!o.material||!o.material.isMeshStandardMaterial||keep.has(o))return;
+    let inHead=false;for(let p=o.parent;p;p=p.parent)if(p===head)inHead=true;
+    const slab=o.material.color.getHexString()==='4a5059';
+    o.material.transparent=true;o.material.opacity=slab?.92:inHead?.9:.7;o.material.depthWrite=slab;});
+  let fovBase=22;
+  function resize(){const w=host.clientWidth,h=host.clientHeight;if(!w||!h)return;renderer.setSize(w,h,false);
+    renderer.domElement.style.width=w+'px';renderer.domElement.style.height=h+'px';camera.aspect=w/h;camera.fov=w/h<1?fovBase*1.6:fovBase;camera.updateProjectionMatrix();}
+  new ResizeObserver(resize).observe(host);resize();
+  (function loop(){controls.update();renderer.render(scene,camera);requestAnimationFrame(loop);})();
+  return {scene,camera,controls,zG,head,RX,RZ,SU,FLOOR,ramBot,GYk,RH,LEN,ZS,M,mesh,spr,dash,SPR,transp};
+}
+const collect=(root)=>{const set=new Set();root.traverse(o=>{if(o.isMesh)set.add(o)});return set;};
+
+// ===== ИЗОМЕТРИЯ: ПЕРПЕНДИКУЛЯРНОСТЬ Z (уголок на линейке) =====
+const ISO={mode:'X',last:null,update(){},cam:null,zoom:false};
+(function(){
+  if(!window.THREE){$('isoFail').hidden=false;return;}
+  const W=buildModel($('iso'),null),{scene,camera,controls,zG,head,RX,RZ,SU,FLOOR,GYk,RH,LEN,ZS,M,mesh,spr,dash,SPR}=W;
+  const pivot=zG.position.clone();
+  dash(new THREE.Vector3(RX,pivot.y+0.25,RZ),new THREE.Vector3(RX,FLOOR+0.02,RZ),0xe8eef5,scene);
+  dash(new THREE.Vector3(0,0.25,0),new THREE.Vector3(0,FLOOR+0.02-pivot.y,0),0xe0a85a,zG);
+  const tip=head.localToWorld(new THREE.Vector3(0,-90,0));
+  // мм: высота опор, высота линейки, грань уголка от оси C (зазор до головы), основание уголка, срез вершины
+  const SUP=60,RUL=60,FACE=420,BASE=540,CUT=45;
+  const yRul=FLOOR+(SUP+RUL)*SU, yC=tip.y+30*SU;    // нижняя точка касания — чуть выше торца шпинделя
+  const keep=new Set();
+  function setup(alongX){const g=new THREE.Group();scene.add(g);
+    const dir=alongX?new THREE.Vector3(-1,0,0):new THREE.Vector3(0,0,1);   // от оси C к грани уголка
+    const len=2000*SU,w=50*SU,h=RUL*SU,c=new THREE.Vector3(RX,0,RZ).add(dir.clone().multiplyScalar((FACE+BASE/2)*SU));
+    mesh(alongX?new THREE.BoxGeometry(len,h,w):new THREE.BoxGeometry(w,h,len),M(0x9aa6b4),g,c.x,FLOOR+SUP*SU+h/2,c.z);
+    [-1,1].forEach(sd=>{const d=sd*553*SU;mesh(new THREE.BoxGeometry(70*SU,SUP*SU,70*SU),M(0x39414b),g,c.x+(alongX?d:0),FLOOR+SUP*SU/2,c.z+(alongX?0:d));});
+    const sq=new THREE.Mesh(new THREE.BufferGeometry(),M(0xd4a25e,.95));
+    sq.position.set(RX+dir.x*FACE*SU,yRul,RZ+dir.z*FACE*SU);if(!alongX)sq.rotation.y=Math.PI/2;g.add(sq);g.sq=sq;
+    // индикатор на оси C: магнитная стойка на корпусе головы, штанга вниз, рычаг, индикатор, ножка в грань уголка
+    const mkInd=(par,base,op)=>{const ig=new THREE.Group();ig.position.copy(base);par.add(ig);const m=M(0x3f7fb0,op),mt=M(0x6b7684,op);
+      const P=(r,y)=>dir.clone().multiplyScalar(r*SU).add(new THREE.Vector3(0,y*SU,0));
+      const bar=(a,b,rad,mat)=>{const v=b.clone().sub(a),o=new THREE.Mesh(new THREE.CylinderGeometry(rad*SU,rad*SU,v.length(),10),mat);
+        o.quaternion.setFromUnitVectors(new THREE.Vector3(0,1,0),v.clone().normalize());o.position.copy(a.clone().add(b).multiplyScalar(.5));ig.add(o);return o;};
+      const RB=alongX?300:262;                                                                              // радиус борта головы в этом направлении
+      const mb=new THREE.Mesh(new THREE.BoxGeometry(60*SU,50*SU,60*SU),mt);mb.position.copy(P(RB,330));ig.add(mb);   // магнитная база на голове
+      bar(P(RB,305),P(RB,60),8,mt);bar(P(RB,60),P(FACE-95,60),7,mt);bar(P(FACE-95,60),P(FACE-95,0),6,mt); // штанга, рычаг
+      const dial=new THREE.Mesh(new THREE.CylinderGeometry(30*SU,30*SU,16*SU,24),m);dial.position.copy(P(FACE-70,0));
+      dial.rotation.set(alongX?0:Math.PI/2,0,alongX?Math.PI/2:0);ig.add(dial);                                 // корпус индикатора
+      bar(P(FACE-55,0),P(FACE,0),3,m);                                                                       // ножка касается грани
+      ig.traverse(o=>{if(o.isMesh)keep.add(o)});return ig;};
+    g.ind=mkInd(zG,new THREE.Vector3(0,yC-pivot.y,0),1);g.ghost=mkInd(scene,new THREE.Vector3(RX,yC,RZ),.3);
+    return g;}
+  const SX=setup(true),SYg=setup(false);
+  function squareGeo(H){const sh=new THREE.Shape();sh.moveTo(0,0);sh.lineTo(-BASE*SU,0);sh.lineTo(-CUT*SU,H*SU);sh.lineTo(0,H*SU);sh.lineTo(0,0);
+    const g=new THREE.ExtrudeGeometry(sh,{depth:40*SU,bevelEnabled:false});g.translate(0,0,-20*SU);return g;}
+  const PL={ПЛ:[-1,-1],ПП:[-1,1],ЗЛ:[1,-1],ЗП:[1,1]},plates={},plLab={};
+  const dxP=1100/2*LEN/7200,dzP=410*(ZS[1]-ZS[0])/5102,yP=GYk(5075)+RH+0.012;
+  Object.entries(PL).forEach(([k,[sx,sz]])=>{const m=mesh(new THREE.BoxGeometry(0.12,0.03,0.09),M(0x9aa4b0),scene,RX+sx*dxP,yP,RZ+sz*dzP);
+    m.renderOrder=7;m.material.depthTest=false;plates[k]=m;keep.add(m);const l=spr(240,110,0.22);l.position.set(RX+sx*dxP*1.25,yP+0.26,RZ+sz*dzP*1.6);plLab[k]=l;});
+  [SX,SYg].forEach(g=>g.traverse(o=>{if(o.isMesh)keep.add(o)}));
+  W.transp(keep);
+  const lTop=spr(),lBot=spr(),lFront=spr();lFront.position.set(-LEN/2-0.4,FLOOR+0.05,0);
+  const T=new THREE.Vector3(RX,0.3,RZ);
+  ISO.cam=m=>{const z=ISO.zoom,t=z?new THREE.Vector3(RX,FLOOR+0.5,RZ):T,o=m==='X'?new THREE.Vector3(-2.6,3.4,10.5):new THREE.Vector3(-10.5,3.4,2.6);
+    camera.position.copy(t).add(o.multiplyScalar(z?0.3:1));controls.target.copy(t);controls.update();
+    SPR.forEach(sp=>sp.scale.copy(sp.base).multiplyScalar(z?0.32:1));};
+  ISO.cam('X');
+  ISO.update=function(){if(!ISO.last)return;const {cut,ax,ay,dX,dY}=ISO.last,X=ISO.mode==='X';
+    const fg='#dde6f2',mu='#93a2b3',gr='#e0a85a';
+    const mx=Math.max(...Object.values(cut),1e-9),base=new THREE.Color(0x9aa4b0),hot=new THREE.Color(gr);
+    Object.keys(PL).forEach(k=>{const t=cut[k]>5e-7?0.35+0.65*cut[k]/mx:0;plates[k].material.color.copy(base).lerp(hot,t);
+      plLab[k].draw([[k,fg,40,42],[cut[k]>5e-7?'−'+Math.round(cut[k]*1000)+' мкм':'0',cut[k]>5e-7?gr:mu,36,88]]);});
+    lFront.draw([['ПЕРЕД (X−)',fg,40,60]]);
+    const K=1.2*Math.PI/180;zG.rotation.set(X?0:Math.sign(ay)*K,0,X?-Math.sign(ax)*K:0);
+    SX.visible=X;SYg.visible=!X;SX.ind.visible=X;SYg.ind.visible=!X;SX.ghost.visible=X;SYg.ghost.visible=!X;
+    const L=Math.min(1200,Math.max(100,v(X?'bLx':'bLy')||500)),S=X?SX:SYg;
+    S.sq.geometry.dispose();S.sq.geometry=squareGeo(Math.max(400,L+(yC-yRul)/SU+80));
+    S.ghost.position.set(RX,yC+L*SU,RZ);
+    const d=X?dX:dY,dir=X?new THREE.Vector3(-1,0,0):new THREE.Vector3(0,0,1),off=dir.clone().multiplyScalar(-(ISO.zoom?0.12:0.35));
+    lTop.position.set(RX,yC+L*SU+0.08,RZ).add(off);lBot.position.set(RX,yC-0.08,RZ).add(off);
+    lTop.draw([['верх: '+(d>=0?'+':'')+f(d,3),gr,40,44],['через '+L+' мм по Z',mu,30,90]]);
+    lBot.draw([['низ: 0 (ноль)',fg,40,60]]);};
+})();
+function isoMode(m){ISO.mode=m;ISO.cam&&ISO.cam(m);$('isoX').setAttribute('aria-pressed',m==='X');$('isoY').setAttribute('aria-pressed',m==='Y');ISO.update();}
+
+// ===== ИЗОМЕТРИЯ: ПЛОСКОСТЬ ОСИ C (п. 12) =====
+// A = +90, оправка горизонтально; стойка с индикатором на плите смотрит вверх в нижнюю образующую оправки
+const ISOC={pos:'C0',last:null,update(){},zoom:true};
+(function(){
+  if(!window.THREE){$('isoCFail').hidden=false;return;}
+  const W=buildModel($('isoC'),600),{scene,camera,controls,zG,head,RX,RZ,SU,FLOOR,ramBot,LEN,M,mesh,spr,dash,SPR}=W;
+  const keep=new Set();
+  // поворотная часть оси A: корпус A, шпиндель, нос, инструмент, ось шпинделя
+  const aG=new THREE.Group();aG.position.set(0,300,0);head.add(aG);head.updateMatrixWorld(true);
+  head.children.filter(o=>o!==aG&&((o.isMesh&&Math.abs(o.position.x)<1&&o.position.y<=300)||(o.isLine&&!o.isLineSegments&&o.material.color.getHexString()==='9a7fc4'))).forEach(o=>aG.attach(o));
+  // контрольная оправка Ø40 и точка нижней образующей на её конце
+  const mand=new THREE.Mesh(new THREE.CylinderGeometry(20,20,360,24),M(0xd9dee4));mand.position.set(0,-300-180,0);aG.add(mand);keep.add(mand);
+  const mk=new THREE.Object3D();mk.position.set(0,-300-340,20);aG.add(mk);        // +z головы до поворота A → низ после A+90
+  const mA=new THREE.Object3D(),mB=new THREE.Object3D();mA.position.set(0,-300,0);mB.position.set(0,-660,0);aG.add(mA);aG.add(mB); // начало и конец оправки
+  aG.rotation.x=Math.PI/2;                                                        // A+90: при C0 оправка смотрит влево (Y+)
+  // группа наклона оси C: поворот вокруг фланца
+  const cG=new THREE.Group();cG.position.set(RX,ramBot,RZ);zG.parent.add(cG);cG.attach(head);
+  // идеальная вертикаль и фактическая ось C
+  dash(new THREE.Vector3(RX,ramBot+0.3,RZ),new THREE.Vector3(RX,FLOOR+0.02,RZ),0xe8eef5,scene);
+  dash(new THREE.Vector3(0,0.3,0),new THREE.Vector3(0,FLOOR+0.02-ramBot,0),0x5f93b0,cG);
+  // сектора между ползуном и фланцем C: центр каждого на своей оси, стыки на диагоналях
+  const secs={},secLab={},R1=213.75*SU,R2=238.75*SU,ySec=ramBot-6*SU;
+  [['Зад',0],['Лев',90],['Пер',180],['Прав',270]].forEach(([k,c])=>{const g=4*Math.PI/180,a0=(c-45)*Math.PI/180+g,a1=(c+45)*Math.PI/180-g;
+    const sh=new THREE.Shape();sh.absarc(0,0,R2,a0,a1,false);sh.absarc(0,0,R1,a1,a0,true);
+    const geo=new THREE.ExtrudeGeometry(sh,{depth:14*SU,bevelEnabled:false,curveSegments:24});geo.rotateX(-Math.PI/2);
+    const m=new THREE.Mesh(geo,new THREE.MeshStandardMaterial({color:0x9aa4b0,roughness:.5,metalness:.3,depthTest:false,transparent:true,opacity:.95}));
+    m.position.set(RX,ySec,RZ);m.renderOrder=7;scene.add(m);keep.add(m);secs[k]=m;
+    const l=spr(240,110,0.12);const cc=c*Math.PI/180;l.position.set(RX+Math.cos(cc)*0.42,ySec+0.07,RZ-Math.sin(cc)*0.42);secLab[k]=l;});
+  // стойка с индикатором на плите
+  const st=new THREE.Group();scene.add(st);const mt=M(0x6b7684),mb=M(0x3f7fb0);
+  mesh(new THREE.BoxGeometry(80*SU,60*SU,60*SU),mt,st,0,FLOOR+30*SU,0);                        // магнитная база
+  const rod=new THREE.Mesh(new THREE.CylinderGeometry(8*SU,8*SU,1,10),mt);st.add(rod);
+  const dial=new THREE.Mesh(new THREE.CylinderGeometry(30*SU,30*SU,16*SU,24),mb);dial.rotation.x=Math.PI/2;st.add(dial);
+  const stem=new THREE.Mesh(new THREE.CylinderGeometry(3*SU,3*SU,45*SU,8),mb);st.add(stem);
+  st.traverse(o=>{if(o.isMesh)keep.add(o)});
+  W.transp(keep);
+  const lab={},POS={C0:0,'C+180':180,'C+90':90,'C−90':-90},KEY={C0:'sC0','C+180':'sC180','C+90':'sC90','C−90':'sCm90'},DIRN={C0:'влево Y+','C+180':'вправо Y−','C+90':'вперёд X−','C−90':'назад X+'};
+  Object.keys(POS).forEach(k=>lab[k]=spr(300,110,0.12));
+  const lFront=spr(300,90,0.2);lFront.position.set(RX-0.95,FLOOR+0.05,RZ);
+  // бледные оправки в остальных положениях C
+  const ghosts={};['C0','C+180','C+90','C−90'].forEach(k=>{const g=new THREE.Group();scene.add(g);
+    const c=new THREE.Mesh(new THREE.CylinderGeometry(20*SU,20*SU,1,20),new THREE.MeshStandardMaterial({color:0xd9dee4,transparent:true,opacity:.22,depthWrite:false}));g.add(c);keep.add(c);
+    const l=new THREE.Line(new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(0,-0.5,0),new THREE.Vector3(0,0.5,0)]),new THREE.LineDashedMaterial({color:0xd9dee4,dashSize:.02,gapSize:.015,transparent:true,opacity:.8,depthTest:false}));
+    l.computeLineDistances();l.renderOrder=6;g.add(l);g.c=c;g.l=l;ghosts[k]=g;});
+  const placeGhost=(g,a,b)=>{const v=b.clone().sub(a),L=v.length();g.position.copy(a.clone().add(b).multiplyScalar(.5));
+    g.quaternion.setFromUnitVectors(new THREE.Vector3(0,1,0),v.normalize());g.c.scale.set(1,L,1);g.l.scale.set(1,L*1.15,1);g.l.computeLineDistances();};
+  const trace=new THREE.Line(new THREE.BufferGeometry(),new THREE.LineBasicMaterial({color:0x7fb0d6,depthTest:false,transparent:true}));trace.renderOrder=6;scene.add(trace);
+  const ref=new THREE.Line(new THREE.BufferGeometry(),new THREE.LineDashedMaterial({color:0xe8eef5,dashSize:.03,gapSize:.02,depthTest:false,transparent:true,opacity:.55}));ref.renderOrder=6;scene.add(ref);
+  const loDot=new THREE.Mesh(new THREE.SphereGeometry(14*SU,16,12),new THREE.MeshBasicMaterial({color:0xe0a85a,depthTest:false}));loDot.renderOrder=7;scene.add(loDot);keep.add(loDot);
+  const loLab=spr(300,110,0.11);
+  const contactAt=deg=>{head.rotation.y=deg*Math.PI/180;cG.updateMatrixWorld(true);return mk.getWorldPosition(new THREE.Vector3());};
+  const T0=new THREE.Vector3(RX,(ramBot+FLOOR)/2,RZ);
+  ISOC.cam=()=>{camera.position.copy(T0).add(new THREE.Vector3(-4.0,2.0,0.9).multiplyScalar(ISOC.zoom?1:2.4));controls.target.copy(T0);controls.update();
+    SPR.forEach(sp=>sp.scale.copy(sp.base).multiplyScalar(ISOC.zoom?1:2));};
+  ISOC.cam();
+  ISOC.update=function(){if(!ISOC.last)return;const {cut,aY,aX}=ISOC.last,fg='#dde6f2',mu='#93a2b3',gr='#e0a85a';
+    // наклон оси C (утрированно): aY>0 (слева ниже) → поворот вокруг x на −K; aX>0 (спереди ниже) → вокруг z на +K
+    const K=3*Math.PI/180,mA_=Math.max(Math.abs(aX),Math.abs(aY));     // направление наклона — по соотношению XZ и YZ
+    cG.rotation.set(mA_>1e-9?-aY/mA_*K:0,0,mA_>1e-9?aX/mA_*K:0);
+    const mx=Math.max(...Object.values(cut),1e-9),base=new THREE.Color(0x9aa4b0),hot=new THREE.Color(gr),NM={Зад:'Задний',Лев:'Левый',Пер:'Передний',Прав:'Правый'};
+    Object.keys(secs).forEach(k=>{const t=cut[k]>5e-7?0.35+0.65*cut[k]/mx:0;secs[k].material.color.copy(base).lerp(hot,t);
+      secLab[k].draw([[NM[k],fg,38,42],[cut[k]>5e-7?'−'+Math.round(cut[k]*1000)+' мкм':'0',cut[k]>5e-7?gr:mu,36,88]]);});
+    lFront.draw([['ПЕРЕД (X−)',fg,40,56]]);
+    Object.keys(POS).forEach(k=>{contactAt(POS[k]);placeGhost(ghosts[k],mA.getWorldPosition(new THREE.Vector3()),mB.getWorldPosition(new THREE.Vector3()));ghosts[k].visible=k!==ISOC.pos;});
+    Object.keys(POS).forEach(k=>{const p=contactAt(POS[k]),on=k===ISOC.pos,val=$(KEY[k]).value;
+      lab[k].position.copy(p).add(new THREE.Vector3(0,-0.1,0));lab[k].material.opacity=on?1:.55;
+      lab[k].draw([[k+' · '+DIRN[k],on?gr:mu,32,40],[(val===''?'—':val.replace('.',','))+' мм',on?fg:mu,36,88]]);});
+    // круг, который описывает конец оправки при повороте C, и горизонтальный круг для сравнения
+    const pts=[];for(let d=0;d<=360;d+=5)pts.push(contactAt(d));
+    const cen=pts.slice(0,-1).reduce((a,b)=>a.add(b),new THREE.Vector3()).multiplyScalar(1/(pts.length-1));
+    const rad=pts.slice(0,-1).reduce((a,b)=>a+Math.hypot(b.x-cen.x,b.z-cen.z),0)/(pts.length-1);
+    trace.geometry.setFromPoints(pts);ref.geometry.setFromPoints(Array.from({length:73},(_,i)=>{const t=i*5*Math.PI/180;return new THREE.Vector3(cen.x+rad*Math.cos(t),cen.y,cen.z+rad*Math.sin(t));}));
+    ref.computeLineDistances();
+    const lo=pts.reduce((a,b)=>b.y<a.y?b:a),hi=pts.reduce((a,b)=>b.y>a.y?b:a),flat=hi.y-lo.y<1e-6;
+    loDot.visible=!flat;loDot.position.copy(lo);loLab.visible=!flat;loLab.position.copy(lo).add(new THREE.Vector3(0,-0.09,0));
+    loLab.draw([['ниже всего',gr,34,48],['сюда заваливается',mu,28,88]]);
+    const p=contactAt(POS[ISOC.pos]);                                  // голова остаётся в выбранном положении C
+    const top=p.y-3*SU,dy=top-45*SU,rodTop=dy-30*SU;
+    st.position.set(p.x,0,p.z);stem.position.set(0,top-22.5*SU,0);dial.position.set(0,dy-30*SU,0);
+    rod.scale.y=Math.max(0.01,rodTop-60*SU-FLOOR);rod.position.set(0,(rodTop+FLOOR+60*SU)/2-30*SU,0);};
+  ['C0','C+180','C+90','C−90'].forEach((k,i)=>{$('cPos'+i).onclick=()=>{ISOC.pos=k;['C0','C+180','C+90','C−90'].forEach((q,j)=>$('cPos'+j).setAttribute('aria-pressed',q===k));ISOC.update();};});
+  $('cZoom').onclick=()=>{ISOC.zoom=!ISOC.zoom;$('cZoom').setAttribute('aria-pressed',!ISOC.zoom);ISOC.cam();};
+})();
+$('isoX').onclick=()=>isoMode('X');$('isoZ').onclick=()=>{ISO.zoom=!ISO.zoom;$('isoZ').setAttribute('aria-pressed',ISO.zoom);ISO.cam&&ISO.cam(ISO.mode);ISO.update();};$('isoY').onclick=()=>isoMode('Y');
+
+function calc(){calcSec();calcBas();calcTilt();save();}
+copyText($('sCopy'),$('sCopied'),()=>secText);copyText($('bCopy'),$('bCopied'),()=>basText);
+calc();
+</script>
+
+</body>
+</html>
