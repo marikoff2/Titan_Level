@@ -49,7 +49,7 @@ h3{font-size:12px;font-weight:600;margin:0;color:var(--muted);text-transform:upp
 .fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px 12px}
 .fields.three{grid-template-columns:repeat(3,minmax(0,1fr))}
 @media (max-width:460px){.fields,.fields.three{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}}
-label{display:flex;flex-direction:column;gap:4px;font-size:13px;color:var(--muted);min-width:0}
+label{display:flex;flex-direction:column;justify-content:space-between;gap:4px;font-size:13px;color:var(--muted);min-width:0}
 input,select{font:500 15px var(--f-mono);color:var(--fg);background:var(--bg);border:1px solid var(--line);border-radius:5px;padding:7px 9px;width:100%;font-variant-numeric:tabular-nums}
 select{font-family:var(--f-ui)}
 .note{font-size:12.5px;color:var(--muted);margin:0}
@@ -90,9 +90,8 @@ svg text{font-family:var(--f-ui)}
     <p>s/n 20250035 · расчёт подкладок по замерам · все величины в мм</p>
   </header>
   <div class="tabs" role="tablist">
-    <button role="tab" id="t-sec" aria-selected="true">Сектора оси C · п. 12</button>
+    <button role="tab" id="t-sec" aria-selected="true">Ось C</button>
     <button role="tab" id="t-bas" aria-selected="false">Пластины корзины · XZ / YZ</button>
-    <button role="tab" id="t-tilt" aria-selected="false">Пересчёт наклона и угла</button>
   </div>
 
   <!-- ===== СЕКТОРА C ===== -->
@@ -193,28 +192,6 @@ svg text{font-family:var(--f-ui)}
     </div>
   </section>
 
-  <!-- ===== ПЕРЕСЧЁТ ===== -->
-  <section id="p-tilt" class="grid" hidden>
-    <div class="card">
-      <h2>Наклон на другую длину</h2>
-      <div class="fields">
-        <label>Отклонение, мм<input id="tE" type="number" step="0.001"></label>
-        <label>на длине, мм<input id="tL" type="number" step="1"></label>
-      </div>
-      <table id="tTab"></table>
-      <p class="note">Например, XY: допуск 0,02/700, а меряете на 500 — допустимо 0,014.</p>
-    </div>
-    <div class="card">
-      <h2>Угол по разнице на плече</h2>
-      <p class="note">Для нуля A (п. 11) и C (п. 13): разница показаний и расстояние между точками замера.</p>
-      <div class="fields">
-        <label>Разница показаний, мм<input id="aD" type="number" step="0.001"></label>
-        <label>Расстояние между точками, мм<input id="aL" type="number" step="1"></label>
-      </div>
-      <div class="big" id="aBig"></div>
-      <p class="note">Если точки симметричны относительно оси вращения (как ±90), сдвиг нуля — это угол из этой разницы; направление сдвига проверяется пробным поворотом <span class="tag">ВЕРОЯТНО</span>.</p>
-    </div>
-  </section>
 </div>
 
 <script src="three.min.js"></script>
@@ -222,7 +199,7 @@ svg text{font-family:var(--f-ui)}
 <script>
 const $=id=>document.getElementById(id);
 const DEF={sC0:0,sC180:0.010,sC90:0.004,sCm90:0,sL:300,sD:452.5,sW:25,sAng:90,sTol:0.02,sTolL:500,
-  bXb:0,bXt:0.012,bLx:500,bYb:0,bYt:-0.006,bLy:500,bBx:1100,bBy:820,bTol:0.02,bTolL:500,tE:0.02,tL:700,aD:0.010,aL:600};
+  bXb:0,bXt:0.012,bLx:500,bYb:0,bYt:-0.006,bLy:500,bBx:1100,bBy:820,bTol:0.02,bTolL:500};
 let saved={};try{saved=JSON.parse(localStorage.getItem('titanGeom')||'{}')}catch(e){}
 Object.keys(DEF).forEach(k=>{$(k).value=(saved[k]!==undefined?saved[k]:DEF[k]);$(k).addEventListener('input',calc);});
 const v=k=>parseFloat(String($(k).value).replace(',','.'));
@@ -231,7 +208,7 @@ const um=x=>isFinite(x)?Math.round(x*1000)+' мкм':'—';
 function save(){const o={};Object.keys(DEF).forEach(k=>o[k]=$(k).value);try{localStorage.setItem('titanGeom',JSON.stringify(o))}catch(e){}}
 
 // вкладки
-const TABS=[['t-sec','p-sec'],['t-bas','p-bas'],['t-tilt','p-tilt']];
+const TABS=[['t-sec','p-sec'],['t-bas','p-bas']];
 function showTab(t){TABS.forEach(([b,p])=>{$(b).setAttribute('aria-selected',b===t);$(p).hidden=b!==t;});try{localStorage.setItem('titanGeomTab',t)}catch(e){}}
 TABS.forEach(([b])=>$(b).onclick=()=>showTab(b));
 try{const t=localStorage.getItem('titanGeomTab');if(t&&$(t))showTab(t)}catch(e){}
@@ -348,16 +325,6 @@ function drawBas(cut){
       <text x="${x}" y="${y+4}" text-anchor="middle" font-size="11" font-weight="600" fill="var(--fg)">${k}</text>
       <text x="${x<180?x-24:x+24}" y="${y+4}" text-anchor="${x<180?'end':'start'}" font-size="12" font-weight="600" fill="${hot?'var(--grind)':'var(--muted)'}">${hot?'−'+Math.round(cut[k]*1000):'0'}</text>`;});
   $('bSvg').innerHTML=s;}
-
-// ===== ПЕРЕСЧЁТ =====
-function calcTilt(){
-  const a=v('tE')/v('tL');
-  $('tTab').innerHTML='<tr><th>Длина</th><th style="text-align:right">Отклонение, мм</th></tr>'+
-    [300,500,600,700,1000].map(l=>`<tr><td>${l} мм</td><td class="num">${f(a*l)}</td></tr>`).join('')+
-    `<tr><td>мкм/м</td><td class="num">${f(a*1e6,1)}</td></tr><tr><td>угловые секунды</td><td class="num">${f(Math.atan(a)*180/Math.PI*3600,2)}</td></tr>`;
-  const ang=Math.atan(v('aD')/v('aL'))*180/Math.PI;
-  $('aBig').innerHTML=`<div><span>Угол</span><b>${f(ang,5)}°</b><span>для сдвига нуля</span></div><div><span>То же</span><b>${f(ang*3600,1)}″</b><span>угловых секунд</span></div>`;}
-
 
 // ===== 3D-МОДЕЛЬ СТАНКА (общая для вкладок) =====
 // та же модель, что в «Станок TITAN4020»: x — вдоль станка (+ к заду = X+), y — вверх, z — поперёк (Y+ → z<0)
@@ -676,7 +643,7 @@ const ISOC={pos:'C0',last:null,update(){},zoom:true};
 })();
 $('isoX').onclick=()=>isoMode('X');$('isoZ').onclick=()=>{ISO.zoom=!ISO.zoom;$('isoZ').setAttribute('aria-pressed',ISO.zoom);ISO.cam&&ISO.cam(ISO.mode);ISO.update();};$('isoY').onclick=()=>isoMode('Y');
 
-function calc(){calcSec();calcBas();calcTilt();save();}
+function calc(){calcSec();calcBas();save();}
 copyText($('sCopy'),$('sCopied'),()=>secText);copyText($('bCopy'),$('bCopied'),()=>basText);
 calc();
 </script>
