@@ -22,16 +22,9 @@ function createWindow() {
     if (input.key === 'F5') { win.reload(); e.preventDefault(); }
   });
   // оформление «командный пульт» — только для Windows, поверх той же страницы, что в APK
-  let skin = '';
-  try { skin = fs.readFileSync(path.join(__dirname, 'titan-skin.css'), 'utf8'); } catch (e) { skin = ''; }
-  if (skin) win.webContents.on('dom-ready', () => { win.webContents.insertCSS(skin).catch(() => {}); });
-  // вкладка «Геометрия» — только в Windows-версии (APK не меняется)
-  let geom = '';
-  try { geom = fs.readFileSync(path.join(__dirname, 'titan-geom.js'), 'utf8'); } catch (e) { geom = ''; }
-  if (geom) win.webContents.on('dom-ready', () => {
-    if (win.webContents.getURL().endsWith('index.html')) win.webContents.executeJavaScript(geom).catch(() => {});
-  });
-  win.loadFile(path.join(__dirname, 'app', 'index.html'));
+  // 2.0: как в APK — заставка и меню разделов (home.html), серая гамма TIA (tia.css внутри страниц).
+  // Прежнее тёмное оформление (titan-skin.css) и встраиваемая вкладка «Геометрия» больше не подключаются.
+  win.loadFile(path.join(__dirname, 'app', 'home.html'));
 }
 
 app.whenReady().then(createWindow);

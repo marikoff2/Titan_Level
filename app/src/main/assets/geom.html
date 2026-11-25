@@ -231,8 +231,8 @@ function save(){const o={};Object.keys(DEF).forEach(k=>o[k]=$(k).value);try{loca
 const TABS=[['t-sec','p-sec'],['t-bas','p-bas']];
 function showTab(t){TABS.forEach(([b,p])=>{$(b).setAttribute('aria-selected',b===t);$(p).hidden=b!==t;});try{localStorage.setItem('titanGeomTab',t)}catch(e){}}
 TABS.forEach(([b])=>$(b).onclick=()=>showTab(b));
-// пасхалка: 6 нажатий подряд на «Ось C»
-{let n=0,tm=0;const moo=$('moo');
+// пасхалка: 6 нажатий подряд на «Ось C» (кроме Windows-версии)
+if(!/Electron/.test(navigator.userAgent)){let n=0,tm=0;const moo=$('moo');
  $('t-sec').addEventListener('click',()=>{clearTimeout(tm);n++;tm=setTimeout(()=>n=0,2500);if(n>=6){n=0;moo.hidden=false;}});
  $('t-bas').addEventListener('click',()=>{n=0;});
  moo.onclick=()=>{moo.hidden=true;};}
