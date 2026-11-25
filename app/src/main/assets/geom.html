@@ -33,6 +33,14 @@ body{margin:0}
   --accent-soft:#1d2f40; --ok:#6cc08f; --ok-soft:#183026; --bad:#e58b77; --bad-soft:#3a201b; --grind:#e0a85a; --grind-soft:#382a17; color-scheme:dark}
 *{box-sizing:border-box}
 [hidden]{display:none!important}
+#moo{position:fixed;inset:0;z-index:50;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;
+  background:rgba(20,24,28,.82);color:#fff;font:600 26px var(--f-ui);cursor:pointer;animation:mooIn .35s ease}
+#moo small{font:400 13px var(--f-ui);color:#c9d1d7}
+#moo #lips{transform-origin:200px 320px;animation:smack 1.1s ease-in-out infinite}
+@keyframes mooIn{from{opacity:0;transform:scale(.85)}to{opacity:1;transform:none}}
+@keyframes smack{0%,100%{transform:scale(1)}45%{transform:scale(1.08,1.14)}60%{transform:scale(.96,.92)}}
+@media (prefers-reduced-motion:reduce){#moo,#moo #lips{animation:none}}
+
 body{background:var(--bg);color:var(--fg);font-family:var(--f-ui);font-size:15px;line-height:1.45;
   padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:18px 40px}
 .wrap{max-width:1080px;margin:0 auto;display:flex;flex-direction:column;gap:16px}
@@ -86,6 +94,45 @@ svg text{font-family:var(--f-ui)}
 .warn{border-left:3px solid var(--grind);padding:6px 10px;background:var(--grind-soft);font-size:13px;border-radius:0 4px 4px 0}
 </style>
 
+<div id="moo" hidden role="dialog" aria-label="Пасхалка">
+  <svg viewBox="0 0 400 420" width="320" style="max-width:82vw;height:auto" aria-hidden="true">
+    <defs>
+      <radialGradient id="lipG" cx="45%" cy="35%" r="70%"><stop offset="0" stop-color="#ff9ccf"/><stop offset=".55" stop-color="#ff4fa3"/><stop offset="1" stop-color="#c2186f"/></radialGradient>
+      <radialGradient id="muz" cx="50%" cy="40%" r="65%"><stop offset="0" stop-color="#ffd6dc"/><stop offset="1" stop-color="#f1a8b4"/></radialGradient>
+    </defs>
+    <!-- рога и уши -->
+    <path d="M118 92 Q92 40 120 18 Q118 56 146 84Z" fill="#efe3c8" stroke="#3a3a3a" stroke-width="4"/>
+    <path d="M282 92 Q308 40 280 18 Q282 56 254 84Z" fill="#efe3c8" stroke="#3a3a3a" stroke-width="4"/>
+    <ellipse cx="70" cy="130" rx="52" ry="24" transform="rotate(-22 70 130)" fill="#fff" stroke="#3a3a3a" stroke-width="4"/>
+    <ellipse cx="72" cy="132" rx="30" ry="11" transform="rotate(-22 72 132)" fill="#f6b9c4"/>
+    <ellipse cx="330" cy="130" rx="52" ry="24" transform="rotate(22 330 130)" fill="#fff" stroke="#3a3a3a" stroke-width="4"/>
+    <ellipse cx="328" cy="132" rx="30" ry="11" transform="rotate(22 328 132)" fill="#f6b9c4"/>
+    <!-- голова с пятнами -->
+    <path d="M120 80 Q200 40 280 80 Q318 160 296 250 L104 250 Q82 160 120 80Z" fill="#fff" stroke="#3a3a3a" stroke-width="4"/>
+    <path d="M150 74 Q186 60 196 92 Q176 128 140 116 Q128 92 150 74Z" fill="#2b2b2b"/>
+    <path d="M262 120 Q292 128 292 168 Q270 186 248 162 Q240 134 262 120Z" fill="#2b2b2b"/>
+    <!-- чёлка -->
+    <path d="M176 66 Q190 46 200 70 Q210 44 226 68" fill="none" stroke="#3a3a3a" stroke-width="4" stroke-linecap="round"/>
+    <!-- глаза с ресницами -->
+    <ellipse cx="160" cy="160" rx="22" ry="26" fill="#fff" stroke="#3a3a3a" stroke-width="4"/><circle cx="165" cy="166" r="11" fill="#2b2b2b"/><circle cx="169" cy="161" r="4" fill="#fff"/>
+    <ellipse cx="240" cy="160" rx="22" ry="26" fill="#fff" stroke="#3a3a3a" stroke-width="4"/><circle cx="235" cy="166" r="11" fill="#2b2b2b"/><circle cx="239" cy="161" r="4" fill="#fff"/>
+    <path d="M140 140 l-10 -10 M150 134 l-6 -13 M162 132 l0 -14" stroke="#2b2b2b" stroke-width="4" stroke-linecap="round"/>
+    <path d="M260 140 l10 -10 M250 134 l6 -13 M238 132 l0 -14" stroke="#2b2b2b" stroke-width="4" stroke-linecap="round"/>
+    <!-- морда -->
+    <ellipse cx="200" cy="262" rx="112" ry="74" fill="url(#muz)" stroke="#3a3a3a" stroke-width="4"/>
+    <ellipse cx="160" cy="236" rx="13" ry="9" fill="#8a3b4a"/><ellipse cx="240" cy="236" rx="13" ry="9" fill="#8a3b4a"/>
+    <!-- огромные силиконовые губы -->
+    <g id="lips">
+      <path d="M86 300 Q120 252 168 270 Q200 254 232 270 Q280 252 314 300 Q262 318 200 316 Q138 318 86 300Z" fill="url(#lipG)" stroke="#8e0f52" stroke-width="5"/>
+      <path d="M86 300 Q138 318 200 316 Q262 318 314 300 Q300 380 200 384 Q100 380 86 300Z" fill="url(#lipG)" stroke="#8e0f52" stroke-width="5"/>
+      <path d="M92 301 Q200 326 308 301" fill="none" stroke="#8e0f52" stroke-width="5" stroke-linecap="round"/>
+      <ellipse cx="150" cy="282" rx="22" ry="7" fill="#fff" opacity=".7"/><ellipse cx="246" cy="282" rx="18" ry="6" fill="#fff" opacity=".6"/>
+      <ellipse cx="170" cy="348" rx="34" ry="10" fill="#fff" opacity=".55"/><ellipse cx="236" cy="352" rx="16" ry="6" fill="#fff" opacity=".45"/>
+    </g>
+  </svg>
+  <p>Муу-у-у! 💋</p>
+  <small>нажмите, чтобы закрыть</small>
+</div>
 <div class="wrap">
   <header>
     <h1>Геометрия TITAN4020</h1>
@@ -215,6 +262,12 @@ function save(){const o={};Object.keys(DEF).forEach(k=>o[k]=$(k).value);try{loca
 const TABS=[['t-sec','p-sec'],['t-bas','p-bas']];
 function showTab(t){TABS.forEach(([b,p])=>{$(b).setAttribute('aria-selected',b===t);$(p).hidden=b!==t;});try{localStorage.setItem('titanGeomTab',t)}catch(e){}}
 TABS.forEach(([b])=>$(b).onclick=()=>showTab(b));
+// пасхалка: 6 нажатий подряд на «Ось C»
+{let n=0,tm=0;const moo=$('moo');
+ $('t-sec').addEventListener('click',()=>{clearTimeout(tm);n++;tm=setTimeout(()=>n=0,2500);if(n>=6){n=0;moo.hidden=false;}});
+ $('t-bas').addEventListener('click',()=>{n=0;});
+ moo.onclick=()=>{moo.hidden=true;};}
+
 try{const t=localStorage.getItem('titanGeomTab');if(t&&$(t))showTab(t)}catch(e){}
 
 function chip(ok){return `<span class="chip ${ok?'ok':'bad'}">${ok?'в допуске':'вне допуска'}</span>`}

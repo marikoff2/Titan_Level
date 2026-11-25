@@ -19,7 +19,7 @@
 body{margin:0}
 img{max-width:100%}
 [hidden]{display:none!important}
-.modeonly{display:none}:root[data-mode] .modeonly{display:block}:root[data-mode] section.modeonly{display:flex}
+.modeonly,.modeonly-i{display:none}:root[data-mode] .modeonly{display:block}:root[data-mode] .modeonly-i{display:inline-block}:root[data-mode] section.modeonly{display:flex}
 /* Layout: инструментальный лист — шапка с шагом и шириной, продольный ввод, поперечный ввод, 3D; вкладка графиков */
 :root{
   --bg:#eef1f3; --panel:#ffffff; --fg:#1b2329; --muted:#5d6a73; --line:#d3dade;
@@ -220,6 +220,7 @@ button:disabled{opacity:.5;cursor:default}
           <button id="vIso" class="on">Изометрия</button>
           <button id="vFront">Спереди</button>
           <button id="vSide">Сбоку</button>
+          <button id="vChart" class="modeonly-i">График</button>
         </div>
       </div>
       <div class="toggles" role="group" aria-label="Что показывать">
@@ -229,6 +230,7 @@ button:disabled{opacity:.5;cursor:default}
         <label class="tg" for="tg-mut"><input type="checkbox" id="tg-mut" checked> Взаимный уровень станин</label>
       </div>
       <p class="note" id="cmp3dNote" hidden></p>
+      <div id="chartSlot"></div>
       <div id="scene"><div class="fsbar"><span id="fsViews" hidden style="display:contents"><button data-v="vIso">Изометрия</button><button data-v="vFront">Спереди</button><button data-v="vSide">Сбоку</button></span><button id="fsBtn" aria-label="Открыть 3D на весь экран">⛶ На весь экран</button></div></div>
       <div class="viewbar">
         <div class="legend"><span>ниже</span><span class="ramp"></span><span>выше</span></div>
@@ -243,7 +245,6 @@ button:disabled{opacity:.5;cursor:default}
   </div>
 
   <div class="tabpane" id="tabChart" hidden>
-    <div class="chartsep modeonly">График</div>
     <section class="panel">
       <div class="bedhead"><span class="sw" style="background:var(--accent)"></span><h2>Левая станина — продольная высота, мкм</h2></div>
       <div class="scroll"><svg class="chart" id="chart0" viewBox="0 0 720 300" width="100%" style="min-width:520px" role="img" aria-label="Левая станина, высота опор"></svg></div>
@@ -337,7 +338,6 @@ button:disabled{opacity:.5;cursor:default}
     <iframe id="geomFrame" title="Геометрия" style="display:block;width:100%;border:0;min-height:600px;background:transparent"></iframe>
   </div>
   <div class="tabpane" id="tabFChart" hidden>
-    <div class="chartsep modeonly">График</div>
     <section class="panel">
       <div class="bedhead"><span class="sw" style="background:var(--accent)"></span><h2>Левая станина — продольная высота, мкм (окончательное)</h2></div>
       <div class="scroll"><svg class="chart" id="fchart0" viewBox="0 0 720 300" width="100%" style="min-width:520px" role="img" aria-label="Левая станина, высота точек"></svg></div>
@@ -888,7 +888,16 @@ function setView(v){
   else camera.position.set(-30,21,24);
   controls.target.set(0,0,0);controls.update();
 }
-['vIso','vFront','vSide'].forEach(id=>document.getElementById(id).onclick=()=>setView(id));
+['vIso','vFront','vSide'].forEach(id=>document.getElementById(id).onclick=()=>{showChart(false);setView(id);});
+// Android 2.0: кнопка «График» в панели вида — график вместо 3D (повторное нажатие — обратно к 3D)
+function showChart(on){const r=document.documentElement,btn=document.getElementById('vChart');if(!r.dataset.mode)return;
+  const pane=document.getElementById(VIEW==='final'?'tabFChart':'tabChart'),slot=document.getElementById('chartSlot');
+  if(on){slot.appendChild(pane);pane.hidden=false;if(VIEW==='final'&&window.finCharts)window.finCharts();}
+  else{const other=document.getElementById(VIEW==='final'?'tabChart':'tabFChart');[pane,other].forEach(p=>{if(p.parentNode===slot)p.hidden=true;});}
+  r.classList.toggle('showchart',on);btn.classList.toggle('on',on);btn.textContent=on?'3D':'График';
+  ['vIso','vFront','vSide'].forEach(id=>{if(on)document.getElementById(id).classList.remove('on');});
+  if(!on)requestAnimationFrame(resize);}
+document.getElementById('vChart').onclick=()=>{const on=!document.documentElement.classList.contains('showchart');showChart(on);if(!on)setView('vIso');};
 document.getElementById('exag').addEventListener('input',update3D);
 ['long','cross','dist','mut'].forEach(k=>{const el=document.getElementById('tg-'+k);el.checked=state.vis[k]!==false;
   el.addEventListener('change',()=>{state.vis[k]=el.checked;save();update3D();});});

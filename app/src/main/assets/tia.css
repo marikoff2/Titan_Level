@@ -23,15 +23,15 @@
 :root[data-mode] nav.tabs{display:none}
 :root[data-mode] header h1{display:none}
 :root[data-mode=fin] header{display:none}
-:root[data-mode=pre] #tabChart[hidden],:root[data-mode=fin] #tabFChart[hidden]{display:flex!important}
-:root[data-mode] #tabChart,:root[data-mode] #tabFChart{flex-direction:column;gap:18px}
+/* «График» — в панели «Станины, вид с отклонениями» вместо 3D */
+#chartSlot>.tabpane{display:flex;flex-direction:column;gap:12px}
+:root.showchart #scene,:root.showchart #viewPanel .toggles,:root.showchart #viewPanel .legend,:root.showchart #viewPanel .viewbar:last-of-type,:root.showchart #cmp3dNote,:root.showchart #viewPanel>p.note{display:none!important}
+#chartSlot .panel{box-shadow:none}
 :root[data-mode] .panel{border-radius:3px;border-color:var(--line);box-shadow:0 1px 0 rgba(0,0,0,.04)}
 :root[data-mode] .panel>h2:first-child,:root[data-mode] .panel>.viewbar>h2,:root[data-mode] .panel>.bedhead h2{
   font-family:"IBM Plex Sans Condensed","IBM Plex Sans",sans-serif}
 :root[data-mode] .wrap>.tabpane>h2,:root[data-mode] #tabMain>h2{border-left:4px solid var(--accent);padding-left:8px}
 :root[data-mode] button.on{background:var(--accent);border-color:var(--accent);color:#fff}
-.chartsep{font:600 12px "IBM Plex Mono",monospace;letter-spacing:.12em;color:var(--muted);text-transform:uppercase;
-  border-top:2px solid var(--accent);padding-top:10px;margin-top:6px}
 
 /* блок «Максимальные отклонения» */
 .maxdev{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px}
