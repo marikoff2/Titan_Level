@@ -417,6 +417,16 @@ function buildInputs(){
   document.getElementById('nEyebrow').textContent=N;
   document.getElementById('nsup').value=N;
   const bedsEl=document.getElementById('beds');bedsEl.innerHTML='';
+  if(document.documentElement.dataset.mode){ // Android 2.0: продольный — столбцом, как поперечный
+    const p=document.createElement('section');p.className='panel';let g='<div class="cross">';
+    state.r.forEach((row,b)=>{
+      g+=`<div class="xbox"><div class="bedhead"><span class="sw" style="background:${COLS[b]}"></span><h3>${NAMES[b]}</h3></div><div class="scroll"><table class="xt"><thead><tr><th>Шаг</th><th>Показание, мкм/м</th><th>Высота, мкм</th></tr></thead><tbody>`;
+      g+=`<tr><td class="sup">опора 1</td><td></td><td class="d" id="h${b}_0">—</td></tr>`;
+      for(let i=0;i<N-1;i++)g+=`<tr><td class="sup">${i+1} → ${i+2}</td><td class="in"><input id="b${b}s${i}" inputmode="decimal" aria-label="${NAMES[b]}, промежуток ${i+1}–${i+2}, мкм/м"></td><td class="d" id="h${b}_${i+1}">—</td></tr>`;
+      g+=`</tbody></table></div></div>`;});
+    p.innerHTML=g+'</div>';bedsEl.appendChild(p);
+    state.r.forEach((row,b)=>{for(let i=0;i<N-1;i++)document.getElementById(`b${b}s${i}`).value=row[i]??'';});
+  }else
   state.r.forEach((row,b)=>{
     const p=document.createElement('section');p.className='panel';
     let g=`<div class="bedhead"><span class="sw" style="background:${COLS[b]}"></span><h3>${NAMES[b]}</h3></div><div class="scroll"><div class="grid" style="grid-template-columns:132px repeat(${N-1},52px 96px) 52px">`;
