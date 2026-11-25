@@ -1,0 +1,50 @@
+/* Серая гамма разделов Android 2.0 — в духе «Project view» TIA Portal:
+   светло-серое поле, тёмно-графитовые заголовки, бирюзовый акцент (Siemens petrol), оранжевый — для внимания. */
+:root[data-mode]{
+  --bg:#dcdfe2; --panel:#f3f4f5; --fg:#1f2428; --muted:#5a636a; --line:#b4bbc0;
+  --accent:#00838f; --bed2:#c25e00; --steel:#9aa3a9; --hi:#d2691e; --lo:#00838f; --input:#ffffff;
+  /* geom.html */
+  --accent-soft:#d3e9eb; --ok:#2f7d4f; --ok-soft:#dcefe3; --bad:#b4442f; --bad-soft:#f5e0db; --grind:#c25e00; --grind-soft:#f6e7d6;
+  color-scheme:light;
+}
+:root[data-mode] body{background:var(--bg);padding-top:0}
+/* верхняя строка: графит, «хлебные крошки» как в TIA */
+.tiabar{position:sticky;top:0;z-index:20;display:flex;align-items:center;gap:12px;
+  margin-inline:calc(-1 * max(16px, env(safe-area-inset-left,0px)));margin-bottom:14px;
+  padding:calc(8px + env(safe-area-inset-top,0px)) max(16px, env(safe-area-inset-right,0px)) 8px max(16px, env(safe-area-inset-left,0px));
+  background:linear-gradient(#3d464d,#2f363c);color:#e9eef1;border-bottom:2px solid #00a3ad}
+.tiaback{font:600 14px "IBM Plex Sans",system-ui,sans-serif;color:#fff;background:#4c565d;border:1px solid #66727a;border-radius:3px;padding:7px 12px;cursor:pointer}
+.tiaback:active{background:#00838f}
+.tiapath{display:flex;flex-direction:column;min-width:0;line-height:1.2}
+.tiapath span{font:500 11px "IBM Plex Mono",monospace;letter-spacing:.12em;color:#8fd3d8}
+.tiapath b{font:600 15px "IBM Plex Sans Condensed","IBM Plex Sans",sans-serif;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+/* index.html в режиме раздела: без верхних вкладок, график под замерами */
+:root[data-mode] nav.tabs{display:none}
+:root[data-mode] header h1{display:none}
+:root[data-mode=fin] header{display:none}
+:root[data-mode=pre] #tabChart[hidden],:root[data-mode=fin] #tabFChart[hidden]{display:flex!important}
+:root[data-mode] #tabChart,:root[data-mode] #tabFChart{flex-direction:column;gap:18px}
+:root[data-mode] .panel{border-radius:3px;border-color:var(--line);box-shadow:0 1px 0 rgba(0,0,0,.04)}
+:root[data-mode] .panel>h2:first-child,:root[data-mode] .panel>.viewbar>h2,:root[data-mode] .panel>.bedhead h2{
+  font-family:"IBM Plex Sans Condensed","IBM Plex Sans",sans-serif}
+:root[data-mode] .wrap>.tabpane>h2,:root[data-mode] #tabMain>h2{border-left:4px solid var(--accent);padding-left:8px}
+:root[data-mode] button.on{background:var(--accent);border-color:var(--accent);color:#fff}
+.chartsep{font:600 12px "IBM Plex Mono",monospace;letter-spacing:.12em;color:var(--muted);text-transform:uppercase;
+  border-top:2px solid var(--accent);padding-top:10px;margin-top:6px}
+
+/* блок «Максимальные отклонения» */
+.maxdev{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px}
+.maxdev .md{background:#fff;border:1px solid var(--line);border-left:4px solid var(--accent);border-radius:3px;padding:9px 11px;min-width:0}
+.maxdev .md.warn{border-left-color:var(--bed2)}
+.maxdev .md h4{margin:0 0 4px;font:600 12px "IBM Plex Sans",sans-serif;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
+.maxdev .md .v{font:600 19px "IBM Plex Mono",monospace;font-variant-numeric:tabular-nums}
+.maxdev .md .s{font-size:13px;color:var(--muted)}
+.maxdev .md .row{display:flex;flex-wrap:wrap;justify-content:space-between;gap:2px 8px;font-size:12.5px;font-variant-numeric:tabular-nums}
+.maxdev .md .row b{font-family:"IBM Plex Mono",monospace;font-weight:600}
+
+/* geom.html в режиме раздела */
+:root[data-mode=geom] body{padding-top:0}
+:root[data-mode=geom] header h1{font-size:18px}
+:root[data-mode=geom] .card{border-radius:3px}
+:root[data-mode=geom] .tabs button[aria-selected="true"]{background:var(--accent);border-color:var(--accent);color:#fff}

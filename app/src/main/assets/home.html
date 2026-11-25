@@ -1,0 +1,292 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>TITAN 4020</title>
+<style>
+@font-face{font-family:"IBM Plex Sans";src:url("fonts/IBMPlexSans-Regular.woff2") format("woff2");font-weight:400}
+@font-face{font-family:"IBM Plex Sans";src:url("fonts/IBMPlexSans-Medium.woff2") format("woff2");font-weight:500}
+@font-face{font-family:"IBM Plex Sans";src:url("fonts/IBMPlexSans-SemiBold.woff2") format("woff2");font-weight:600}
+@font-face{font-family:"IBM Plex Mono";src:url("fonts/IBMPlexMono-Medium.woff2") format("woff2");font-weight:500}
+@font-face{font-family:"IBM Plex Sans Condensed";src:url("fonts/IBMPlexSansCondensed-SemiBold.woff2") format("woff2");font-weight:600}
+/* Стартовый экран Android 2.0. Гамма — «Portal view» TIA Portal: графит, серые плитки, бирюзовый акцент. */
+:root{
+  --bg0:#1d2328; --bg1:#2a3238; --tile:#353e45; --tile-hi:#3f4a52; --edge:#4c5860;
+  --fg:#eef2f4; --muted:#9aa7af; --petrol:#00a3ad; --petrol-d:#00838f; --amber:#f0a030;
+  --f-ui:"IBM Plex Sans",system-ui,sans-serif; --f-cond:"IBM Plex Sans Condensed","IBM Plex Sans",sans-serif; --f-mono:"IBM Plex Mono",monospace;
+  color-scheme:dark;
+}
+html,body{height:100%;margin:0}
+body{background:radial-gradient(130% 80% at 50% 0%,var(--bg1) 0%,var(--bg0) 70%);color:var(--fg);font-family:var(--f-ui);overflow:hidden;
+  -webkit-tap-highlight-color:transparent}
+[hidden]{display:none!important}
+/* заставка */
+#splash{position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;transition:opacity .6s ease}
+#splash.out{opacity:0;pointer-events:none}
+#stage{width:100%;height:62vh;max-height:520px}
+#stage canvas{display:block}
+#word{display:flex;gap:.08em;margin-top:-2vh;font:600 clamp(40px,13vw,86px)/1 var(--f-cond);letter-spacing:.06em;color:var(--fg);height:1.1em}
+#word span{display:inline-block;opacity:0;transform:translateY(-.55em) scaleY(1.6);filter:blur(6px);color:var(--petrol);
+  text-shadow:0 0 18px rgba(0,163,173,.9)}
+#word span.on{animation:drop .5s cubic-bezier(.2,.9,.25,1.25) forwards}
+#word span.gap{width:.35em}
+@keyframes drop{
+  0%{opacity:0;transform:translateY(-.55em) scaleY(1.6);filter:blur(6px);color:var(--petrol)}
+  55%{opacity:1;transform:translateY(.04em) scaleY(.92);filter:blur(0);color:#7fe9ef}
+  100%{opacity:1;transform:none;filter:none;color:var(--fg);text-shadow:0 0 0 rgba(0,163,173,0)}}
+#rule{width:0;height:2px;margin-top:14px;background:linear-gradient(90deg,transparent,var(--petrol),transparent);transition:width .9s ease}
+#rule.on{width:min(78vw,520px)}
+#sub{margin-top:10px;font:500 12px var(--f-mono);letter-spacing:.32em;color:var(--muted);opacity:0;transition:opacity .6s ease}
+#sub.on{opacity:1}
+#skip{position:fixed;bottom:calc(14px + env(safe-area-inset-bottom,0px));right:16px;font:500 12px var(--f-ui);color:var(--muted)}
+/* меню */
+#menu{position:fixed;inset:0;overflow:auto;display:flex;flex-direction:column;
+  padding:calc(22px + env(safe-area-inset-top,0px)) max(16px,env(safe-area-inset-right,0px)) calc(22px + env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px))}
+.mhead{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;border-bottom:2px solid var(--petrol);padding-bottom:12px;max-width:640px;width:100%;margin:0 auto}
+.mhead h1{margin:0;font:600 30px/1 var(--f-cond);letter-spacing:.08em}
+.mhead p{margin:4px 0 0;font:500 11px var(--f-mono);letter-spacing:.18em;color:var(--muted)}
+.mhead .ver{font:500 11px var(--f-mono);color:var(--muted)}
+.tiles{display:flex;flex-direction:column;gap:12px;max-width:640px;width:100%;margin:22px auto 0}
+.tile{display:grid;grid-template-columns:64px minmax(0,1fr) 22px;align-items:center;gap:14px;text-align:left;
+  background:linear-gradient(180deg,var(--tile-hi),var(--tile));border:1px solid var(--edge);border-left:5px solid var(--edge);border-radius:3px;
+  padding:16px 14px;color:var(--fg);font:inherit;cursor:pointer;opacity:0;transform:translateX(-24px)}
+.tile.in{animation:tin .45s ease forwards}
+@keyframes tin{to{opacity:1;transform:none}}
+.tile:active,.tile:focus-visible{border-left-color:var(--petrol);background:linear-gradient(180deg,#45525b,#3a454d);outline:none}
+.tile .ic{width:64px;height:52px;border-radius:2px;background:#232a2f;border:1px solid #56636b;display:grid;place-items:center}
+.tile .ic svg{width:44px;height:36px}
+.tile b{display:block;font:600 19px/1.2 var(--f-cond);letter-spacing:.01em}
+.tile span{display:block;margin-top:4px;font-size:13px;color:var(--muted);line-height:1.35}
+.tile .ar{font:600 20px var(--f-ui);color:var(--petrol)}
+.tile .no{font:500 11px var(--f-mono);color:var(--petrol);letter-spacing:.14em;display:block;margin-bottom:2px}
+.mfoot{max-width:640px;width:100%;margin:auto auto 0;padding-top:22px;font:500 11px var(--f-mono);color:#6f7d86;letter-spacing:.08em;display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.replay{background:none;border:0;color:#6f7d86;font:inherit;padding:0;cursor:pointer;text-decoration:underline}
+@media (prefers-reduced-motion:reduce){#word span{opacity:1;transform:none;filter:none;color:var(--fg)}.tile{opacity:1;transform:none}}
+</style>
+</head>
+<body>
+<div id="splash" aria-label="TITAN 4020">
+  <div id="stage"></div>
+  <div id="word" aria-hidden="true"></div>
+  <div id="rule"></div>
+  <div id="sub">S/N 20250035</div>
+  <div id="skip">нажмите, чтобы пропустить</div>
+</div>
+
+<div id="menu" hidden>
+  <div class="mhead">
+    <div><h1>TITAN 4020</h1><p>S/N 20250035 · ПУСКОНАЛАДКА</p></div>
+    <div class="ver">TITAN LEVEL 2.0</div>
+  </div>
+  <div class="tiles">
+    <button class="tile" data-go="index.html?mode=pre">
+      <div class="ic"><svg viewBox="0 0 44 36" fill="none" stroke="#00a3ad" stroke-width="2"><path d="M3 26h38"/><path d="M5 26v6M39 26v6"/><path d="M8 20l9-3 9 2 10-4" stroke-dasharray="3 2"/><circle cx="8" cy="20" r="2" fill="#00a3ad"/><circle cx="36" cy="15" r="2" fill="#00a3ad"/></svg></div>
+      <div><span class="no">01</span><b>Предварительное выставление станин X</b><span>Продольный и поперечный уровень, 4130, взаимный уровень, замеры, 3D и график</span></div>
+      <div class="ar">›</div>
+    </button>
+    <button class="tile" data-go="index.html?mode=fin">
+      <div class="ic"><svg viewBox="0 0 44 36" fill="none" stroke="#00a3ad" stroke-width="2"><path d="M3 22h38"/><path d="M3 28h38"/><path d="M9 22v6M18 22v6M27 22v6M36 22v6"/><rect x="12" y="10" width="20" height="6" rx="1"/><path d="M22 10V6"/></svg></div>
+      <div><span class="no">02</span><b>Окончательное выставление станин X</b><span>Линейка по наружной направляющей, 11 опор, замеры, 3D и график</span></div>
+      <div class="ar">›</div>
+    </button>
+    <button class="tile" data-go="geom.html?mode=geom">
+      <div class="ic"><svg viewBox="0 0 44 36" fill="none" stroke="#00a3ad" stroke-width="2"><path d="M8 32V6"/><path d="M8 32h28"/><path d="M8 32L30 10" stroke-dasharray="3 2"/><circle cx="30" cy="22" r="7"/><path d="M30 13v-4"/></svg></div>
+      <div><span class="no">03</span><b>Геометрия</b><span>Ось C — сектора, пластины корзины XZ / YZ, 3D-схемы замеров</span></div>
+      <div class="ar">›</div>
+    </button>
+  </div>
+  <div class="mfoot"><span>Уровень станин X · Геометрия</span><button class="replay" id="replay">показать заставку</button></div>
+</div>
+
+<script src="three.min.js"></script>
+<script>
+// ---------- меню ----------
+const menu=document.getElementById('menu'),splash=document.getElementById('splash');
+document.querySelectorAll('.tile').forEach(t=>t.onclick=()=>{location.href=t.dataset.go;});
+function showMenu(){splash.classList.add('out');menu.hidden=false;
+  document.querySelectorAll('.tile').forEach((t,i)=>setTimeout(()=>t.classList.add('in'),120+i*110));
+  setTimeout(()=>{splash.hidden=true;stop=true;},650);
+  try{sessionStorage.setItem('titanSplash','1');}catch(e){}}
+let stop=false;
+document.getElementById('replay').onclick=()=>{try{sessionStorage.removeItem('titanSplash');}catch(e){}location.reload();};
+let seen=false;try{seen=sessionStorage.getItem('titanSplash')==='1';}catch(e){}
+if(seen||!window.THREE){splash.hidden=true;showMenu();}
+else{
+// ---------- заставка: станок пунктиром, поворот на 120° слева направо, буквы TITAN 4020 ----------
+const host=document.getElementById('stage');
+const renderer=new THREE.WebGLRenderer({antialias:true,alpha:true});renderer.setClearColor(0,0);
+renderer.setPixelRatio(Math.min(devicePixelRatio,2));host.appendChild(renderer.domElement);
+const scene=new THREE.Scene();
+const camera=new THREE.PerspectiveCamera(20,1,1,300);
+scene.add(new THREE.HemisphereLight(0xffffff,0x667788,0.8));
+const BH=1.245,BW=0.35,FLOOR=-BH/2-0.1,LEN=6,ZS=[-(3.585*BW+BW/2),3.585*BW+BW/2],INNER=[1,-1],SHOE=0.05;
+const EDGE='#8eabc8';
+// профиль станины спереди: внутренняя сторона вертикальная, наружная — вниз и скосом к широкому основанию
+const PROF=[[-0.5,0],[0.5,0],[0.5,0.233],[1.246,0.78],[1.246,1],[-0.5,1]];
+function bedGeo(b){const sh=new THREE.Shape(),P=PROF.map(([o,t])=>[o*BW*INNER[b],BH/2-t*BH]);
+  sh.moveTo(P[0][0],P[0][1]);for(let k=1;k<P.length;k++)sh.lineTo(P[k][0],P[k][1]);sh.lineTo(P[0][0],P[0][1]);
+  const g=new THREE.ExtrudeGeometry(sh,{depth:LEN,bevelEnabled:false});g.translate(0,0,-LEN/2);g.rotateY(Math.PI/2);return g;}
+function addMesh(g,col,rough=.6,metal=.25,pos){const m=new THREE.Mesh(g,new THREE.MeshStandardMaterial({color:col,roughness:rough,metalness:metal}));
+  if(pos)m.position.copy(pos);scene.add(m);
+  const e=new THREE.LineSegments(new THREE.EdgesGeometry(g,25),new THREE.LineBasicMaterial({color:EDGE,transparent:true,opacity:.45}));e.position.copy(m.position);scene.add(e);return m;}
+
+// плита фундамента и пол
+{const sl=new THREE.BoxGeometry(LEN+1.6,0.3,ZS[1]-ZS[0]+BW+1.6);addMesh(sl,'#4a5059',.95,0,new THREE.Vector3(0,FLOOR-0.151,0));
+ const grid=new THREE.GridHelper(16,64,0x34465c,0x1e2836);grid.position.y=FLOOR-0.3;scene.add(grid);}
+
+// станины, направляющие, башмаки
+const N=11,O_IN=-0.5*BW+0.035,O_OUT=1.246*BW-0.04;
+ZS.forEach((z,b)=>{
+  const g=bedGeo(b);addMesh(g,'#2b3038',.7,.1,new THREE.Vector3(0,0,z));
+  [-1,1].forEach(sd=>addMesh(new THREE.BoxGeometry(LEN,0.045,0.06),'#c9d3df',.45,.4,new THREE.Vector3(0,BH/2+0.0225,z+sd*BW*0.27)));
+  for(let i=0;i<N;i++){const x=-LEN/2+i*LEN/(N-1);
+    [O_IN,O_OUT].forEach(o=>addMesh(new THREE.BoxGeometry(0.1,0.1,SHOE),'#3a4555',.6,.25,new THREE.Vector3(x,FLOOR+0.05,z-INNER[b]*o)));}
+});
+
+// траверса, каретка Y, ползун Z, голова — по 3D-модели (мм)
+// модель: X — поперёк (центры станин −906 и 4196), Y — вверх (верх станин 3738), Z — вдоль (перед = 8805)
+const KH=0.5; // траверса и ось Z ниже в 2 раза
+const GX=xm=>ZS[0]+(xm+906)*(ZS[1]-ZS[0])/5102;
+const GY=ym=>BH/2+(ym-3738)*BH/1356;
+const LIFT=(1337*KH*BH/1356)/2;            // салазки X: высота — половина толщины траверсы
+const GYk=ym=>GY(3738+(ym-3738)*KH)+LIFT;   // всё, что на траверсе, поднято на высоту салазок
+const GZ=zm=>-LEN/2+(8805-zm)*LEN/7200;
+function box(x0,x1,y0,y1,z0,z1,col,yf=GYk){const a=GZ(z1),b=GZ(z0);
+  return addMesh(new THREE.BoxGeometry(Math.abs(b-a),yf(y1)-yf(y0),GX(x1)-GX(x0)),col,.6,.25,new THREE.Vector3((a+b)/2,(yf(y0)+yf(y1))/2,(GX(x0)+GX(x1))/2));}
+function cyl(xc,zc,r,y0,y1,col){const rs=r*(ZS[1]-ZS[0])/5102,h=GY(y1)-GY(y0);
+  return addMesh(new THREE.CylinderGeometry(rs,rs,h,28),col,.4,.5,new THREE.Vector3(GZ(zc),(GY(y0)+GY(y1))/2,GX(xc)));}
+const C={trav:'#7f8996',cart:'#939daa',ram:'#a3adb9',head:'#5f6976',spin:'#c3ccd6',tool:'#d4a25e'};
+// траверса: коробка с проёмом сверху, на всю ширину верха обеих станин — стоит на обеих направляющих
+box(-1218,4508,3738,4040,4228,5788,C.trav);
+box(-1218,4508,4040,5075,4228,4478,C.trav);
+box(-1218,4508,4040,5075,5538,5788,C.trav);
+box(-1218,-718,4040,5075,4478,5538,C.trav);
+box(4008,4508,4040,5075,4478,5538,C.trav);
+// направляющие Y на траверсе: 2 сверху на стенках и 2 на внутренних гранях стенок (смотрят друг на друга)
+const RAIL='#c9d3df',RW=0.06,RH=0.045;
+const yTop=GYk(5075),zA=GX(-718),zB=GX(4008),zL=zB-zA,zC=(zA+zB)/2;
+[4353,5663].forEach(zm=>addMesh(new THREE.BoxGeometry(RW,RH,zL),RAIL,.45,.4,new THREE.Vector3(GZ(zm),yTop+RH/2,zC)));     // сверху
+const xRearIn=GZ(4478),xFrontIn=GZ(5538),yIn=GYk(4800);
+addMesh(new THREE.BoxGeometry(RH,RW,zL),RAIL,.45,.4,new THREE.Vector3(xRearIn-RH/2,yIn,zC));    // на внутренней грани задней стенки
+addMesh(new THREE.BoxGeometry(RH,RW,zL),RAIL,.45,.4,new THREE.Vector3(xFrontIn+RH/2,yIn,zC));   // на внутренней грани передней стенки
+// корзина оси Z (каретка Y): 1320 мм поперёк, по глубине — на всю траверсу; плита лежит на верхних направляющих,
+// корпус опущен в полость траверсы между боковыми направляющими
+{const z0=GX(768),z1=GX(2088),zc=(z0+z1)/2,zw=z1-z0;
+ const pa=GZ(5788),pb=GZ(4228),py0=yTop+RH+0.025,py1=py0+0.16;
+ addMesh(new THREE.BoxGeometry(Math.abs(pb-pa),py1-py0,zw),C.cart,.6,.25,new THREE.Vector3((pa+pb)/2,(py0+py1)/2,zc));   // верхняя плита
+ const ba=xFrontIn+RH+0.02,bb=xRearIn-RH-0.02,by0=GYk(4250);
+ addMesh(new THREE.BoxGeometry(Math.abs(bb-ba),py0-by0,zw*0.96),C.cart,.6,.25,new THREE.Vector3((ba+bb)/2,(by0+py0)/2,zc)); // корпус в полости
+ // каретки на направляющих
+ [GZ(4353),GZ(5663)].forEach(x=>[zc-zw*0.32,zc+zw*0.32].forEach(z=>addMesh(new THREE.BoxGeometry(0.09,0.025,0.14),'#4a535e',.5,.4,new THREE.Vector3(x,yTop+RH+0.0125,z))));
+ [[xRearIn-RH-0.01],[xFrontIn+RH+0.01]].forEach(([x])=>[zc-zw*0.32,zc+zw*0.32].forEach(z=>addMesh(new THREE.BoxGeometry(0.02,0.09,0.14),'#4a535e',.5,.4,new THREE.Vector3(x,yIn,z))));}
+// салазки X: на каждой станине под траверсой, по обеим направляющим, на всю глубину траверсы
+ZS.forEach(z=>{const a=GZ(5788),b=GZ(4228),y0=BH/2+0.045,y1=BH/2+LIFT;
+  addMesh(new THREE.BoxGeometry(Math.abs(b-a),y1-y0,BW*0.92),'#5d6773',.55,.35,new THREE.Vector3((a+b)/2,(y0+y1)/2,z));
+  [-1,1].forEach(sd=>[GZ(5600),GZ(4416)].forEach(x=>addMesh(new THREE.BoxGeometry(0.16,0.05,0.09),'#4a535e',.5,.4,new THREE.Vector3(x,BH/2+0.07,z+sd*BW*0.27))));});
+// ползун Z 500×500 — квадратный, в одном масштабе с головой
+const SU=BH/1356;                          // мм → сцена для ползуна и головы: тот же масштаб, что высота станин
+const RX=GZ(5008),RZ=GX(1428);             // ось ползуна в сцене
+const DZ=600*SU;                           // ось Z опущена на половину хода (1200/2 = 600 мм)
+const ramBot=GYk(3656)-DZ,ramTop=ramBot+2*(GYk(6056)-GYk(3656)); // ползун Z удлинён в 2 раза
+addMesh(new THREE.BoxGeometry(500*SU,ramTop-ramBot,500*SU),C.ram,.55,.3,new THREE.Vector3(RX,(ramTop+ramBot)/2,RZ));
+// направляющие Z: 4 штуки, 2 на передней грани ползуна и 2 на задней, по краям
+{const h=ramTop-ramBot-0.04,yc=(ramTop+ramBot)/2,t=0.035,w=0.05,off=(250-35)*SU;
+ [-1,1].forEach(f=>[-1,1].forEach(sd=>addMesh(new THREE.BoxGeometry(t,h,w),'#c9d3df',.45,.4,
+   new THREE.Vector3(RX+f*(250*SU+t/2),yc,RZ+sd*off))));}
+
+// голова — по 3D-модели (вилочная A/C), локально в мм: y вверх от торца шпинделя, x поперёк, z вперёд
+function headGroup(){
+  const g=new THREE.Group();
+  const M=(col,r=.5,m=.35)=>new THREE.MeshStandardMaterial({color:col,roughness:r,metalness:m});
+  const add=(geo,mat,x,y,z,rx=0,ry=0,rz=0)=>{const o=new THREE.Mesh(geo,mat);o.position.set(x,y,z);o.rotation.set(rx,ry,rz);g.add(o);
+    const e=new THREE.LineSegments(new THREE.EdgesGeometry(geo,35),new THREE.LineBasicMaterial({color:'#55606d',transparent:true,opacity:.6}));
+    e.position.copy(o.position);e.rotation.copy(o.rotation);g.add(e);return o;};
+  const body=M('#c9ced5',.55,.25),cover=M('#8e959e',.6,.2),metal=M('#b9c1ca',.35,.6),dark=M('#3b4149',.5,.4),red=M('#c0392b',.5,.2),green=M('#3fbf4f',.5,.1);
+  // щёки вилки: профиль сбоку 465×590, низ сильно скруглён, верх со снятыми углами
+  const cheek=()=>{const sh=new THREE.Shape(),D=465/2,H0=104,H1=694,R=190,C=45;
+    sh.moveTo(-D,H0+R);sh.lineTo(-D,H1-C);sh.lineTo(-D+C,H1);sh.lineTo(D-C,H1);sh.lineTo(D,H1-C);sh.lineTo(D,H0+R);
+    sh.quadraticCurveTo(D,H0,D-R,H0);sh.lineTo(-D+R,H0);sh.quadraticCurveTo(-D,H0,-D,H0+R);
+    const geo=new THREE.ExtrudeGeometry(sh,{depth:188,bevelEnabled:true,bevelThickness:10,bevelSize:10,bevelSegments:2,curveSegments:10});
+    geo.translate(0,0,-94);geo.rotateY(Math.PI/2);return geo;};
+  add(cheek(),cover,-224,0,0);           // левая щека
+  add(cheek(),cover, 224,0,0);           // правая щека
+  add(new THREE.BoxGeometry(260,150,465),body,0,619,0);                       // перемычка сверху
+  // корпус оси A: цилиндр R190, срезанный с двух сторон хордами (по 20 % диаметра) параллельно Z —
+  // вытянутый прямоугольник со скруглённым верхом; ось A проходит по центру скругления
+  {const R=190,cz=300,hw=R*0.6,ya=Math.sqrt(R*R-hw*hw),yb=110,sh=new THREE.Shape();
+   sh.moveTo(-hw,yb);sh.lineTo(hw,yb);sh.lineTo(hw,cz+ya);sh.absarc(0,cz,R,Math.atan2(ya,hw),Math.atan2(ya,-hw),false);sh.lineTo(-hw,yb);
+   const g=new THREE.ExtrudeGeometry(sh,{depth:250,bevelEnabled:false,curveSegments:24});g.translate(0,0,-125);g.rotateY(Math.PI/2);
+   add(g,body,0,0,0);}
+  add(new THREE.CylinderGeometry(105,105,170,28),body,0,190,0);               // корпус шпинделя
+  add(new THREE.CylinderGeometry(90,90,30,28),dark,0,90,0);                   // торец шпинделя
+  add(new THREE.CylinderGeometry(78,70,75,28),dark,0,37,0);                   // нос шпинделя (HSK)
+  // оправка с инструментом
+  add(new THREE.CylinderGeometry(32,32,90,20),M('#d4a25e',.4,.5),0,-45,0);
+  // зелёный кабельный канал по внутренней кромке левой щеки спереди
+  // ось C: фланец, кольца, корпус, верхний фланец, мотор
+  add(new THREE.CylinderGeometry(236,236,100,40),body,0,744,0);
+  add(new THREE.TorusGeometry(232,7,8,48),red,0,796,0,Math.PI/2);
+  add(new THREE.CylinderGeometry(178,178,312,40),metal,0,950,0);
+  add(new THREE.CylinderGeometry(200,200,36,40),metal,0,1124,0);
+  add(new THREE.TorusGeometry(196,6,8,48),red,0,1143,0,Math.PI/2);
+  add(new THREE.CylinderGeometry(97,97,225,28),metal,0,1257,0);
+  add(new THREE.BoxGeometry(70,40,90),dark,0,1389,0);                          // разъём мотора
+  return g;}
+const head=headGroup();
+head.scale.set(SU*0.85,SU,SU);head.rotation.y=0; // C0: ось A параллельна X (щёки спереди и сзади), голова уже на 15 % по оси A
+// низ головы — на 776 мм ниже торца ползуна (как в модели); верх головы (мотор) уходит внутрь ползуна
+head.position.set(RX,ramBot-776*SU,RZ);
+scene.add(head);
+// оси вращения пунктиром: A — сквозь щёки (параллельна X при C0), C — вертикально по оси шпинделя
+const AX={A:'#b8955a',C:'#5f93b0',S:'#9a7fc4'}; // приглушённые цвета осей: A — охра, C — голубой, шпиндель — сиреневый
+{const mk=(pts,col)=>{const g=new THREE.BufferGeometry().setFromPoints(pts.map(p=>new THREE.Vector3(...p)));
+   const l=new THREE.Line(g,new THREE.LineDashedMaterial({color:col,dashSize:40,gapSize:28,depthTest:false,transparent:true,opacity:.55}));
+   l.computeLineDistances();l.renderOrder=3;head.add(l);return l;};
+ mk([[-520,300,0],[520,300,0]],AX.A);              // ось A
+ mk([[0,300,0],[0,1900,0]],AX.C);                  // ось C — от оси A вверх
+ mk([[0,-420,0],[0,300,0]],AX.S);}                 // ось шпинделя — от оси A вниз через инструмент (при A0 совпадает с C)
+head.updateMatrixWorld(true);
+// всё превращаем в пунктирные рёбра; старые линии модели прячем
+const LINES=[];
+scene.traverse(o=>{if(o.isLine)o.visible=false;});
+const metas=[];scene.traverse(o=>{if(o.isMesh)metas.push(o);});
+const dmat=new THREE.LineDashedMaterial({color:0x2fc6cf,dashSize:0.06,gapSize:0.04,transparent:true,opacity:0});
+const dmatH=new THREE.LineDashedMaterial({color:0xbfeff2,dashSize:0.025,gapSize:0.018,transparent:true,opacity:0});
+metas.forEach(m=>{m.material.visible=false;let inHead=false;for(let p=m.parent;p;p=p.parent)if(p===head)inHead=true;
+  const e=new THREE.LineSegments(new THREE.EdgesGeometry(m.geometry,22),inHead?dmatH:dmat);e.computeLineDistances();m.add(e);LINES.push(e);});
+// группа поворота: всё, что в сцене (кроме света)
+const rig=new THREE.Group();scene.children.filter(o=>!o.isLight).forEach(o=>rig.add(o));scene.add(rig);
+// подставка: тонкий круг под станком
+{const pts=[];for(let i=0;i<=96;i++){const t=i/96*Math.PI*2;pts.push(new THREE.Vector3(Math.cos(t)*4.4,FLOOR-0.32,Math.sin(t)*3.4));}
+ const c=new THREE.Line(new THREE.BufferGeometry().setFromPoints(pts),new THREE.LineDashedMaterial({color:0x00a3ad,dashSize:.12,gapSize:.1,transparent:true,opacity:.35}));c.computeLineDistances();scene.add(c);}
+const T=new THREE.Vector3(0,0.2,0),DIR=new THREE.Vector3(-30,21,24).normalize();
+function resize(){const w=host.clientWidth,h=host.clientHeight;if(!w||!h)return;renderer.setSize(w,h,false);
+  renderer.domElement.style.width=w+'px';renderer.domElement.style.height=h+'px';camera.aspect=w/h;camera.fov=w/h<1?30:22;camera.updateProjectionMatrix();
+  // расстояние — чтобы станок (≈8 условных единиц по диагонали) занял почти всю ширину
+  const d=9.6/(2*Math.tan(camera.fov*Math.PI/360)*Math.min(camera.aspect,1.5));
+  camera.position.copy(DIR).multiplyScalar(d).add(T);camera.lookAt(T);}
+new ResizeObserver(resize).observe(host);resize();
+// буквы
+const word=document.getElementById('word');
+'TITAN 4020'.split('').forEach(ch=>{const s=document.createElement('span');if(ch===' '){s.className='gap';}else s.textContent=ch;word.appendChild(s);});
+const letters=[...word.querySelectorAll('span:not(.gap)')];
+const ease=t=>t<.5?4*t*t*t:1-Math.pow(-2*t+2,3)/2;
+const DUR=4.6,A0=-60*Math.PI/180,A1=60*Math.PI/180; // поворот на 120° слева направо
+let t0=null,fired=false;
+letters.forEach((s,i)=>setTimeout(()=>s.classList.add('on'),1100+i*170));
+setTimeout(()=>document.getElementById('rule').classList.add('on'),1100+letters.length*170+200);
+setTimeout(()=>document.getElementById('sub').classList.add('on'),1100+letters.length*170+600);
+function frame(ts){if(stop)return;if(t0==null)t0=ts;const t=(ts-t0)/1000;
+  const k=Math.min(1,t/DUR);rig.rotation.y=A0+(A1-A0)*ease(k);
+  const op=Math.min(1,t/0.9);dmat.opacity=0.85*op;dmatH.opacity=0.95*op;
+  dmat.dashSize=0.06;
+  renderer.render(scene,camera);
+  if(t>DUR+1.0&&!fired){fired=true;showMenu();}
+  requestAnimationFrame(frame);}
+requestAnimationFrame(frame);
+splash.addEventListener('click',()=>{if(!fired){fired=true;showMenu();}});
+}
+</script>
+</body>
+</html>

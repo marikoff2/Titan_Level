@@ -66,7 +66,7 @@ public class MainActivity extends Activity {
         web.addJavascriptInterface(new Bridge(), "TitanAndroid");
         setContentView(web);
         if (savedInstanceState != null) web.restoreState(savedInstanceState);
-        else web.loadUrl("file:///android_asset/index.html");
+        else web.loadUrl("file:///android_asset/home.html");   // 2.0: заставка и меню разделов
     }
 
     /** Выгрузка замеров: файл в «Загрузки/TitanLevel», затем окно «Поделиться» (почта, мессенджер, Claude). */
