@@ -111,11 +111,13 @@ svg text{font-family:var(--f-ui)}
         <label>Плечо от оси C<input id="sL" type="number" step="1"></label>
         <label>Ø средней линии отверстий<input id="sD" type="number" step="0.1"></label>
         <label>Ширина пластин<input id="sW" type="number" step="1"></label>
-        <label>Угол одного сектора, °<input id="sAng" type="number" step="1"></label>
+        <label>Угол сектора Пер / Зад, °<input id="sAngX" type="number" step="1"></label>
+        <label>Угол сектора Лев / Прав, °<input id="sAngY" type="number" step="1"></label>
+        <label>Отверстий на фланце<input id="sHoles" type="number" step="1"></label>
         <label>Допуск, мм<input id="sTol" type="number" step="0.001"></label>
         <label>на длине, мм<input id="sTolL" type="number" step="1"></label>
       </div>
-      <p class="note">Сектора стоят между ползуном Z и фланцем оси C, центр каждого сектора на своей оси, стыки на диагоналях. Допуск по умолчанию 0,02/500 — сверить с протоколом.</p>
+      <p class="note">Сектора стоят между ползуном Z и фланцем оси C, центр каждого сектора на своей оси. На фланце 18 отверстий, одно — на оси перед–зад; по умолчанию Пер/Зад по 5 болтов (≈100°), Лев/Прав по 4 (≈80°) — уточнить по заводским секторам. Допуск по умолчанию 0,02/500 — сверить с протоколом.</p>
     </div>
     <div class="card">
       <h2>Результат</h2>
@@ -198,7 +200,7 @@ svg text{font-family:var(--f-ui)}
 <script src="OrbitControls.js"></script>
 <script>
 const $=id=>document.getElementById(id);
-const DEF={sC0:0,sC180:0.010,sC90:0.004,sCm90:0,sL:300,sD:452.5,sW:25,sAng:90,sTol:0.02,sTolL:500,
+const DEF={sC0:0,sC180:0.010,sC90:0.004,sCm90:0,sL:300,sD:452.5,sW:25,sAngX:100,sAngY:80,sHoles:18,sTol:0.02,sTolL:500,
   bXb:0,bXt:0.012,bLx:500,bYb:0,bYt:-0.006,bLy:500,bBx:1100,bBy:820,bTol:0.02,bTolL:500};
 let saved={};try{saved=JSON.parse(localStorage.getItem('titanGeom')||'{}')}catch(e){}
 Object.keys(DEF).forEach(k=>{$(k).value=(saved[k]!==undefined?saved[k]:DEF[k]);$(k).addEventListener('input',calc);});
@@ -222,17 +224,19 @@ function prompt2(t){const ta=document.createElement('textarea');ta.value=t;ta.st
 // ===== СЕКТОРА =====
 let secText='';
 function calcSec(){
-  const L=v('sL'),R=v('sD')/2,W=v('sW'),phi=v('sAng')/2*Math.PI/180;
-  const r1=R-W/2,r2=R+W/2,rc=(2/3)*(r2**3-r1**3)/(r2**2-r1**2),xb=rc*Math.sin(phi)/phi; // центр опоры сектора от оси C
+  const L=v('sL'),R=v('sD')/2,W=v('sW');
+  const r1=R-W/2,r2=R+W/2,rc=(2/3)*(r2**3-r1**3)/(r2**2-r1**2);
+  const xbOf=ang=>{const ph=ang/2*Math.PI/180;return rc*Math.sin(ph)/ph;};        // центр опоры сектора от оси C
+  const xbX=xbOf(v('sAngX')),xbY=xbOf(v('sAngY'));                                // Пер/Зад и Лев/Прав
   const dY=v('sC0')-v('sC180'),dX=v('sC90')-v('sCm90');
   const aY=dY/(2*L),aX=dX/(2*L);                // наклон, мм/мм; «+» — сторона C0 (Y+) / C+90 (X−) ниже
-  const raw={Лев:aY*xb,Прав:-aY*xb,Пер:aX*xb,Зад:-aX*xb};
+  const raw={Лев:aY*xbY,Прав:-aY*xbY,Пер:aX*xbX,Зад:-aX*xbX};
   const mn=Math.min(...Object.values(raw)),cut={};Object.keys(raw).forEach(k=>cut[k]=raw[k]-mn);
   const tol=v('sTol')/v('sTolL'),okY=Math.abs(aY)<=tol+1e-12,okX=Math.abs(aX)<=tol+1e-12;
   const per=v('sTolL');
   $('sBig').innerHTML=`<div><span>YZ · C0 / C+180</span><b>${f(aY*per)}</b><span>мм на ${per} ${chip(okY)}</span></div>
     <div><span>XZ · C+90 / C−90</span><b>${f(aX*per)}</b><span>мм на ${per} ${chip(okX)}</span></div>
-    <div><span>Центр опоры сектора</span><b>${f(xb,1)}</b><span>мм от оси C · k = ${f(xb/(2*L),3)}</span></div>`;
+    <div><span>Центр опоры: Пер/Зад · Лев/Прав</span><b>${f(xbX,1)} · ${f(xbY,1)}</b><span>мм от оси C · k = ${f(xbX/(2*L),3)} · ${f(xbY/(2*L),3)}</span></div>`;
   const names=[['Пер','Передний','X−'],['Зад','Задний','X+'],['Лев','Левый','Y+'],['Прав','Правый','Y−']];
   $('sTab').innerHTML='<tr><th>Сектор</th><th>Сторона</th><th style="text-align:right">Снять, мм</th><th style="text-align:right">мкм</th></tr>'+
     names.map(([k,n,s])=>`<tr><td>${n}</td><td>${s}</td><td class="num">${f(cut[k])}</td><td class="num">${Math.round(cut[k]*1000)}</td></tr>`).join('');
@@ -250,15 +254,18 @@ function arc(cx,cy,r,a0,a1){const p=a=>[cx+r*Math.cos(a),cy-r*Math.sin(a)];const
   return `M${x0.toFixed(1)},${y0.toFixed(1)} A${r},${r} 0 0 0 ${x1.toFixed(1)},${y1.toFixed(1)}`;}
 function drawSec(cut){
   // вид сверху: перед — внизу, левая сторона (Y+) — слева, как стоя перед станком
-  const cx=180,cy=160,r=100,g=(90-Math.min(89,v('sAng')))/2*Math.PI/180+0.03,D=Math.PI/180;
+  const cx=180,cy=160,r=100,D=Math.PI/180,span={Зад:v('sAngX'),Пер:v('sAngX'),Лев:v('sAngY'),Прав:v('sAngY')};
   const sec=[['Зад',90],['Лев',180],['Пер',270],['Прав',0]];
   const mx=Math.max(...Object.values(cut),1e-9);
   let s=`<circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="var(--line)" stroke-dasharray="3 4"/>`;
-  sec.forEach(([k,c])=>{const a0=(c-45)*D+g,a1=(c+45)*D-g,hot=cut[k]>5e-7;
+  sec.forEach(([k,c])=>{const h=Math.min(89,Math.max(5,span[k]||90))/2-1.5,a0=(c-h)*D,a1=(c+h)*D,hot=cut[k]>5e-7;
     s+=`<path d="${arc(cx,cy,r,a0,a1)}" fill="none" stroke="${hot?'var(--grind)':'var(--muted)'}" stroke-width="${hot?14:10}" stroke-linecap="butt" opacity="${hot?0.55+0.45*cut[k]/mx:0.5}"/>`;
     const lx=cx+(r+38)*Math.cos(c*D),ly=cy-(r+38)*Math.sin(c*D);
     s+=`<text x="${lx}" y="${ly-4}" text-anchor="middle" font-size="12" fill="var(--muted)">${{Зад:'Задний',Лев:'Левый',Пер:'Передний',Прав:'Правый'}[k]}</text>
         <text x="${lx}" y="${ly+12}" text-anchor="middle" font-size="13" font-weight="600" fill="${hot?'var(--grind)':'var(--fg)'}">${hot?'−'+Math.round(cut[k]*1000)+' мкм':'0'}</text>`;});
+  // отверстия фланца: одно — ровно на оси перед–зад (по фото)
+  const nh=Math.max(0,Math.min(72,Math.round(v('sHoles')||0)));
+  for(let i=0;i<nh;i++){const a=(270+i*360/nh)*D;s+=`<circle cx="${(cx+r*Math.cos(a)).toFixed(1)}" cy="${(cy-r*Math.sin(a)).toFixed(1)}" r="3.2" fill="var(--panel)" stroke="var(--fg)" stroke-width="1"/>`;}
   s+=`<circle cx="${cx}" cy="${cy}" r="3" fill="var(--fg)"/><text x="${cx+8}" y="${cy-6}" font-size="11" fill="var(--muted)">ось C</text>
      <text x="${cx}" y="322" text-anchor="middle" font-size="11" fill="var(--muted)">ПЕРЕД (X−) · вид сверху</text>`;
   $('sSvg').innerHTML=s;}
@@ -580,9 +587,11 @@ const ISOC={pos:'C0',last:null,update(){},zoom:true};
   dash(new THREE.Vector3(0,0.3,0),new THREE.Vector3(0,FLOOR+0.02-ramBot,0),0x5f93b0,cG);
   // сектора между ползуном и фланцем C: центр каждого на своей оси, стыки на диагоналях
   const secs={},secLab={},R1=213.75*SU,R2=238.75*SU,ySec=ramBot-6*SU;
-  [['Зад',0],['Лев',90],['Пер',180],['Прав',270]].forEach(([k,c])=>{const g=4*Math.PI/180,a0=(c-45)*Math.PI/180+g,a1=(c+45)*Math.PI/180-g;
-    const sh=new THREE.Shape();sh.absarc(0,0,R2,a0,a1,false);sh.absarc(0,0,R1,a1,a0,true);
-    const geo=new THREE.ExtrudeGeometry(sh,{depth:14*SU,bevelEnabled:false,curveSegments:24});geo.rotateX(-Math.PI/2);
+  const secGeo=(c,span)=>{const h=(Math.min(89,Math.max(5,span||90))/2-1.5)*Math.PI/180,cc=c*Math.PI/180;
+    const sh=new THREE.Shape();sh.absarc(0,0,R2,cc-h,cc+h,false);sh.absarc(0,0,R1,cc+h,cc-h,true);
+    const geo=new THREE.ExtrudeGeometry(sh,{depth:14*SU,bevelEnabled:false,curveSegments:24});geo.rotateX(-Math.PI/2);return geo;};
+  const SECC={Зад:0,Лев:90,Пер:180,Прав:270},secSpan={};
+  [['Зад',0],['Лев',90],['Пер',180],['Прав',270]].forEach(([k,c])=>{const geo=secGeo(c,90);
     const m=new THREE.Mesh(geo,new THREE.MeshStandardMaterial({color:0x9aa4b0,roughness:.5,metalness:.3,depthTest:false,transparent:true,opacity:.95}));
     m.position.set(RX,ySec,RZ);m.renderOrder=7;scene.add(m);keep.add(m);secs[k]=m;
     const l=spr(240,110,0.12);const cc=c*Math.PI/180;l.position.set(RX+Math.cos(cc)*0.42,ySec+0.07,RZ-Math.sin(cc)*0.42);secLab[k]=l;});
@@ -618,6 +627,8 @@ const ISOC={pos:'C0',last:null,update(){},zoom:true};
     const K=3*Math.PI/180,mA_=Math.max(Math.abs(aX),Math.abs(aY));     // направление наклона — по соотношению XZ и YZ
     cG.rotation.set(mA_>1e-9?-aY/mA_*K:0,0,mA_>1e-9?aX/mA_*K:0);
     const mx=Math.max(...Object.values(cut),1e-9),base=new THREE.Color(0x9aa4b0),hot=new THREE.Color(gr),NM={Зад:'Задний',Лев:'Левый',Пер:'Передний',Прав:'Правый'};
+    Object.keys(secs).forEach(k=>{const sp=(k==='Пер'||k==='Зад')?v('sAngX'):v('sAngY');
+      if(secSpan[k]!==sp){secSpan[k]=sp;secs[k].geometry.dispose();secs[k].geometry=secGeo(SECC[k],sp);}});
     Object.keys(secs).forEach(k=>{const t=cut[k]>5e-7?0.35+0.65*cut[k]/mx:0;secs[k].material.color.copy(base).lerp(hot,t);
       secLab[k].draw([[NM[k],fg,38,42],[cut[k]>5e-7?'−'+Math.round(cut[k]*1000)+' мкм':'0',cut[k]>5e-7?gr:mu,36,88]]);});
     lFront.draw([['ПЕРЕД (X−)',fg,40,56]]);
