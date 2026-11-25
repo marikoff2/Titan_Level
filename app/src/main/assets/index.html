@@ -162,6 +162,7 @@ button:disabled{opacity:.5;cursor:default}
     <button role="tab" data-tab="chart" aria-selected="false">График</button>
     <button role="tab" data-tab="final" aria-selected="false">Окончательное выставление</button>
     <button role="tab" data-tab="fchart" aria-selected="false">График</button>
+    <button role="tab" data-tab="geom" aria-selected="false">Геометрия</button>
   </nav>
 
   <div class="tabpane" id="tabMain">
@@ -318,6 +319,10 @@ button:disabled{opacity:.5;cursor:default}
     </section>
   </div>
 
+  <div class="tabpane" id="tabGeom" hidden>
+    <!-- Геометрия: ось C (сектора), пластины корзины XZ/YZ, 3D-схемы замеров. Страница geom.html, грузится при первом открытии -->
+    <iframe id="geomFrame" title="Геометрия" style="display:block;width:100%;border:0;min-height:600px;background:transparent"></iframe>
+  </div>
   <div class="tabpane" id="tabFChart" hidden>
     <section class="panel">
       <div class="bedhead"><span class="sw" style="background:var(--accent)"></span><h2>Левая станина — продольная высота, мкм (окончательное)</h2></div>
@@ -865,11 +870,17 @@ matchMedia('(prefers-color-scheme: dark)').addEventListener('change',applyTheme)
 new MutationObserver(applyTheme).observe(document.documentElement,{attributes:true,attributeFilter:['data-theme']});
 document.fonts&&document.fonts.ready.then(update3D);
 
+// вкладка «Геометрия»: страница во фрейме, высота фрейма — по содержимому (листается вся страница)
+function openGeom(){const fr=document.getElementById('geomFrame');if(fr.src)return;
+  fr.onload=()=>{try{const d=fr.contentDocument,fit=()=>{fr.style.height=Math.max(600,d.documentElement.scrollHeight)+'px';};
+    fit();new ResizeObserver(fit).observe(d.body);}catch(e){fr.style.height='calc(100vh - 120px)';}};
+  fr.src='geom.html';}
 function showTab(t){
   document.getElementById('tabMain').hidden=t!=='main';document.getElementById('tabChart').hidden=t!=='chart';
   document.getElementById('tabFinal').hidden=t!=='final';document.getElementById('tabFChart').hidden=t!=='fchart';
+  document.getElementById('tabGeom').hidden=t!=='geom';if(t==='geom')openGeom();
   if(t==='fchart'&&window.finCharts)window.finCharts();
-  document.querySelector('header .controls').hidden=t==='final'||t==='fchart'; // шаг и число опор к этой вкладке не относятся
+  document.querySelector('header .controls').hidden=t==='final'||t==='fchart'||t==='geom'; // шаг и число опор к этой вкладке не относятся
   document.querySelectorAll('.tabs button').forEach(b=>b.setAttribute('aria-selected',String(b.dataset.tab===t)));
   setCtx(t==='final'?'final':'main');
   if(t!=='chart')resize();

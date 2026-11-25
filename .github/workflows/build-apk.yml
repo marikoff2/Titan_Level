@@ -42,7 +42,6 @@ jobs:
           mkdir -p windows/app
           cp -r app/src/main/assets/* windows/app/
           cp windows/res/icon.png windows/app/icon.png
-          cp windows/geom.html windows/app/geom.html
           cd windows
           npm install --no-audit --no-fund 2>&1 | tee ../build.log
           npm run dist 2>&1 | tee -a ../build.log
